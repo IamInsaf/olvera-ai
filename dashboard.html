@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="google-adsense-account" content="ca-pub-6090544760574516">
+  <title>Career Assessment Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f0f2f5;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    #dashboard {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .assessment-section {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 20px;
+    }
+    .assessment-section h3 {
+      color: #3498db;
+      margin-bottom: 10px;
+    }
+    .assessment-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding: 8px;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+    }
+    .assessment-label {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    .assessment-value {
+      color: #7f8c8d;
+    }
+    #logout-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    #logout-btn:hover {
+      background-color: #c0392b;
+    }
+    .no-data {
+      text-align: center;
+      color: #7f8c8d;
+      padding: 20px;
+    }
+    .login-message {
+      text-align: center;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Career Assessment Dashboard</h1>
+  <div id="dashboard">
+    <p>Loading your assessment...</p>
+  </div>
+
+  <!-- Firebase App -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const dashboardDiv = document.getElementById("dashboard");
+
+    // Function to format key names for display
+    function formatKey(key) {
+      return key.replace(/([A-Z])/g, ' $1')
+                .replace(/^./, str => str.toUpperCase())
+                .replace(/_/g, ' ');
+    }
+
+    // Function to create assessment section
+    function createAssessmentSection(title, data) {
+      const section = document.createElement('div');
+      section.className = 'assessment-section';
+      
+      const titleElement = document.createElement('h3');
+      titleElement.textContent = title;
+      section.appendChild(titleElement);
+      
+      Object.entries(data).forEach(([key, value]) => {
+        const item = document.createElement('div');
+        item.className = 'assessment-item';
+        
+        const label = document.createElement('span');
+        label.className = 'assessment-label';
+        label.textContent = formatKey(key);
+        
+        const val = document.createElement('span');
+        val.className = 'assessment-value';
+        val.textContent = value;
+        
+        item.appendChild(label);
+        item.appendChild(val);
+        section.appendChild(item);
+      });
+      
+      return section;
+    }
+
+    // Function to create logout button
+    function createLogoutButton() {
+      const button = document.createElement('button');
+      button.id = 'logout-btn';
+      button.textContent = 'Logout';
+      button.addEventListener('click', () => {
+        auth.signOut().then(() => {
+          dashboardDiv.innerHTML = '<div class="login-message"><p>You have been logged out. Please log in to view your dashboard.</p></div>';
+        }).catch((error) => {
+          console.error('Logout error:', error);
+        });
+      });
+      return button;
+    }
+
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const docRef = db.collection("careerAssessments").doc(user.uid);
+          const docSnap = await docRef.get();
+
+          if (docSnap.exists) {
+            const data = docSnap.data();
+            dashboardDiv.innerHTML = '<h2>Your Career Assessment Results</h2>';
+            
+            // Group data by sections if needed (you can customize this based on your data structure)
+            const sections = {
+              "Personal Information": {
+                name: data.name || 'Not provided',
+                email: data.email || 'Not provided',
+                dateCompleted: data.timestamp ? new Date(data.timestamp).toLocaleDateString() : 'Not available'
+              },
+              "Assessment Results": {
+                ...data
+              }
+            };
+            
+            // Remove duplicate fields from Assessment Results
+            delete sections["Assessment Results"].name;
+            delete sections["Assessment Results"].email;
+            delete sections["Assessment Results"].timestamp;
+            
+            // Create sections
+            Object.entries(sections).forEach(([title, sectionData]) => {
+              if (Object.keys(sectionData).length > 0) {
+                dashboardDiv.appendChild(createAssessmentSection(title, sectionData));
+              }
+            });
+            
+            // Add logout button
+            dashboardDiv.appendChild(createLogoutButton());
+          } else {
+            dashboardDiv.innerHTML = '<div class="no-data"><p>No assessment data found.</p></div>';
+            dashboardDiv.appendChild(createLogoutButton());
+          }
+        } catch (error) {
+          console.error("Error getting document:", error);
+          dashboardDiv.innerHTML = '<div class="no-data"><p>Error loading data. Please try again later.</p></div>';
+          dashboardDiv.appendChild(createLogoutButton());
+        }
+      } else {
+        dashboardDiv.innerHTML = '<div class="login-message"><p>Please log in to view your dashboard.</p></div>';
+      }
+    });
+  </script>
+</body>
+</html>

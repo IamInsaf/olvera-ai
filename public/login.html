@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-adsense-account" content="ca-pub-6090544760574516">
+  <title>Olvera - Login</title>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(-45deg, #1e3c72, #2a5298, #4776b3, #7db9e8);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+    
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      z-index: 1;
+      position: relative;
+      transition: transform 0.3s ease;
+      backdrop-filter: blur(5px);
+    }
+    
+    h2 {
+      text-align: center;
+      color: #2a5298;
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 1.5rem;
+    }
+    
+    input, button {
+      width: 100%;
+      padding: 12px 15px;
+      margin-top: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
+    }
+    
+    button {
+      background-color: #2a5298;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    
+    button:hover, button:active {
+      background-color: #1e3c72;
+    }
+    
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    #recaptcha-container {
+      margin: 12px 0;
+      transform: scale(0.95);
+      transform-origin: center;
+    }
+    
+    .career-icons {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .career-icon {
+      position: absolute;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 20px;
+      animation: float 15s infinite linear;
+      opacity: 0;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    .success-message, .error-message {
+      text-align: center;
+      margin-top: 12px;
+      font-weight: 500;
+      animation: fadeIn 0.5s ease;
+      font-size: 14px;
+      padding: 8px;
+      border-radius: 4px;
+    }
+    
+    .success-message {
+      color: #28a745;
+      background-color: rgba(40, 167, 69, 0.1);
+    }
+    
+    .error-message {
+      color: #dc3545;
+      background-color: rgba(220, 53, 69, 0.1);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .phone-input {
+      margin-bottom: 12px;
+    }
+    
+    .powered-by {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    /* Privacy Policy Checkbox Styles */
+    .privacy-container {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .privacy-container input {
+      width: auto;
+      margin-right: 10px;
+    }
+    
+    .privacy-container label {
+      font-size: 14px;
+      color: #333;
+    }
+    
+    .privacy-container a {
+      color: #2a5298;
+      text-decoration: none;
+    }
+    
+    .privacy-container a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+      width: 90%;
+    }
+    
+    .modal-close {
+      background: #2a5298;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    
+    /* Mobile-specific optimizations */
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+        animation: none;
+        background: linear-gradient(#1e3c72, #2a5298);
+      }
+      
+      .container {
+        padding: 20px;
+        border-radius: 10px;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+        margin-bottom: 15px;
+      }
+      
+      input, button {
+        padding: 10px 12px;
+        font-size: 15px;
+      }
+      
+      #recaptcha-container {
+        transform: scale(0.85);
+        margin: 10px -15px;
+      }
+      
+      .career-icon {
+        font-size: 16px;
+      }
+      
+      .privacy-container label {
+        font-size: 13px;
+      }
+    }
+    
+    @media (max-width: 360px) {
+      .container {
+        padding: 15px;
+      }
+      
+      h2 {
+        font-size: 1.2rem;
+      }
+      
+      #recaptcha-container {
+        transform: scale(0.8);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="career-icons" id="careerIcons"></div>
+
+  <div class="container">
+    <h2>Olvera Career Login</h2>
+    <input type="text" id="userName" placeholder="Your Name">
+    <div class="phone-input">
+      <input type="tel" id="phoneNumber" placeholder="Phone Number">
+    </div>
+    
+    <div class="privacy-container">
+      <input type="checkbox" id="agreePolicy" required>
+      <label for="agreePolicy">I agree to the <a href="#" id="privacyLink">Privacy Policy</a></label>
+    </div>
+    
+    <div id="recaptcha-container"></div>
+    <button onclick="sendOTP()" id="sendOTPBtn">Send OTP</button>
+
+    <input type="text" id="otp" placeholder="Enter OTP" style="display:none;" inputmode="numeric">
+    <button onclick="verifyOTP()" id="verifyBtn" style="display:none;">Verify OTP</button>
+    
+    <div id="message" style="display:none;"></div>
+    <div class="powered-by">powered by: inzafindustries</div>
+  </div>
+
+  <!-- Privacy Policy Modal -->
+  <div id="privacyModal" class="modal">
+    <div class="modal-content">
+      <h3>Privacy Policy</h3>
+      <p>Last Updated: 5 MAY 2025</p>
+      
+      <h4>Information We Collect</h4>
+      <p>When you register with Olvera Career, we collect:</p>
+      <ul>
+        <li>Your name</li>
+        <li>Phone number</li>
+        <li>OTP verification data</li>
+      </ul>
+      
+      <h4>How We Use Your Information</h4>
+      <p>We use your personal information to:</p>
+      <ul>
+        <li>Create and manage your account</li>
+        <li>Verify your identity</li>
+        <li>Provide our services to you</li>
+      </ul>
+      
+      <h4>Data Security</h4>
+      <p>We implement security measures to protect your personal information from unauthorized access.</p>
+      
+      <h4>Your Rights</h4>
+      <p>You have the right to access, correct, or delete your personal information.</p>
+      
+      <button class="modal-close" onclick="document.getElementById('privacyModal').style.display='none'">Close</button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+  <script>
+    // Career icons to display
+    const careerIcons = [
+      'fa-graduation-cap', 'fa-briefcase', 'fa-code', 
+      'fa-chart-line', 'fa-flask', 'fa-paint-brush',
+      'fa-heartbeat', 'fa-calculator', 'fa-microscope',
+      'fa-laptop-code', 'fa-user-tie', 'fa-robot',
+      'fa-project-diagram', 'fa-book', 'fa-lightbulb',
+      'fa-globe', 'fa-building', 'fa-network-wired'
+    ];
+
+    // Create floating career icons (fewer on mobile)
+    function createCareerIcons() {
+      const container = document.getElementById('careerIcons');
+      const iconCount = window.innerWidth < 480 ? 8 : 15;
+      
+      for (let i = 0; i < iconCount; i++) {
+        const icon = document.createElement('i');
+        icon.className = `career-icon fas ${careerIcons[Math.floor(Math.random() * careerIcons.length)]}`;
+        
+        // Random positioning and animation
+        icon.style.left = `${Math.random() * 100}%`;
+        icon.style.fontSize = `${Math.random() * 15 + 10}px`;
+        icon.style.animationDuration = `${Math.random() * 15 + 10}s`;
+        icon.style.animationDelay = `${Math.random() * 5}s`;
+        
+        container.appendChild(icon);
+      }
+    }
+
+    // Your Firebase Config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Initialize phone input
+    const phoneInput = document.querySelector("#phoneNumber");
+    const iti = window.intlTelInput(phoneInput, {
+      utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+      preferredCountries: ['us', 'gb', 'in', 'br'],
+      separateDialCode: true,
+      initialCountry: "auto",
+      geoIpLookup: function(callback) {
+        fetch("https://ipapi.co/json")
+          .then(function(res) { return res.json(); })
+          .then(function(data) { callback(data.country_code); })
+          .catch(function() { callback('us'); });
+      }
+    });
+
+    // reCAPTCHA - compact version for mobile
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: window.innerWidth < 480 ? 'compact' : 'normal',
+      callback: (response) => {
+        console.log("reCAPTCHA solved");
+      },
+      'expired-callback': () => {
+        console.log("reCAPTCHA expired");
+      }
+    });
+
+    // Show message function
+    function showMessage(message, isError = false) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = message;
+      messageDiv.className = isError ? 'error-message' : 'success-message';
+      messageDiv.style.display = 'block';
+      
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 3000);
+    }
+
+    // Privacy policy modal
+    document.getElementById('privacyLink').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById('privacyModal').style.display = 'flex';
+    });
+
+    // Send OTP function
+    function sendOTP() {
+      const phoneNumber = iti.getNumber();
+      const userName = document.getElementById('userName').value.trim();
+      const agreePolicy = document.getElementById('agreePolicy').checked;
+      
+      if (!userName) {
+        showMessage("Please enter your name", true);
+        return;
+      }
+      
+      if (!phoneNumber) {
+        showMessage("Please enter a valid phone number", true);
+        return;
+      }
+      
+      if (!agreePolicy) {
+        showMessage("You must agree to the Privacy Policy to continue", true);
+        return;
+      }
+
+      const appVerifier = window.recaptchaVerifier;
+
+      auth.signInWithPhoneNumber(phoneNumber, appVerifier)
+        .then((confirmationResult) => {
+          window.confirmationResult = confirmationResult;
+          document.getElementById('otp').style.display = 'block';
+          document.getElementById('verifyBtn').style.display = 'block';
+          document.getElementById('sendOTPBtn').disabled = true;
+          showMessage('OTP sent successfully!');
+          
+          if (window.innerWidth < 768) {
+            document.getElementById('otp').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          showMessage(error.message, true);
+        });
+    }
+
+    // Verify OTP function
+    function verifyOTP() {
+      const otp = document.getElementById('otp').value;
+      const userName = document.getElementById('userName').value.trim();
+      const phoneNumber = iti.getNumber();
+      const agreePolicy = document.getElementById('agreePolicy').checked;
+      
+      if (!otp || otp.length < 6) {
+        showMessage("Please enter a valid OTP", true);
+        return;
+      }
+      
+      if (!agreePolicy) {
+        showMessage("You must agree to the Privacy Policy to continue", true);
+        return;
+      }
+
+      confirmationResult.confirm(otp)
+        .then((result) => {
+          const user = result.user;
+          
+          // Save user data to Firestore including privacy policy acceptance
+          db.collection("Olverauser").doc(user.uid).set({
+            name: userName,
+            phone: phoneNumber,
+            privacyPolicyAccepted: true,
+            policyAcceptedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+          })
+          .then(() => {
+            showMessage('Login Successful! Redirecting...');
+            setTimeout(() => {
+              window.location.href = "index";
+            }, 1500);
+          })
+          .catch((error) => {
+            console.error("Error saving user data: ", error);
+            showMessage('Login successful but could not save profile data.', true);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+          showMessage('Invalid OTP. Please try again.', true);
+        });
+    }
+
+    // Initialize career icons when page loads
+    window.onload = function() {
+      createCareerIcons();
+      setInterval(createCareerIcons, 15000); // Add more icons every 15 seconds
+      
+      // Adjust for very small screens
+      if (window.innerWidth < 360) {
+        document.querySelectorAll('input, button').forEach(el => {
+          el.style.padding = '8px 10px';
+        });
+      }
+    };
+    
+    // Handle orientation changes
+    window.addEventListener('orientationchange', function() {
+      setTimeout(() => {
+        window.recaptchaVerifier.render().then(widgetId => {
+          window.recaptchaVerifier.reset(widgetId);
+        });
+      }, 300);
+    });
+  </script>
+</body>
+</html>

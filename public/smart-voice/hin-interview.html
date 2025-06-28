@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Interview</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    #startContainer {
+      text-align: center;
+      margin: 40px 0;
+    }
+    #startButton {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin-top: 20px;
+    }
+    #interviewContainer {
+      display: none;
+    }
+    #questionContainer, #answerContainer {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f5f5f5;
+    }
+    #questionText {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    #answerText {
+      min-height: 60px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background: white;
+    }
+    #typedAnswer {
+      width: 100%;
+      min-height: 100px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-top: 10px;
+      display: none;
+    }
+    #status {
+      margin-top: 10px;
+      font-style: italic;
+      color: #666;
+    }
+    #timer {
+      font-weight: bold;
+    }
+    .hidden {
+      display: none;
+    }
+    
+    #sessionTimer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      display: none;
+    }
+    
+    #languageSelection {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f0f0f0;
+    }
+    
+    .language-option {
+      display: inline-block;
+      margin: 0 10px;
+    }
+    
+    .language-option input {
+      margin-right: 5px;
+    }
+    
+    .action-buttons {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .action-button {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    #toggleInputButton {
+      background: #f1c40f;
+      color: #000;
+    }
+    
+    #submitAnswerButton {
+      background: #2ecc71;
+      color: white;
+      display: none;
+    }
+    
+    #stopRecordingButton {
+      background: #e74c3c;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="sessionTimer">05:00</div>
+  
+  <div id="startContainer">
+    <h2>AI Interview</h2>
+    <button id="startButton">Start Interview</button>
+  </div>
+  
+  <div id="interviewContainer">
+    <div id="authStatus" class="hidden"></div>
+    <div id="userIdDisplay" class="hidden"></div>
+    
+    <div id="questionContainer">
+      <div id="questionText">Question will appear here...</div>
+    </div>
+    
+    <div id="answerContainer">
+      <div id="answerText">Your answer will appear here as you speak...</div>
+      <textarea id="typedAnswer" placeholder="Type your answer here..."></textarea>
+      <div id="timer">Response time: 0.0s</div>
+      <div id="status">Press the Start button to begin</div>
+      
+      <div class="action-buttons">
+        <button id="toggleInputButton" class="action-button">Switch to Typing</button>
+        <button id="submitAnswerButton" class="action-button">Submit Answer</button>
+        <button id="stopRecordingButton" class="action-button">Stop Recording</button>
+        <button type="button" id="endInterviewButton" onclick="window.location.href='vresults'" class="action-button">End interview</button>
+      </div>
+    </div>
+    
+    <div id="output"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, serverTimestamp, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-functions.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const functions = getFunctions(app);
+    const auth = getAuth(app);
+    
+    // Voice recognition variables
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    // App state variables
+    let currentUserId = null;
+    let currentAIQuestion = null;
+    let answerText = "";
+    let startTime = 0;
+    let responseTimer = null;
+    let silenceTimer = null;
+    let timeToStart = 0;
+    let responseTime = 0;
+    let isRecording = false;
+    let isSpeaking = false;
+    let questionCounter = 0;
+    let sessionTimer = null;
+    let sessionTimeLeft = 10 * 60; // 5 minutes in seconds
+    let selectedLanguage = 'hi-IN'; // Default language
+    let inputMode = 'voice'; // 'voice' or 'text'
+
+    // DOM elements
+    const startContainer = document.getElementById('startContainer');
+    const interviewContainer = document.getElementById('interviewContainer');
+    const startButton = document.getElementById('startButton');
+    const questionText = document.getElementById('questionText');
+    const answerTextElement = document.getElementById('answerText');
+    const typedAnswerElement = document.getElementById('typedAnswer');
+    const statusElement = document.getElementById('status');
+    const timerElement = document.getElementById('timer');
+    const outputElement = document.getElementById('output');
+    const authStatusElement = document.getElementById('authStatus');
+    const userIdDisplayElement = document.getElementById('userIdDisplay');
+    const questionContainer = document.getElementById('questionContainer');
+    const answerContainer = document.getElementById('answerContainer');
+    const sessionTimerElement = document.getElementById('sessionTimer');
+    const languageOptions = document.querySelectorAll('input[name="language"]');
+    const toggleInputButton = document.getElementById('toggleInputButton');
+    const submitAnswerButton = document.getElementById('submitAnswerButton');
+    const stopRecordingButton = document.getElementById('stopRecordingButton');
+
+    // Set up language selection
+    languageOptions.forEach(option => {
+      option.addEventListener('change', (event) => {
+        selectedLanguage = event.target.value;
+      });
+    });
+
+    // Function to update session timer
+    function updateSessionTimer() {
+      const minutes = Math.floor(sessionTimeLeft / 60);
+      const seconds = sessionTimeLeft % 60;
+      sessionTimerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (sessionTimeLeft <= 0) {
+        endSession();
+      } else {
+        sessionTimeLeft--;
+      }
+    }
+
+    // Function to end the session
+    function endSession() {
+      clearInterval(sessionTimer);
+      
+      // Stop all recording
+      if (isRecording) {
+        recognition.stop();
+      }
+      
+      // Redirect to certificate page
+      window.location.href = "smart-voice/vresults";
+    }
+
+    // Function to clear interactions collection
+    async function clearInteractionsCollection(userId) {
+      try {
+        questionCounter = 0; // Reset counter when clearing
+        const userRef = doc(db, "conversations", userId);
+        const interactionsRef = collection(userRef, "interactions");
+        
+        // Get all documents in the interactions collection
+        const querySnapshot = await getDocs(interactionsRef);
+        
+        // Delete each document
+        const deletePromises = [];
+        querySnapshot.forEach((doc) => {
+          deletePromises.push(deleteDoc(doc.ref));
+        });
+        
+        await Promise.all(deletePromises);
+        console.log("All interactions deleted successfully");
+      } catch (error) {
+        console.error("Error deleting interactions:", error);
+      }
+    }
+
+    // Initialize speech recognition
+    recognition.onresult = (event) => {
+      clearTimeout(silenceTimer);
+      
+      // Get the current transcript from the last result
+      const lastResult = event.results[event.results.length - 1];
+      const transcript = lastResult[0].transcript;
+      
+      // Only update if this is a final result
+      if (lastResult.isFinal) {
+        answerText = transcript;
+        answerTextElement.textContent = transcript;
+        
+        // Reset silence timer (2 seconds)
+        silenceTimer = setTimeout(stopRecording, 2000);
+      }
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+      statusElement.textContent = `Error: ${event.error}`;
+      stopRecording();
+    };
+
+    recognition.onend = () => {
+      if (isRecording) {
+        recognition.start(); // Restart recognition if we're still recording
+      }
+    };
+
+    // Toggle between voice and text input
+    function toggleInputMode() {
+      if (inputMode === 'voice') {
+        // Switch to text input
+        inputMode = 'text';
+        toggleInputButton.textContent = 'Switch to Voice';
+        answerTextElement.style.display = 'none';
+        typedAnswerElement.style.display = 'block';
+        submitAnswerButton.style.display = 'inline-block';
+        stopRecordingButton.style.display = 'none';
+        
+        // Stop recording if active
+        if (isRecording) {
+          stopRecording();
+        }
+        
+        // Set the typed answer to any previously recorded answer
+        typedAnswerElement.value = answerText;
+        statusElement.textContent = "Type your answer above and click Submit";
+      } else {
+        // Switch to voice input
+        inputMode = 'voice';
+        toggleInputButton.textContent = 'Switch to Typing';
+        answerTextElement.style.display = 'block';
+        typedAnswerElement.style.display = 'none';
+        submitAnswerButton.style.display = 'none';
+        stopRecordingButton.style.display = 'inline-block';
+        
+        // Update answer text with any typed content
+        answerText = typedAnswerElement.value;
+        answerTextElement.textContent = answerText;
+        
+        // Start recording if not already
+        if (!isRecording && !isSpeaking) {
+          startRecording();
+        }
+      }
+    }
+
+    // Submit typed answer
+    function submitTypedAnswer() {
+      answerText = typedAnswerElement.value.trim();
+      if (answerText) {
+        statusElement.textContent = "Processing your answer...";
+        saveInteraction();
+      } else {
+        statusElement.textContent = "Please type your answer before submitting";
+      }
+    }
+
+    // Start interview process
+    async function startInterview() {
+      startButton.disabled = true;
+      startButton.textContent = "Starting...";
+      
+      // Set the selected language for recognition
+      recognition.lang = selectedLanguage;
+      console.log('Setting recognition language to:', selectedLanguage);
+      
+      // Show session timer
+      sessionTimerElement.style.display = 'block';
+      
+      // Start session timer
+      sessionTimer = setInterval(updateSessionTimer, 1000);
+      
+      // Start authentication
+      signInAnonymously(auth).catch((error) => {
+        console.error("Anonymous sign-in failed:", error);
+        startButton.textContent = "Error - Try Again";
+        startButton.disabled = false;
+      });
+    }
+
+    // Handle authentication state
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUserId = user.uid;
+        authStatusElement.textContent = "✅ Authenticated";
+        userIdDisplayElement.textContent = `User ID: ${user.uid}`;
+        
+        // Clear previous interactions
+        await clearInteractionsCollection(user.uid);
+        
+        // Show interview interface
+        startContainer.style.display = 'none';
+        interviewContainer.style.display = 'block';
+        
+        // Start first question
+        startNewConversation();
+      }
+    });
+
+    async function startNewConversation() {
+        sessionTimerElement.style.display = 'block';
+
+        sessionTimer = setInterval(updateSessionTimer, 1000);
+
+      recognition.lang = selectedLanguage;
+      console.log('Setting recognition language to:', selectedLanguage);
+
+      startContainer.style.display = 'none';
+      interviewContainer.style.display = 'block';
+      // Set first question
+      currentAIQuestion = "What is your current situation?";
+      questionText.textContent = `Question 1: ${currentAIQuestion}`;
+      speakQuestion(currentAIQuestion);
+      outputElement.textContent = "Ready for your first response!";
+    }
+
+    function speakQuestion(question) {
+      isSpeaking = true;
+      statusElement.textContent = "Please wait for the question to finish...";
+      
+      const speech = new SpeechSynthesisUtterance();
+      speech.text = question;
+      speech.rate = 1;
+      speech.pitch = 1;
+      speech.lang = selectedLanguage; // Set the language for speech synthesis
+      
+      speech.onend = () => {
+        isSpeaking = false;
+        // Auto-start recording after question is read (only in voice mode)
+        if (inputMode === 'voice') {
+          setTimeout(startRecording, 300);
+        } else {
+          statusElement.textContent = "Type your answer above";
+        }
+      };
+      
+      window.speechSynthesis.speak(speech);
+    }
+
+    function startRecording() {
+      if (!isRecording && !isSpeaking && inputMode === 'voice') {
+        isRecording = true;
+        answerText = "";
+        answerTextElement.textContent = "";
+        startTime = Date.now();
+        timeToStart = 0;
+        
+        // Start measuring time to first response
+        const startResponseTimer = setInterval(() => {
+          timeToStart += 0.1;
+        }, 100);
+        
+        recognition.start();
+        statusElement.textContent = "Listening... Speak now";
+        
+        // Start response timer when speech is first detected
+        recognition.onspeechstart = () => {
+          clearInterval(startResponseTimer);
+          responseTime = 0;
+          responseTimer = setInterval(() => {
+            responseTime += 0.1;
+            timerElement.textContent = `Response time: ${responseTime.toFixed(1)}s`;
+          }, 100);
+        };
+      }
+    }
+
+    function stopRecording() {
+      if (isRecording) {
+        isRecording = false;
+        recognition.stop();
+        clearInterval(responseTimer);
+        statusElement.textContent = "Processing your answer...";
+        
+        if (answerText.trim()) {
+          saveInteraction();
+        } else {
+          statusElement.textContent = "No speech detected. Starting again...";
+          timerElement.textContent = "Response time: 0.0s";
+          setTimeout(startRecording, 1000);
+        }
+      }
+    }
+
+    // Function to save user interaction
+    async function saveInteraction() {
+      if (!currentUserId || !answerText.trim()) {
+        outputElement.textContent = "❌ No answer to save";
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "conversations", currentUserId);
+        const interactionsRef = collection(userRef, "interactions");
+
+        await setDoc(userRef, {
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          language: selectedLanguage
+        }, { merge: true });
+
+        const interactionId = "question_" + (questionCounter + 1);
+        await setDoc(doc(interactionsRef, interactionId), {
+          question: currentAIQuestion,
+          answer: answerText,
+          timeToStart: parseFloat(timeToStart.toFixed(1)),
+          responseTime: parseFloat(responseTime.toFixed(1)),
+          timestamp: serverTimestamp()
+        });
+
+        questionCounter++; // Increment after saving
+        outputElement.textContent = "✅ Answer saved! Generating next question...";
+        await generateAIQuestion();
+      } catch (error) {
+        console.error("Error saving interaction:", error);
+        outputElement.textContent = "❌ Failed to save answer.";
+        window.location.href = 'login'
+        setTimeout(() => {
+          if (inputMode === 'voice') {
+            startRecording();
+          }
+        }, 1000);
+      }
+    }
+
+    // Function to generate AI question
+    async function generateAIQuestion() {
+      if (!currentUserId) {
+        outputElement.textContent = "❌ Please wait while we authenticate you...";
+        return;
+      }
+
+      outputElement.textContent = "⏳ Generating next question...";
+      
+      const generate = httpsCallable(functions, "generateAIhinQuestion");
+      try {
+        const result = await generate({ 
+          userId: currentUserId,
+          language: selectedLanguage 
+        });
+        currentAIQuestion = result.data.question;
+        questionText.textContent = `Question ${questionCounter + 1}: ${currentAIQuestion}`;
+        speakQuestion(currentAIQuestion);
+        outputElement.textContent = "🤖 Next question ready!";
+        timerElement.textContent = "Response time: 0.0s";
+      } catch (error) {
+        console.error("Error generating question:", error);
+        outputElement.textContent = "❌ Failed to generate question.";
+        setTimeout(() => {
+          if (inputMode === 'voice') {
+            startRecording();
+          }
+        }, 1000);
+      }
+    }
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', () => {
+      if (isRecording) {
+        recognition.stop();
+      }
+      if (sessionTimer) {
+        clearInterval(sessionTimer);
+      }
+    });
+
+    // Event listeners
+    startButton.addEventListener('click', startNewConversation);
+    toggleInputButton.addEventListener('click', toggleInputMode);
+    submitAnswerButton.addEventListener('click', submitTypedAnswer);
+    stopRecordingButton.addEventListener('click', stopRecording);
+  </script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olvera - Secure Payment</title>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 80px;
+      padding: 20px;
+    }
+
+    input {
+      margin: 10px;
+      padding: 10px;
+      width: 250px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 12px 30px;
+      font-size: 16px;
+      background-color: #1c1c3c;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #2c2c5c;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .desktop-message {
+      background-color: #fff8e1;
+      border: 1px solid #ffd54f;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      margin: 0 auto;
+      display: none;
+    }
+
+    .desktop-message h3 {
+      color: #e65100;
+      margin-top: 0;
+    }
+
+    .desktop-message p {
+      margin-bottom: 15px;
+    }
+
+    .qr-code {
+      margin: 20px auto;
+      padding: 10px;
+      background: white;
+      display: inline-block;
+      border: 1px solid #ddd;
+    }
+
+    .mobile-only {
+      display: none;
+    }
+
+    .copy-url {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 4px;
+      margin: 10px auto;
+      max-width: 400px;
+      word-break: break-all;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .copy-url:hover {
+      background: #eee;
+    }
+
+    .copy-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 5px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .copy-url:hover .copy-tooltip {
+      opacity: 1;
+    }
+
+    @media only screen and (max-width: 768px) {
+      .desktop-message {
+        display: none !important;
+      }
+      .mobile-only {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="desktop-message" id="desktopMessage">
+    <h3>Mobile Payment Required</h3>
+    <p>We've detected that you're accessing this page from a desktop computer.</p>
+    <p>For security and better user experience, payments can only be processed from mobile devices.</p>
+    <p>Please scan this QR code with your smartphone to open the payment page:</p>
+    <div class="qr-code-container">
+      <div id="qrCode" class="qr-code">
+        <img src='qr.png' alt="QR Code">
+      </div>
+    </div>
+    <p>Or copy this URL and open it on your mobile browser:</p>
+    <div class="copy-url" id="pageUrlContainer" onclick="copyUrl()">
+      <span id="pageUrl"></span>
+      <span class="copy-tooltip">Click to copy</span>
+    </div>
+    <p id="copyFeedback" style="color: green; display: none;">URL copied to clipboard!</p>
+    <button onclick="checkPaymentStatusManually()" style="margin-top: 20px;">Check Payment Status</button>
+    <p id="desktopStatus"></p>
+  </div>
+  
+  <style>
+    .qr-code-container {
+      width: 200px;
+      height: 200px;
+      margin: 15px auto;
+      padding: 10px;
+      background: white;
+      border: 1px solid #ddd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .qr-code-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+  </style>
+
+  <div class="mobile-only" id="mobileContent">
+    <h2>Pay ₹49 to Unlock Career Test</h2>
+
+    <div id="paymentSection" style="display: none;">
+      <input type="text" id="name" placeholder="Enter your name"><br>
+      <input type="text" id="phone" placeholder="Enter your phone number"><br>
+      <button onclick="startPayment()">Pay ₹49 Now</button>
+      <div id="status"></div>
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const backendURL = "https://us-central1-promgn-in.cloudfunctions.net/paymentAPI";
+
+    let currentUserId = null;
+    let paymentChecked = false;
+
+    // Check if device is mobile
+    function isMobileDevice() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    // Copy URL to clipboard
+    function copyUrl() {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        const feedback = document.getElementById('copyFeedback');
+        feedback.style.display = 'block';
+        setTimeout(() => {
+          feedback.style.display = 'none';
+        }, 2000);
+      });
+    }
+
+    
+ 
+    // Manual payment status check for desktop
+    async function checkPaymentStatusManually() {
+      const user = auth.currentUser;
+      if (!user) return;
+      
+      const statusElement = document.getElementById('desktopStatus');
+      statusElement.textContent = "Checking payment status...";
+      statusElement.style.color = "#333";
+      
+      try {
+        const userRef = db.collection("Olverausers").doc(user.uid);
+        const doc = await userRef.get();
+
+        if (doc.exists && doc.data()?.hasPaid === true) {
+          statusElement.textContent = "✅ Payment verified! Redirecting...";
+          statusElement.style.color = "green";
+          setTimeout(() => {
+            window.location.href = "home.html";
+          }, 1500);
+        } else {
+          statusElement.textContent = "Payment not yet completed. Please complete payment on your mobile device and check again.";
+          statusElement.style.color = "orange";
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        statusElement.textContent = "Error checking payment status. Please try again.";
+        statusElement.style.color = "red";
+      }
+    }
+
+    // Check payment status in Firestore
+    async function checkPaymentStatus(user, isInitialCheck = false) {
+      if (!user?.uid) {
+        console.error("No user provided");
+        window.location.href = "login.html";
+        return false;
+      }
+
+      try {
+        const userRef = db.collection("Olverausers").doc(user.uid);
+        const doc = await userRef.get();
+
+        if (doc.exists && doc.data()?.hasPaid === true) {
+          console.log("✅ Payment verified via olverausers. Access granted.");
+          // Redirect to dashboard or unlock content
+          window.location.href = "home.html";
+          return true;
+        } else {
+          console.log("❌ User has not paid or record not found:", user.uid);
+          // Only redirect if we're not on payments page and this is the initial check
+          if (isInitialCheck && !window.location.href.includes('payments.html')) {
+           // window.location.href = "payments.html";
+          }
+          return false;
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        if (isInitialCheck && !window.location.href.includes('payments.html')) {
+          window.location.href = "payments.html";
+        }
+        return false;
+      }
+    }
+
+    // Initialize page
+    function initPage() {
+      // Show appropriate content based on device
+      if (!isMobileDevice()) {
+        document.getElementById('desktopMessage').style.display = 'block';
+        document.getElementById('mobileContent').style.display = 'none';
+        
+      } else {
+        document.getElementById('desktopMessage').style.display = 'none';
+        document.getElementById('mobileContent').style.display = 'block';
+      }
+
+      // Handle auth state changes
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          currentUserId = user.uid;
+          
+          // First check payment status (initial check)
+          checkPaymentStatus(user, true);
+          
+          // Only show payment section if on mobile
+          if (isMobileDevice()) {
+            document.getElementById("paymentSection").style.display = "block";
+          }
+        } else {
+          // User not logged in, redirect to login
+          window.location.href = "login.html";
+        }
+      });
+    }
+
+    // Start payment process
+    async function startPayment() {
+      if (!isMobileDevice()) {
+        alert("Please use a mobile device to complete the payment.");
+        return;
+      }
+
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const status = document.getElementById("status");
+
+      if (!name || !phone) {
+        return alert("Name and phone are required.");
+      }
+
+      if (!/^\d{10}$/.test(phone)) {
+        return alert("Please enter a valid 10-digit phone number.");
+      }
+
+      status.innerText = "Creating order...";
+      status.style.color = "#333";
+
+      try {
+        const res = await fetch(`${backendURL}/createOrder`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, phone, userId: currentUserId })
+        });
+
+        const { order, error } = await res.json();
+        if (!order) {
+          status.innerText = "Order creation failed: " + (error || "Unknown error");
+          status.style.color = "red";
+          return;
+        }
+
+        const options = {
+          key: "rzp_live_dE2RUyUj98msAj",
+          amount: order.amount,
+          currency: "INR",
+          name: "Olvera",
+          description: "Career Test Payment",
+          order_id: order.id,
+          handler: async function (response) {
+            status.innerText = "Verifying payment...";
+            status.style.color = "#333";
+
+            const verifyRes = await fetch(`${backendURL}/verifyPayment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              status.innerText = "✅ Payment successful! Redirecting...";
+              status.style.color = "green";
+              
+              // Update Firestore and redirect after short delay
+              try {
+                await db.collection("Olverausers").doc(currentUserId).set({
+                  hasPaid: true,
+                  paymentDate: new Date(),
+                  name: name,
+                  phone: phone
+                }, { merge: true });
+                
+                setTimeout(() => {
+                  window.location.href = "dashboard.html";
+                }, 1500);
+              } catch (error) {
+                console.error("Error updating payment status:", error);
+                status.innerText = "Payment verified but database update failed. Please contact support.";
+                status.style.color = "orange";
+              }
+            } else {
+              status.innerText = "❌ Payment verification failed.";
+              status.style.color = "red";
+            }
+          },
+          prefill: { name, contact: phone, email: currentUserId + "@olvera.com" },
+          theme: { color: "#1c1c3c" },
+          modal: {
+            ondismiss: function() {
+              status.innerText = "Payment window closed.";
+              status.style.color = "#333";
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.error("Payment error:", err);
+        status.innerText = "Something went wrong during payment.";
+        status.style.color = "red";
+      }
+    }
+
+    // Initialize the page when loaded
+    window.onload = initPage;
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Firebase Profile Card</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+</head>
+<body>
+  <div class="profile-card">
+    <!-- Floating background elements -->
+    <div class="floating-elements">
+      <div class="floating-element" style="width: 100px; height: 100px; top: -50px; left: -50px; animation-delay: 0s;"></div>
+      <div class="floating-element" style="width: 150px; height: 150px; bottom: -75px; right: -75px; animation-delay: 3s;"></div>
+      <div class="floating-element" style="width: 80px; height: 80px; top: 30%; right: -40px; animation-delay: 6s;"></div>
+    </div>
+    
+    <!-- Left Column -->
+    <div class="profile-left">
+      <!-- Header -->
+      <div class="profile-header">
+        <div class="profile-photo-container">
+          <img class="profile-photo" id="user-photo" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" alt="User Photo" />
+        </div>
+        <div class="profile-info">
+          <h1 class="profile-name" id="user-name">Loading...</h1>
+          <p class="profile-contact">
+            <span><i class="fas fa-envelope"></i> <span id="user-email">john.doe@example.com</span></span>
+            <span><i class="fas fa-phone"></i> <span id="user-phone">+123 456 7890</span></span>
+            <span><i class="fas fa-map-marker-alt"></i> <span id="user-location">San Francisco, CA</span></span>
+          </p>
+          <div class="social-links">
+            <a href="#" id="social-linkedin"><i class="fab fa-linkedin"></i></a>
+            <a href="#" id="social-github"><i class="fab fa-github"></i></a>
+            <a href="#" id="social-twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" id="social-dribbble"><i class="fab fa-dribbble"></i></a>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Stats -->
+      <div class="graph-section">
+        <h2 class="section-title"><i class="fas fa-chart-line"></i> Performance Metrics</h2>
+        <div class="graph-container">
+          <div class="graph-bar" id="confidence-bar" style="--graph-width: 75%;"></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <span class="stat-value" id="response-time">30s</span>
+            <span class="stat-label">Avg Response</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="accuracy">85%</span>
+            <span class="stat-label">Accuracy</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="consistency">92%</span>
+            <span class="stat-label">Consistency</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-value" id="rating">4.9/5</span>
+            <span class="stat-label">Rating</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sliders (Display only - controlled from Firebase) -->
+      <div class="sliders-section">
+        <h2 class="section-title"><i class="fas fa-sliders-h"></i> Skill Levels</h2>
+        <div class="slider-container">
+          <div class="slider-header">
+            <span class="slider-title">Technical Expertise</span>
+            <span class="slider-value" id="technical-value">75%</span>
+          </div>
+          <input type="range" min="0" max="100" value="75" id="technical-slider" disabled />
+        </div>
+        
+        <div class="slider-container">
+          <div class="slider-header">
+            <span class="slider-title">Problem Solving</span>
+            <span class="slider-value" id="problem-value">70%</span>
+          </div>
+          <input type="range" min="0" max="100" value="70" id="problem-slider" disabled />
+        </div>
+        
+        <div class="slider-container">
+          <div class="slider-header">
+            <span class="slider-title">Creativity</span>
+            <span class="slider-value" id="creativity-value">80%</span>
+          </div>
+          <input type="range" min="0" max="100" value="80" id="creativity-slider" disabled />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Column -->
+    <div class="profile-right">
+      <!-- Traits -->
+      <div class="additional-insights">
+        <h2 class="section-title"><i class="fas fa-user-astronaut"></i> Personality Traits</h2>
+        <div class="tags" id="personality-traits">
+          <!-- Dynamically filled from Firebase -->
+          <span class="tag loading" style="width: 80px; height: 24px; border: none; background: #333;"></span>
+          <span class="tag loading" style="width: 100px; height: 24px; border: none; background: #333;"></span>
+          <span class="tag loading" style="width: 90px; height: 24px; border: none; background: #333;"></span>
+        </div>
+        
+        <h2 class="section-title"><i class="fas fa-project-diagram"></i> Domain Expertise</h2>
+        <div class="radar-placeholder">
+          <p id="expertise-text">Loading expertise data...</p>
+        </div>
+        
+        <h2 class="section-title"><i class="fas fa-rocket"></i> Growth Potential</h2>
+        <div class="progress-container">
+          <div class="progress-bar" id="potential-bar" style="--progress-width: 65%;"></div>
+        </div>
+        <p style="text-align: center; margin-top: 5px;">Current Potential: <strong style="color: var(--accent);" id="potential-value">65%</strong></p>
+      </div>
+      
+      <!-- Certification -->
+      <div class="certification">
+        <h2 class="section-title"><i class="fas fa-certificate"></i> Professional Certification</h2>
+        <input type="text" placeholder="Enter Certificate ID (e.g. OLVERA-2023-ABCDEF)" id="certificate-id" />
+        <div class="btn-group">
+          <button class="btn btn-primary" id="verify-btn">
+            <i class="fas fa-shield-alt"></i> Verify
+          </button>
+          <button class="btn btn-secondary" id="download-btn">
+            <i class="fas fa-download"></i> Download
+          </button>
+        </div>
+      </div>
+      
+      <!-- Badges -->
+      <div class="additional-insights">
+        <h2 class="section-title"><i class="fas fa-award"></i> Achievements</h2>
+        <div class="tags" id="achievements">
+          <!-- Dynamically filled from Firebase -->
+          <span class="tag loading" style="width: 120px; height: 24px; border: none; background: #333;"></span>
+          <span class="tag loading" style="width: 110px; height: 24px; border: none; background: #333;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+  
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "Olvera",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Reference to the profile data in Firebase
+    const profileRef = database.ref('profile');
+
+    // Listen for real-time updates
+    profileRef.on('value', (snapshot) => {
+      const profileData = snapshot.val();
+      
+      if (profileData) {
+        // Update basic info
+        document.getElementById('user-name').textContent = profileData.name || 'John Doe';
+        document.getElementById('user-email').textContent = profileData.email || 'john.doe@example.com';
+        document.getElementById('user-phone').textContent = profileData.phone || '+123 456 7890';
+        document.getElementById('user-location').textContent = profileData.location || 'San Francisco, CA';
+        
+        // Update photo if available
+        if (profileData.photoUrl) {
+          document.getElementById('user-photo').src = profileData.photoUrl;
+        }
+        
+        // Update social links
+        if (profileData.social) {
+          if (profileData.social.linkedin) {
+            document.getElementById('social-linkedin').href = profileData.social.linkedin;
+          }
+          if (profileData.social.github) {
+            document.getElementById('social-github').href = profileData.social.github;
+          }
+          if (profileData.social.twitter) {
+            document.getElementById('social-twitter').href = profileData.social.twitter;
+          }
+          if (profileData.social.dribbble) {
+            document.getElementById('social-dribbble').href = profileData.social.dribbble;
+          }
+        }
+        
+        // Update performance metrics
+        if (profileData.metrics) {
+          document.getElementById('response-time').textContent = profileData.metrics.responseTime || '30s';
+          document.getElementById('accuracy').textContent = profileData.metrics.accuracy || '85%';
+          document.getElementById('consistency').textContent = profileData.metrics.consistency || '92%';
+          document.getElementById('rating').textContent = profileData.metrics.rating || '4.9/5';
+          
+          // Update confidence bar
+          const confidence = profileData.metrics.confidence || 75;
+          document.getElementById('confidence-bar').style.setProperty('--graph-width', `${confidence}%`);
+        }
+        
+        // Update skills
+        if (profileData.skills) {
+          document.getElementById('technical-value').textContent = `${profileData.skills.technical || 75}%`;
+          document.getElementById('technical-slider').value = profileData.skills.technical || 75;
+          
+          document.getElementById('problem-value').textContent = `${profileData.skills.problemSolving || 70}%`;
+          document.getElementById('problem-slider').value = profileData.skills.problemSolving || 70;
+          
+          document.getElementById('creativity-value').textContent = `${profileData.skills.creativity || 80}%`;
+          document.getElementById('creativity-slider').value = profileData.skills.creativity || 80;
+        }
+        
+        // Update personality traits
+        if (profileData.personalityTraits && Array.isArray(profileData.personalityTraits)) {
+          const traitsContainer = document.getElementById('personality-traits');
+          traitsContainer.innerHTML = '';
+          profileData.personalityTraits.forEach(trait => {
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.textContent = trait;
+            traitsContainer.appendChild(tag);
+          });
+        }
+        
+        // Update expertise text
+        if (profileData.expertise) {
+          document.getElementById('expertise-text').textContent = profileData.expertise || 'Domain expertise data';
+        }
+        
+        // Update potential
+        if (profileData.potential) {
+          const potential = profileData.potential.value || 65;
+          document.getElementById('potential-bar').style.setProperty('--progress-width', `${potential}%`);
+          document.getElementById('potential-value').textContent = `${potential}%`;
+        }
+        
+        // Update achievements
+        if (profileData.achievements && Array.isArray(profileData.achievements)) {
+          const achievementsContainer = document.getElementById('achievements');
+          achievementsContainer.innerHTML = '';
+          profileData.achievements.forEach(achievement => {
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            
+            // Add icon based on achievement type
+            let icon = 'fa-trophy';
+            if (achievement.includes('Top')) icon = 'fa-medal';
+            if (achievement.includes('Innovation')) icon = 'fa-lightbulb';
+            
+            tag.innerHTML = `<i class="fas ${icon}"></i> ${achievement}`;
+            achievementsContainer.appendChild(tag);
+          });
+        }
+      }
+    }, (error) => {
+      console.error("Error reading from Firebase:", error);
+    });
+
+    // Button functionality
+    document.getElementById('verify-btn').addEventListener('click', () => {
+      const certId = document.getElementById('certificate-id').value;
+      if (certId) {
+        animateVerification();
+        
+        // In a real app, you would verify against Firebase
+        profileRef.child('certificate').once('value').then(snapshot => {
+          const certData = snapshot.val();
+          if (certData && certData.id === certId) {
+            alert('Certificate verified successfully!');
+          } else {
+            alert('Certificate not found or invalid');
+          }
+        });
+      } else {
+        alert('Please enter a certificate ID');
+      }
+    });
+
+    document.getElementById('download-btn').addEventListener('click', () => {
+      animateDownload();
+      alert('Download started! Your certificate will be available shortly.');
+    });
+
+    function animateVerification() {
+      const card = document.querySelector('.profile-card');
+      card.style.animation = 'none';
+      void card.offsetWidth; // Trigger reflow
+      card.style.animation = 'verificationPulse 1s ease';
+    }
+
+    function animateDownload() {
+      const card = document.querySelector('.profile-card');
+      card.style.animation = 'none';
+      void card.offsetWidth; // Trigger reflow
+      card.style.animation = 'downloadShake 0.5s ease';
+    }
+
+    // Add CSS for animations
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes verificationPulse {
+        0% { box-shadow: 0 0 10px rgba(0, 247, 255, 0.5); }
+        50% { box-shadow: 0 0 30px rgba(0, 247, 255, 0.8); }
+        100% { box-shadow: 0 0 10px rgba(0, 247, 255, 0.5); }
+      }
+      
+      @keyframes downloadShake {
+        0%, 100% { transform: translateY(-5px) rotateX(2deg); }
+        25% { transform: translateY(-5px) rotateX(2deg) rotateZ(-2deg); }
+        50% { transform: translateY(-5px) rotateX(2deg) rotateZ(2deg); }
+        75% { transform: translateY(-5px) rotateX(2deg) rotateZ(-2deg); }
+      }
+      
+      .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.7);
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        pointer-events: none;
+      }
+      
+      @keyframes ripple {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // Floating elements animation
+    document.querySelectorAll('.floating-element').forEach((el, index) => {
+      el.style.animationDuration = `${15 + index * 3}s`;
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   Language Selection
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+      font-family: 'Poppins', sans-serif;
+    }
+  </style>
+ </head>
+ <body class="min-h-screen bg-gradient-to-tr from-indigo-600 via-purple-700 to-pink-600 flex items-center justify-center px-4">
+  <div class="bg-white bg-opacity-90 rounded-3xl shadow-2xl max-w-md w-full p-10 text-center">
+   <h1 class="text-4xl font-extrabold text-indigo-900 mb-8 tracking-wide">
+    LET AI TELL YOUR POTENTIAL
+   </h1>
+   <img alt="Illustration of a glowing AI brain with circuits and digital elements representing artificial intelligence" class="mx-auto mb-8 rounded-full shadow-lg" height="200" loading="lazy" src="https://storage.googleapis.com/a1aa/image/c75aa836-78f0-47a9-c426-0a9d40bf6c5f.jpg" width="200"/>
+   <label class="block text-lg font-semibold text-indigo-800 mb-3" for="language">
+    Select Your Language
+   </label>
+   <select aria-label="Select language to start conversation" class="w-full border-2 border-indigo-500 rounded-lg py-3 px-4 text-indigo-900 font-semibold text-lg focus:outline-none focus:ring-4 focus:ring-indigo-300 mb-8 transition" id="language" name="language">
+    <option disabled="" selected="" value="">
+     Select language
+    </option>
+    <option value="english">
+     English
+    </option>
+    <option value="hindi">
+     Hindi
+    </option>
+    <option value="malayalam">
+     Malayalam
+    </option>
+   </select>
+   <button aria-disabled="true" aria-label="Start conversation button" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-3 rounded-lg text-xl transition flex items-center justify-center gap-3 shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed" disabled="" id="startBtn">
+    <i class="fas fa-play">
+    </i>
+    Start
+   </button>
+  </div>
+  <script>
+   const languageSelect = document.getElementById('language');
+    const startBtn = document.getElementById('startBtn');
+
+    languageSelect.addEventListener('change', () => {
+      startBtn.disabled = languageSelect.value === '';
+      startBtn.setAttribute('aria-disabled', languageSelect.value === '');
+    });
+
+    startBtn.addEventListener('click', () => {
+      const lang = languageSelect.value;
+      if (lang === 'english') {
+        window.location.href = 'smart-voice/eng-interview.html';
+      } else if (lang === 'hindi') {
+        window.location.href = 'smart-voice/hin-interview.html';
+      } else if (lang === 'malayalam') {
+        window.location.href = 'smart-voice/mal-interview.html';
+      }
+    });
+  </script>
+ </body>
+</html>

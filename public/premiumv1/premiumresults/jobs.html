@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talent Analysis Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-functions.js"></script>
+    <style>
+        .analysis-section {
+            background-color: #ffffff;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .analysis-section:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+        .talent-pill {
+            display: inline-block;
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            margin: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .highlight-box {
+            background-color: #f0f9ff;
+            border-left: 4px solid #38bdf8;
+            padding: 1.5rem;
+            border-radius: 0.375rem;
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="mb-8 animate__animated animate__fadeIn">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Your Talent Analysis</h1>
+                    <p class="text-gray-600 mt-1" id="statusMessage">Loading your talent profile...</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="checkAnalysis()" class="px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refresh
+                    </button>
+                    <button onclick="window.location.href='/dashboard'" class="px-3 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 transition flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Dashboard
+                    </button>
+                </div>
+            </div>
+            <div class="progress-bar mt-3" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loading" class="text-center py-12 animate__animated animate__fadeIn">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p class="mt-4 text-gray-600" id="loadingMessage">Loading your analysis...</p>
+            <div class="mt-6 max-w-md mx-auto bg-white p-4 rounded-lg shadow">
+                <p class="text-sm text-gray-500">Did you know? Our analysis evaluates over 50 different talent dimensions to provide personalized recommendations.</p>
+            </div>
+        </div>
+
+        <!-- Generate New Analysis State -->
+        <div id="generateAnalysis" class="hidden text-center py-12 bg-white rounded-lg shadow p-6 animate__animated animate__fadeIn">
+            <div class="text-blue-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-800 mb-2">No Analysis Found</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">We couldn't find an existing analysis for your profile. Generating one will help us provide personalized talent recommendations and career insights.</p>
+            <button onclick="generateNewAnalysis()" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition flex items-center mx-auto shadow-md">
+                <span id="generateButtonText">Generate Analysis</span>
+                <svg id="generateSpinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+            <div class="mt-8 bg-blue-50 p-4 rounded-lg text-left max-w-md mx-auto">
+                <h4 class="font-medium text-blue-800 mb-2">What to expect:</h4>
+                <ul class="text-sm text-blue-700 space-y-1 list-disc pl-5">
+                    <li>Personalized talent strengths assessment</li>
+                    <li>Career path recommendations</li>
+                    <li>Skill development suggestions</li>
+                    <li>Actionable insights</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Analysis Content -->
+        <div id="analysisContent" class="hidden space-y-6 animate__animated animate__fadeIn">
+            <!-- Dynamic content will be inserted here -->
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden text-center py-12 animate__animated animate__fadeIn">
+            <div class="text-red-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-800 mb-2">Something went wrong</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto" id="errorMessage"></p>
+            <div class="flex justify-center space-x-3">
+                <button onclick="checkAnalysis()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Try Again
+                </button>
+                <button onclick="window.location.href='/support'" class="px-4 py-2 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    Contact Support
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+            authDomain: "promgn-in.firebaseapp.com",
+            projectId: "promgn-in",
+            storageBucket: "promgn-in.appspot.com",
+            messagingSenderId: "545429176314",
+            appId: "1:545429176314:web:5590c702b55357b4bfae43",
+            measurementId: "G-YZQG3ZPQMJ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const functions = firebase.functions();
+
+        // DOM elements
+        const loadingElement = document.getElementById('loading');
+        const generateElement = document.getElementById('generateAnalysis');
+        const contentElement = document.getElementById('analysisContent');
+        const errorElement = document.getElementById('errorState');
+        const statusMessage = document.getElementById('statusMessage');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const progressFill = document.getElementById('progressFill');
+
+        // Update progress bar
+        function updateProgress(percentage) {
+            progressFill.style.width = `${percentage}%`;
+        }
+
+        // Enhanced markdown to HTML conversion
+        function formatAnalysisContent(text) {
+    // Convert headers
+    text = text.replace(/^-\s*\*\*Profile Summary\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-800 border-b pb-2">Profile Summary</h2>');
+    text = text.replace(/^-\s*\*\*Career Path \d+: (.*?)\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-800 border-b pb-2">Career Path $1</h2>');
+    text = text.replace(/^-\s*\*\*Comparative Analysis\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-800 border-b pb-2">Comparative Analysis</h2>');
+    text = text.replace(/^-\s*\*\*Projected Development Timeline\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-gray-800 border-b pb-2">Projected Development Timeline</h2>');
+    
+    // Section subheaders
+    text = text.replace(/^\s*-\s*\*\*(Description|Alignment with Profile|Required Skills\/Certifications|Market Demand|Growth Potential|Action Steps)\*\*:/gm, '<h3 class="text-xl font-semibold mt-6 mb-3 text-gray-800">$1</h3>');
+    
+    // Convert bold and italic
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>');
+    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    
+    // Convert numbered action steps
+    text = text.replace(/^\s*(\d+)\.\s+(.*$)/gm, '<li class="mb-2"><span class="font-semibold">$1.</span> $2</li>');
+    
+    // Convert bullet points
+    text = text.replace(/^\s*-\s+(?!\*\*)(.*$)/gm, '<li class="mb-2">$1</li>');
+    
+    // Convert blockquotes to highlight boxes
+    text = text.replace(/^>\s+(.*$)/gm, '</div><div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4">$1</div><div>');
+    
+    // Convert lists to proper HTML
+    let inList = false;
+    let lines = text.split('\n');
+    let newText = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+        if (/^\s*[-•]/.test(lines[i]) || /^\s*\d+\./.test(lines[i])) {
+            if (!inList) {
+                newText.push('<ul class="list-disc pl-5 space-y-2 mb-4">');
+                inList = true;
+            }
+            newText.push(lines[i]);
+        } else {
+            if (inList) {
+                newText.push('</ul>');
+                inList = false;
+            }
+            newText.push(lines[i]);
+        }
+    }
+    
+    if (inList) newText.push('</ul>');
+    text = newText.join('\n');
+    
+    // Convert inline code (for skills/certifications)
+    text = text.replace(/`([^`]+)`/g, '<span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-md text-sm font-mono">$1</span>');
+    
+    // Convert links
+    text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank">$1</a>');
+    
+    // Add special styling for career path names
+    text = text.replace(/Career Path \d+: (.*?):/g, 'Career Path $1: <span class="text-blue-700 font-bold">$2</span>');
+    
+    // Paragraphs
+    text = text.replace(/\n\n/g, '</p><p class="my-4">');
+    
+    // Add special styling for key sections
+    text = text.replace(/(Alignment with Profile|Required Skills\/Certifications|Market Demand|Growth Potential|Action Steps):/g, '<span class="text-green-700 font-semibold">$1</span>:');
+    
+    return '<div class="space-y-6 text-gray-700 leading-relaxed">' + text + '</div>';
+}
+        // Check for existing analysis
+        async function checkAnalysis() {
+            loadingElement.classList.remove('hidden');
+            generateElement.classList.add('hidden');
+            contentElement.classList.add('hidden');
+            errorElement.classList.add('hidden');
+            updateProgress(20);
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                updateProgress(40);
+                loadingMessage.textContent = "Fetching your talent profile...";
+                
+                const docRef = db.collection('talent').doc(user.uid).collection('result').doc('genjob');
+                const doc = await docRef.get();
+                updateProgress(60);
+                
+                if (doc.exists) {
+                    // Analysis exists - display it
+                    const data = doc.data();
+                    const lastUpdated = new Date(data.lastUpdated.seconds * 1000);
+                    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                    statusMessage.textContent = `Last updated: ${lastUpdated.toLocaleDateString('en-US', options)}`;
+                    
+                    // Format the analysis content
+                    loadingMessage.textContent = "Formatting your analysis...";
+                    updateProgress(80);
+                    
+                    const formattedContent = formatAnalysisContent(data.analysis);
+                    contentElement.innerHTML = `
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <div class="p-6 analysis-section fade-in">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="text-2xl font-bold text-gray-800">Your Talent Analysis</h2>
+                                    <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">${data.version || 'v1.0'}</span>
+                                </div>
+                                ${formattedContent}
+                            </div>
+                            
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6 analysis-section fade-in">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-800">Update Your Analysis</h3>
+                                    <p class="text-sm text-gray-600">Generate a fresh analysis with your latest profile data</p>
+                                </div>
+                                <button onclick="generateNewAnalysis()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                    Refresh Analysis
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    loadingElement.classList.add('hidden');
+                    contentElement.classList.remove('hidden');
+                } else {
+                    // No analysis found - show generate option
+                    statusMessage.textContent = "Ready to generate your talent analysis";
+                    loadingElement.classList.add('hidden');
+                    generateElement.classList.remove('hidden');
+                }
+                updateProgress(100);
+            } catch (err) {
+                console.error('Error checking analysis:', err);
+                loadingElement.classList.add('hidden');
+                document.getElementById('errorMessage').textContent = err.message || "An unexpected error occurred while loading your analysis.";
+                errorElement.classList.remove('hidden');
+                updateProgress(0);
+            }
+        }
+
+        // Generate new analysis by calling Cloud Function
+        async function generateNewAnalysis() {
+            const generateButtonText = document.getElementById('generateButtonText');
+            const generateSpinner = document.getElementById('generateSpinner');
+            
+            // Show loading state on button
+            generateButtonText.textContent = "Generating...";
+            generateSpinner.classList.remove('hidden');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                // Call the Cloud Function
+                const analyzeTalent = functions.httpsCallable('genjob');
+                loadingMessage.textContent = "Analyzing your talent profile... This may take a minute.";
+                generateElement.classList.add('hidden');
+                loadingElement.classList.remove('hidden');
+                updateProgress(30);
+                
+                const result = await analyzeTalent({});
+                updateProgress(70);
+                
+                // Show success message briefly
+                loadingMessage.textContent = "Analysis complete! Preparing your results...";
+                updateProgress(90);
+                
+                // Wait a moment then reload the analysis
+                setTimeout(() => {
+                    checkAnalysis();
+                }, 1500);
+                
+            } catch (err) {
+                console.error('Error generating analysis:', err);
+                generateButtonText.textContent = "Generate Analysis";
+                generateSpinner.classList.add('hidden');
+                document.getElementById('errorMessage').textContent = err.message || "Failed to generate analysis. Please try again later.";
+                loadingElement.classList.add('hidden');
+                errorElement.classList.remove('hidden');
+                updateProgress(0);
+            }
+        }
+
+        // Listen for auth state changes
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                checkAnalysis();
+            } else {
+                // Redirect to login if not authenticated
+                window.location.href = '/login';
+            }
+        });
+
+        // Add animation to elements as they come into view
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            document.querySelectorAll('.analysis-section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Negative Analysis Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-functions.js"></script>
+    <style>
+        .analysis-section {
+            background-color: #ffffff;
+            border-left: 4px solid #ef4444;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .analysis-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f87171);
+            width: 0%;
+            transition: width 0.6s ease;
+        }
+        .weakness-tag {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .improvement-tag {
+            background-color: #ffedd5;
+            color: #9a3412;
+        }
+        .action-tag {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse-dot {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .severity-high {
+            border-left-color: #dc2626;
+        }
+        .severity-medium {
+            border-left-color: #ea580c;
+        }
+        .severity-low {
+            border-left-color: #d97706;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800">Your Negative Analysis</h1>
+                    <p class="text-gray-600 flex items-center" id="statusMessage">
+                        <span id="statusText">Loading your profile...</span>
+                        <span id="statusDot" class="ml-2 h-2 w-2 rounded-full bg-red-500 pulse-dot"></span>
+                    </p>
+                </div>
+                <button onclick="checkAnalysis()" class="text-red-500 hover:text-red-700 transition">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            <div class="progress-bar mt-2" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loading" class="text-center py-12 fade-in">
+            <div class="relative mx-auto w-24 h-24">
+                <div class="absolute inset-0 rounded-full border-4 border-red-100"></div>
+                <div class="absolute inset-2 rounded-full border-t-4 border-red-500 animate-spin"></div>
+                <div class="absolute inset-4 flex items-center justify-center">
+                    <i class="fas fa-exclamation-triangle text-red-400 text-2xl"></i>
+                </div>
+            </div>
+            <p class="mt-6 text-gray-600" id="loadingMessage">Analyzing potential areas for improvement...</p>
+            <div class="mt-4 text-sm text-gray-500 flex justify-center space-x-2">
+                <span id="loadingStep1" class="text-red-500">✓ Gathering data</span>
+                <span class="text-gray-300">•</span>
+                <span id="loadingStep2">Identifying concerns</span>
+                <span class="text-gray-300">•</span>
+                <span id="loadingStep3">Formulating recommendations</span>
+            </div>
+        </div>
+
+        <!-- Generate New Analysis State -->
+        <div id="generateAnalysis" class="hidden text-center py-12 bg-white rounded-lg shadow p-6 fade-in">
+            <div class="inline-block p-4 bg-red-50 rounded-full mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-800 mb-2">Identify Areas for Improvement</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">This analysis will help identify potential weaknesses and provide actionable recommendations for professional growth.</p>
+            <button onclick="generateNewAnalysis()" class="px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg hover:from-red-600 hover:to-red-700 transition shadow-md flex items-center mx-auto">
+                <span id="generateButtonText">Generate Negative Analysis</span>
+                <svg id="generateSpinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+            <p class="mt-4 text-sm text-gray-500">Takes about 30-60 seconds</p>
+        </div>
+
+        <!-- Analysis Content -->
+        <div id="analysisContent" class="hidden space-y-6">
+            <!-- Dynamic content will be inserted here -->
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden text-center py-12 fade-in">
+            <div class="inline-block p-4 bg-red-50 rounded-full mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-800 mb-2">Analysis Failed</h3>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto" id="errorMessage"></p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="checkAnalysis()" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition shadow">
+                    <i class="fas fa-redo mr-2"></i> Try Again
+                </button>
+                <button onclick="location.reload()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
+                    <i class="fas fa-home mr-2"></i> Return Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+            authDomain: "promgn-in.firebaseapp.com",
+            projectId: "promgn-in",
+            storageBucket: "promgn-in.appspot.com",
+            messagingSenderId: "545429176314",
+            appId: "1:545429176314:web:5590c702b55357b4bfae43",
+            measurementId: "G-YZQG3ZPQMJ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const functions = firebase.functions();
+
+        // DOM elements
+        const loadingElement = document.getElementById('loading');
+        const generateElement = document.getElementById('generateAnalysis');
+        const contentElement = document.getElementById('analysisContent');
+        const errorElement = document.getElementById('errorState');
+        const statusMessage = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const progressFill = document.getElementById('progressFill');
+        const loadingStep1 = document.getElementById('loadingStep1');
+        const loadingStep2 = document.getElementById('loadingStep2');
+        const loadingStep3 = document.getElementById('loadingStep3');
+
+        // Update progress bar
+        function updateProgress(percentage) {
+            progressFill.style.width = `${percentage}%`;
+            
+            // Update loading steps based on progress
+            if (percentage >= 33) {
+                loadingStep1.classList.add('text-red-500');
+                loadingStep2.classList.add('text-red-400');
+            }
+            if (percentage >= 66) {
+                loadingStep2.classList.add('text-red-500');
+                loadingStep3.classList.add('text-red-400');
+            }
+            if (percentage >= 100) {
+                loadingStep3.classList.add('text-red-500');
+            }
+        }
+
+        // Format analysis content with enhanced styling
+        function formatAnalysisContent(text) {
+            // Convert sections to cards
+            let htmlContent = '';
+            
+            // Split by major sections
+            const sections = text.split(/\n\s*\n/);
+            
+            sections.forEach(section => {
+                if (!section.trim()) return;
+                
+                // Check for section headers and severity levels
+                if (section.includes('Critical Weaknesses:')) {
+                    htmlContent += createSectionCard('Critical Weaknesses', section, 'weakness-tag', 'text-red-600', 'fa-exclamation-circle', 'severity-high');
+                } 
+                else if (section.includes('Areas for Improvement:')) {
+                    htmlContent += createSectionCard('Areas for Improvement', section, 'improvement-tag', 'text-orange-600', 'fa-arrow-up', 'severity-medium');
+                }
+                else if (section.includes('Corrective Actions:')) {
+                    htmlContent += createSectionCard('Corrective Actions', section, 'action-tag', 'text-green-600', 'fa-check-circle', 'severity-low');
+                }
+                else {
+                    // Default section
+                    htmlContent += createSectionCard('Analysis Findings', section, '', 'text-gray-600', 'fa-clipboard-list');
+                }
+            });
+            
+            return htmlContent;
+        }
+        
+        function createSectionCard(title, content, tagClass, textColor, icon, severityClass = '') {
+            // Process content
+            let processedContent = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/-\s+(.*?)(?=\n|$)/g, '<li>$1</li>')
+                .replace(/\d+\.\s+(.*?)(?=\n|$)/g, '<li>$1</li>');
+                
+            // If content doesn't have list items, wrap in paragraphs
+            if (!processedContent.includes('<li>')) {
+                processedContent = processedContent.split('\n')
+                    .filter(line => line.trim())
+                    .map(line => `<p class="mb-3">${line}</p>`)
+                    .join('');
+            } else {
+                processedContent = `<ul class="list-disc pl-5 space-y-2 mb-4">${processedContent}</ul>`;
+            }
+            
+            return `
+                <div class="analysis-section rounded-lg p-6 mb-6 fade-in ${severityClass}">
+                    <div class="flex items-center mb-4">
+                        <div class="mr-3 ${textColor}">
+                            <i class="fas ${icon} fa-lg"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">${title}</h3>
+                    </div>
+                    <div class="text-gray-700">
+                        ${processedContent}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Check for existing analysis
+        async function checkAnalysis() {
+            loadingElement.classList.remove('hidden');
+            generateElement.classList.add('hidden');
+            contentElement.classList.add('hidden');
+            errorElement.classList.add('hidden');
+            statusDot.classList.remove('hidden');
+            statusMessage.textContent = "Loading your negative analysis...";
+            updateProgress(10);
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('Please sign in to view your analysis');
+                }
+                
+                updateProgress(30);
+                loadingMessage.textContent = "Retrieving your profile data...";
+                
+                const docRef = db.collection('talent').doc(user.uid).collection('result').doc('negative');
+                const doc = await docRef.get();
+                updateProgress(60);
+                loadingMessage.textContent = "Formatting your analysis...";
+                
+                if (doc.exists) {
+                    // Analysis exists - display it
+                    const data = doc.data();
+                    statusMessage.textContent = `Last updated: ${new Date(data.lastUpdated.seconds * 1000).toLocaleString()}`;
+                    statusDot.classList.add('hidden');
+                    
+                    // Format the analysis content
+                    const formattedContent = formatAnalysisContent(data.analysis);
+                    contentElement.innerHTML = `
+                        <div class="bg-white rounded-lg shadow p-6 mb-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">About This Analysis</h3>
+                            <p class="text-gray-700 mb-4">This report identifies potential weaknesses and areas for improvement. The goal is constructive feedback to support your professional development.</p>
+                            <div class="flex items-center text-sm text-gray-500">
+                                <i class="fas fa-info-circle mr-2 text-red-400"></i>
+                                <span>All feedback should be viewed as opportunities for growth</span>
+                            </div>
+                        </div>
+                        ${formattedContent}
+                        <div class="bg-white rounded-lg shadow p-6 flex flex-col md:flex-row justify-between items-center">
+                            <div class="mb-4 md:mb-0">
+                                <h3 class="font-medium text-gray-800">Need an updated analysis?</h3>
+                                <p class="text-sm text-gray-600">Generate a fresh assessment with your latest data</p>
+                            </div>
+                            <button onclick="generateNewAnalysis()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition shadow flex items-center">
+                                <i class="fas fa-sync-alt mr-2"></i> Refresh Analysis
+                            </button>
+                        </div>
+                    `;
+                    
+                    loadingElement.classList.add('hidden');
+                    contentElement.classList.remove('hidden');
+                } else {
+                    // No analysis found - show generate option
+                    statusMessage.textContent = "Ready to generate your negative analysis";
+                    statusDot.classList.add('hidden');
+                    loadingElement.classList.add('hidden');
+                    generateElement.classList.remove('hidden');
+                }
+                updateProgress(100);
+            } catch (err) {
+                console.error('Error checking analysis:', err);
+                loadingElement.classList.add('hidden');
+                document.getElementById('errorMessage').textContent = err.message || 'An unexpected error occurred';
+                errorElement.classList.remove('hidden');
+                statusDot.classList.add('hidden');
+                updateProgress(0);
+            }
+        }
+
+        // Generate new analysis by calling Cloud Function
+        async function generateNewAnalysis() {
+            const generateButtonText = document.getElementById('generateButtonText');
+            const generateSpinner = document.getElementById('generateSpinner');
+            
+            // Show loading state on button
+            generateButtonText.textContent = "Analyzing...";
+            generateSpinner.classList.remove('hidden');
+            generateElement.querySelector('button').disabled = true;
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('Please sign in to generate analysis');
+                }
+                
+                // Call the Cloud Function
+                const analyzeTalent = functions.httpsCallable('negative');
+                loadingMessage.textContent = "Identifying potential weaknesses...";
+                generateElement.classList.add('hidden');
+                loadingElement.classList.remove('hidden');
+                statusMessage.textContent = "Generating your negative analysis...";
+                statusDot.classList.remove('hidden');
+                
+                // Simulate progress for better UX
+                const progressInterval = setInterval(() => {
+                    const currentProgress = parseInt(progressFill.style.width) || 0;
+                    if (currentProgress < 90) {
+                        updateProgress(currentProgress + 10);
+                    }
+                }, 1000);
+                
+                const result = await analyzeTalent({});
+                clearInterval(progressInterval);
+                
+                // Show success message briefly
+                loadingMessage.textContent = "Analysis complete! Preparing your results...";
+                updateProgress(100);
+                
+                // Wait a moment then reload the analysis
+                setTimeout(() => {
+                    checkAnalysis();
+                }, 1500);
+                
+            } catch (err) {
+                console.error('Error generating analysis:', err);
+                generateButtonText.textContent = "Generate Negative Analysis";
+                generateSpinner.classList.add('hidden');
+                generateElement.querySelector('button').disabled = false;
+                document.getElementById('errorMessage').textContent = err.message || 'Failed to generate analysis. Please try again.';
+                loadingElement.classList.add('hidden');
+                errorElement.classList.remove('hidden');
+                statusDot.classList.add('hidden');
+            }
+        }
+
+        // Listen for auth state changes
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                checkAnalysis();
+            } else {
+                // Redirect to login if not authenticated
+                window.location.href = '/login';
+            }
+        });
+    </script>
+</body>
+</html>

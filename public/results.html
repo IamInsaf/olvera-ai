@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-adsense-account" content="ca-pub-6090544760574516">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Personalized Career Suggestions | CareerPathAI</title>
+  <meta name="description" content="Discover your ideal career path with AI-powered suggestions based on your skills and interests.">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-functions-compat.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(5px);
+    }
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .countdown {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 15px 0;
+      color: #3b82f6;
+      font-family: monospace;
+    }
+    .ads-container {
+      margin: 20px 0;
+      min-height: 250px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f8fafc;
+      border-radius: 8px;
+      border: 1px dashed #cbd5e1;
+    }
+    .career-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      border-left: 4px solid #3b82f6;
+    }
+    .career-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    .progress-bar {
+      height: 6px;
+      background: #e2e8f0;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #6366f1);
+      width: 0%;
+      transition: width 1s ease-in-out;
+    }
+    .floating-btn {
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    }
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="min-h-screen p-4 sm:p-6">
+  <!-- Countdown Modal -->
+  <div id="countdownModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="mb-4">
+        <i class="fas fa-hourglass-half text-4xl text-blue-500 mb-2"></i>
+        <h2 class="text-xl sm:text-2xl font-bold mb-2 text-gray-800">Your Career Insights Are Loading</h2>
+        <p class="text-gray-600">We're analyzing your responses to provide personalized career suggestions</p>
+      </div>
+      
+      <div class="progress-bar mb-6">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+      
+      <div class="countdown" id="countdownDisplay">30</div>
+      
+      <p class="text-sm text-gray-500 mb-4">Support our free service by viewing this quick ad</p>
+      
+      <div class="ads-container">
+        <!-- AdSense Ad -->
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6090544760574516" crossorigin="anonymous"></script>
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-6090544760574516"
+             data-ad-slot="1234567890"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Your AI-Powered Career Suggestions</h1>
+      <p class="text-gray-600">Based on your skills, interests, and personality traits</p>
+    </div>
+    
+    <!-- Loading State -->
+    <div id="loading" class="text-center py-8">
+      <div class="inline-block p-4 bg-white rounded-lg shadow-sm">
+        <i class="fas fa-spinner fa-spin text-blue-500 text-2xl mb-2"></i>
+        <p class="text-gray-700">Analyzing your responses...</p>
+      </div>
+    </div>
+    
+    <!-- Results Container -->
+    <div id="results" class="space-y-4 hidden">
+      <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div class="p-5 sm:p-6 bg-gradient-to-r from-blue-500 to-indigo-600">
+          <h2 class="text-xl sm:text-2xl font-bold text-white">Your Top Career Matches</h2>
+          <p class="text-blue-100 mt-1">Careers that align with your strengths and preferences</p>
+        </div>
+        <div id="careerResults" class="p-4 sm:p-6 space-y-5"></div>
+      </div>
+    </div>
+    
+    <!-- Test Number Indicator -->
+    <div id="testNumber" class="mt-6 p-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-center text-white hidden pulse-animation">
+      <i class="fas fa-trophy mr-2"></i>
+      <span id="testNumberText" class="font-medium"></span>
+    </div>
+    
+    <!-- Error Message -->
+    <div id="error" class="mt-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg hidden">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-exclamation-circle text-red-500 mt-1"></i>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800" id="errorTitle"></h3>
+          <div class="mt-2 text-sm text-red-700" id="errorMessage"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+      <a href="test" class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center justify-center font-medium shadow-md hover:shadow-lg">
+        <i class="fas fa-redo mr-2"></i> Retake Test
+      </a>
+      <button id="downloadBtn" class="px-5 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition flex items-center justify-center font-medium shadow-md hover:shadow-lg hidden">
+        <i class="fas fa-download mr-2"></i> Download Results
+      </button>
+      <button id="shareBtn" class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition flex items-center justify-center font-medium shadow-md hover:shadow-lg hidden">
+        <i class="fas fa-share-alt mr-2"></i> Share
+      </button>
+    </div>
+    
+    <!-- Feedback Section -->
+    <div class="mt-12 bg-white p-5 rounded-xl shadow-sm">
+      <h3 class="text-lg font-semibold text-gray-800 mb-3">How helpful were these suggestions?</h3>
+      <div class="flex items-center space-x-2 sm:space-x-4">
+        <button class="feedback-btn px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-sm" data-rating="1">
+          <i class="far fa-frown mr-1"></i> Not Helpful
+        </button>
+        <button class="feedback-btn px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-sm" data-rating="2">
+          <i class="far fa-meh mr-1"></i> Somewhat Helpful
+        </button>
+        <button class="feedback-btn px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 text-sm" data-rating="3">
+          <i class="far fa-smile mr-1"></i> Very Helpful
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <div id="floatingBtn" class="fixed bottom-6 right-6 hidden">
+    <button class="floating-btn w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+  </div>
+
+  <script>
+    // Show countdown modal when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      const modal = document.getElementById('countdownModal');
+      const countdownDisplay = document.getElementById('countdownDisplay');
+      const progressFill = document.getElementById('progressFill');
+      
+      // Show modal
+      modal.style.display = 'flex';
+      
+      // Start countdown
+      let seconds = 30;
+      const countdown = setInterval(function() {
+        seconds--;
+        countdownDisplay.textContent = seconds;
+        progressFill.style.width = `${(30 - seconds) * (100/30)}%`;
+        
+        if (seconds <= 0) {
+          clearInterval(countdown);
+          modal.style.display = 'none';
+          progressFill.style.width = '100%';
+        }
+      }, 1000);
+    });
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const functions = firebase.functions();
+    const analytics = firebase.analytics(app);
+
+    // DOM Elements
+    const loading = document.getElementById('loading');
+    const careerResults = document.getElementById('careerResults');
+    const resultsDiv = document.getElementById('results');
+    const errorDiv = document.getElementById('error');
+    const errorTitle = document.getElementById('errorTitle');
+    const errorMessage = document.getElementById('errorMessage');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const testNumberDiv = document.getElementById('testNumber');
+    const testNumberText = document.getElementById('testNumberText');
+    const floatingBtn = document.getElementById('floatingBtn');
+
+    // Track page view
+    analytics.logEvent('page_view', {
+      page_title: 'Career Suggestions',
+      page_location: window.location.href,
+      page_path: window.location.pathname
+    });
+
+    // Set user properties
+    analytics.setUserProperties({
+      preferred_language: navigator.language,
+      device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+    });
+
+    // Track link clicks
+    document.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function() {
+        analytics.logEvent('select_content', {
+          content_type: 'link',
+          content_id: this.getAttribute('href') || 'unknown',
+          method: 'click'
+        });
+      });
+    });
+
+    // Floating button to scroll to top
+    floatingBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      analytics.logEvent('scroll_to_top');
+    });
+
+    // Show floating button when scrolling
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        floatingBtn.classList.remove('hidden');
+      } else {
+        floatingBtn.classList.add('hidden');
+      }
+    });
+
+    // Share functionality
+    shareBtn.addEventListener('click', async () => {
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title: 'My Career Suggestions',
+            text: 'Check out these career suggestions I received from CareerPathAI!',
+            url: window.location.href,
+          });
+          analytics.logEvent('share', { method: 'native' });
+        } else {
+          // Fallback for browsers that don't support Web Share API
+          const dummy = document.createElement('input');
+          document.body.appendChild(dummy);
+          dummy.value = window.location.href;
+          dummy.select();
+          document.execCommand('copy');
+          document.body.removeChild(dummy);
+          
+          alert('Link copied to clipboard!');
+          analytics.logEvent('share', { method: 'clipboard' });
+        }
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    });
+
+    // Feedback buttons
+    document.querySelectorAll('.feedback-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const rating = this.getAttribute('data-rating');
+        analytics.logEvent('feedback', { rating: parseInt(rating) });
+        
+        // Visual feedback
+        document.querySelectorAll('.feedback-btn').forEach(b => {
+          b.classList.remove('bg-blue-100', 'text-blue-800');
+        });
+        this.classList.add('bg-blue-100', 'text-blue-800');
+        
+        // Show thank you message
+        const thankYou = document.createElement('div');
+        thankYou.className = 'mt-3 text-sm text-gray-600';
+        thankYou.innerHTML = 'Thank you for your feedback! <i class="fas fa-heart text-red-500"></i>';
+        this.parentNode.parentNode.appendChild(thankYou);
+      });
+    });
+
+    // Enhanced PDF generation
+    downloadBtn.addEventListener('click', async () => {
+      analytics.logEvent('generate_pdf', { action: 'attempt' });
+
+      const element = document.createElement('div');
+      element.style.fontFamily = "'Poppins', sans-serif";
+      element.style.padding = '20px';
+      element.style.color = '#1f2937';
+      
+      // Header
+      const header = document.createElement('div');
+      header.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="font-size: 22px; font-weight: 700; color: #1e40af; margin-bottom: 5px;">
+            Your CareerPathAI Results
+          </h1>
+          <div style="height: 3px; background: linear-gradient(90deg, #3b82f6, #6366f1); margin: 0 auto 10px; width: 100px;"></div>
+          <p style="color: #6b7280; font-size: 12px; margin-bottom: 0;">
+            Generated on ${new Date().toLocaleDateString('en-US', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </p>
+        </div>
+      `;
+      element.appendChild(header);
+
+      // Add user info if available
+      const user = auth.currentUser;
+      if (user && user.email) {
+        const userInfo = document.createElement('div');
+        userInfo.style.marginBottom = '15px';
+        userInfo.style.paddingBottom = '15px';
+        userInfo.style.borderBottom = '1px solid #e5e7eb';
+        userInfo.innerHTML = `
+          <p style="font-size: 14px; color: #4b5563;"><strong>Email:</strong> ${user.email}</p>
+          <p style="font-size: 14px; color: #4b5563;"><strong>Generated For:</strong> ${user.displayName || 'CareerPathAI User'}</p>
+        `;
+        element.appendChild(userInfo);
+      }
+
+      // Add results
+      const sections = Array.from(document.querySelectorAll('.career-card'));
+      sections.forEach((section, index) => {
+        const sectionClone = section.cloneNode(true);
+        
+        // Clean up for PDF
+        sectionClone.style.marginBottom = '15px';
+        sectionClone.style.padding = '12px';
+        sectionClone.style.backgroundColor = '#f8fafc';
+        sectionClone.style.borderRadius = '8px';
+        sectionClone.style.borderLeft = '4px solid #3b82f6';
+        
+        const html = sectionClone.innerHTML
+          .replace(/<h3/g, '<h3 style="color: #1e40af; font-size: 16px; margin-bottom: 8px; font-weight: 600;"')
+          .replace(/<p/g, '<p style="margin: 6px 0; line-height: 1.4; font-size: 14px;"')
+          .replace(/<strong/g, '<strong style="color: #1e40af;"')
+          .replace(/<em/g, '<em style="color: #4b5563;"')
+          .replace(/<hr/g, '<hr style="border-top: 1px dashed #d1d5db; margin: 10px 0;"')
+          .replace(/<blockquote/g, '<blockquote style="background: #ecfdf5; padding: 10px; border-left: 3px solid #10b981; margin: 10px 0; font-size: 14px;"');
+
+        sectionClone.innerHTML = html;
+        element.appendChild(sectionClone);
+
+        if (index < sections.length - 1) {
+          element.appendChild(document.createElement('br'));
+        }
+      });
+
+      // Footer
+      const footer = document.createElement('div');
+      footer.style.marginTop = '20px';
+      footer.style.paddingTop = '15px';
+      footer.style.borderTop = '1px solid #e5e7eb';
+      footer.style.textAlign = 'center';
+      footer.innerHTML = `
+        <p style="color: #9ca3af; font-size: 10px;">
+          © ${new Date().getFullYear()} CareerPathAI. All rights reserved.
+        </p>
+        <p style="color: #9ca3af; font-size: 10px; margin-top: 5px;">
+          These suggestions are generated by AI and should be used for informational purposes only.
+        </p>
+      `;
+      element.appendChild(footer);
+
+      // PDF options
+      const opt = {
+        margin: 10,
+        filename: `career-suggestions-${new Date().toISOString().slice(0, 10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          letterRendering: true,
+          scrollY: 0
+        },
+        jsPDF: {
+          unit: 'mm',
+          format: 'a4',
+          orientation: 'portrait'
+        }
+      };
+
+      // Update button state
+      const originalBtnHTML = downloadBtn.innerHTML;
+      downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Generating PDF...';
+      downloadBtn.disabled = true;
+
+      try {
+        // Small delay for better UX
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Generate PDF
+        await html2pdf().set(opt).from(element).save();
+        
+        analytics.logEvent('generate_pdf', { action: 'success' });
+      } catch (error) {
+        console.error('PDF generation error:', error);
+        analytics.logEvent('generate_pdf', { action: 'failed', error: error.message });
+        alert('Failed to generate PDF. Please try again or take a screenshot instead.');
+      } finally {
+        downloadBtn.innerHTML = originalBtnHTML;
+        downloadBtn.disabled = false;
+      }
+    });
+
+    // Main function to get career suggestions
+    async function getCareerSuggestions() {
+      analytics.logEvent('load_results', { status: 'started' });
+
+      auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+          showError("Authentication Required", "Please log in to view your personalized career suggestions.");
+          analytics.logEvent('load_results', { status: 'failed', reason: 'not_authenticated' });
+          return;
+        }
+
+        try {
+          const doc = await db.collection('careerAssessments').doc(user.uid).get();
+
+          if (!doc.exists) {
+            showError("No Results Found", "Please complete the career assessment test first.");
+            analytics.logEvent('load_results', { status: 'failed', reason: 'no_assessment_found' });
+            return;
+          }
+
+          const userData = doc.data();
+
+          // Display cached results if available
+          if (userData.aiSuggestions) {
+            displayResults(userData.aiSuggestions);
+            
+            // Get total test count
+            const countSnapshot = await db.collection('testCounters').doc('careerTests').get();
+            const totalTests = countSnapshot.exists ? countSnapshot.data().count : 0;
+            
+            // Display test number
+            testNumberText.textContent = `You are the ${totalTests.toLocaleString()}th user who took this test!`;
+            testNumberDiv.classList.remove('hidden');
+            
+            analytics.logEvent('load_results', {
+              status: 'success',
+              source: 'cache',
+              suggestion_count: userData.aiSuggestions.split(/\n(?=### \d+\.)/).filter(Boolean).length,
+              user_test_number: totalTests
+            });
+            return;
+          }
+
+          // Generate new suggestions if not cached
+          analytics.logEvent('generate_suggestions', {
+            status: 'started',
+            response_count: userData.responses ? Object.keys(userData.responses).length : 0
+          });
+
+          const generateAIResults = functions.httpsCallable('generateAIResults');
+          const response = await generateAIResults({
+            userId: user.uid,
+            responses: userData.responses
+          });
+
+          const data = response.data;
+
+          if (!data.suggestions || typeof data.suggestions !== 'string') {
+            throw new Error("Unexpected AI response format.");
+          }
+
+          // Save to Firestore
+          await db.collection('careerAssessments').doc(user.uid).update({
+            aiSuggestions: data.suggestions,
+            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+          });
+
+          // Display results
+          displayResults(data.suggestions);
+
+          // Get total test count
+          const countSnapshot = await db.collection('testCounters').doc('careerTests').get();
+          const totalTests = countSnapshot.exists ? countSnapshot.data().count : 0;
+          
+          // Display test number
+          testNumberText.textContent = `You are the ${totalTests.toLocaleString()}th user who took this test!`;
+          testNumberDiv.classList.remove('hidden');
+          
+          analytics.logEvent('generate_suggestions', {
+            status: 'success',
+            suggestion_count: data.suggestions.split(/\n(?=### \d+\.)/).filter(Boolean).length,
+            user_test_number: totalTests
+          });
+
+        } catch (err) {
+          console.error("Error:", err);
+          showError("Error Loading Results", err.message || "An unexpected error occurred. Please try again later.");
+          analytics.logEvent('generate_suggestions', { status: 'failed', error: err.message });
+        }
+      });
+    }
+
+    // Display results function
+    function displayResults(suggestionsText) {
+      const suggestions = suggestionsText
+        .split(/\n(?=### \d+\.)/)
+        .filter(Boolean);
+
+      careerResults.innerHTML = '';
+
+      suggestions.forEach((suggestion, i) => {
+        const div = document.createElement('div');
+        div.className = 'career-card p-4';
+
+        let formattedHTML = suggestion.trim()
+          .replace(/### (\d+)\. \*\*(.*?)\*\*/g, 
+            '<h3 class="text-lg font-bold text-blue-700 mb-2">$1. $2</h3>')
+          .replace(/\*\*🔑 Key Fit\*\*: \*(.*?)\*/g, 
+            '<p class="mb-2"><span class="font-semibold text-blue-600">🔑 Key Fit:</span> <em class="text-gray-700">$1</em></p>')
+          .replace(/\*\*🎯 Why It's Suitable\*\*: (.*?)$/gm, 
+            '<p class="mb-2"><span class="font-semibold text-blue-600">🎯 Why It\'s Suitable:</span> <span class="text-gray-700">$1</span></p>')
+          .replace(/\*\*💼 Job Outlook\*\*: (.*?)$/gm, 
+            '<p class="mb-2"><span class="font-semibold text-blue-600">💼 Job Outlook:</span> <span class="text-gray-700">$1</span></p>')
+          .replace(/---/g, '<hr class="my-3 border-gray-200">')
+          .replace(/\*\*🌟 Bonus\*\*: (.*?)$/gm, 
+            '<div class="mt-3 p-3 bg-green-50 rounded-lg"><h4 class="font-semibold text-green-700 mb-1">🌟 Bonus:</h4> <p class="text-gray-700">$1</p></div>')
+          .replace(/> \*\*Suggested Career\/Course\*\*: (.*?)$/gm, 
+            '<blockquote class="mt-2 p-3 bg-green-100 border-l-4 border-green-500 rounded-r-lg"><p class="text-green-800 font-medium">90% Match: $1</p></blockquote>');
+
+        div.innerHTML = formattedHTML;
+        careerResults.appendChild(div);
+      });
+
+      loading.style.display = 'none';
+      resultsDiv.classList.remove('hidden');
+      downloadBtn.classList.remove('hidden');
+      shareBtn.classList.remove('hidden');
+      
+      analytics.logEvent('results_displayed', {
+        suggestion_count: suggestions.length,
+        first_career: suggestions[0]?.match(/### 1\. \*\*(.*?)\*\*/)?.[1] || 'unknown'
+      });
+    }
+
+    // Error display function
+    function showError(title, message) {
+      loading.style.display = 'none';
+      errorTitle.textContent = title;
+      errorMessage.textContent = message;
+      errorDiv.classList.remove('hidden');
+    }
+
+    // Track time spent on page
+    const pageLoadTime = Date.now();
+    window.addEventListener('beforeunload', () => {
+      const timeSpent = Math.floor((Date.now() - pageLoadTime) / 1000);
+      analytics.logEvent('time_spent', { seconds: timeSpent, page: 'results' });
+    });
+
+    // Error tracking
+    window.addEventListener('error', function(e) {
+      analytics.logEvent('exception', {
+        description: e.message,
+        fatal: false,
+        filename: e.filename,
+        lineno: e.lineno,
+        colno: e.colno
+      });
+    });
+
+    // Initialize the page
+    window.onload = getCareerSuggestions;
+  </script>
+</body>
+</html>

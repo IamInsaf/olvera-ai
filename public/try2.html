@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olvera - AI Career Guidance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0A0A0F;
+            --accent-violet: #9D4AFF;
+            --accent-cyan: #00F5FF;
+            --text-light: #FFFFFF;
+            --glass-bg: rgba(15, 15, 25, 0.8);
+            --glass-border: rgba(157, 74, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding: 0 2rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(157, 74, 255, 0.2) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            z-index: 2;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(157, 74, 255, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            color: white;
+            box-shadow: 0 4px 20px rgba(157, 74, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(157, 74, 255, 0.6);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            border: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: transparent;
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+        }
+
+        /* Floating Chatbot */
+        .chatbot-icon {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(157, 74, 255, 0.4);
+            z-index: 100;
+            animation: float 3s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(157, 74, 255, 0.6);
+        }
+
+        .chatbot-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        /* How It Works Section */
+        .section {
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+            font-size: 2.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .section-title span {
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .steps-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 300px;
+            text-align: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(157, 74, 255, 0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .step-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(157, 74, 255, 0.2);
+        }
+
+        .step-card:hover::before {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            border-radius: 50%;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(157, 74, 255, 0.4);
+        }
+
+        .step-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .step-card p {
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+
+        /* AI Features Section */
+        .features-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(157, 74, 255, 0.2);
+            border-color: rgba(157, 74, 255, 0.6);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .feature-card p {
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+
+        /* Student Results Section */
+        .testimonials-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .testimonial-slide {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 0 1rem;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s ease;
+        }
+
+        .testimonial-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            border: 2px solid var(--accent-violet);
+            object-fit: cover;
+        }
+
+        .testimonial-quote {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .testimonial-quote::before,
+        .testimonial-quote::after {
+            content: '"';
+            font-size: 2rem;
+            color: var(--accent-cyan);
+            opacity: 0.5;
+            position: absolute;
+        }
+
+        .testimonial-quote::before {
+            top: -15px;
+            left: -10px;
+        }
+
+        .testimonial-quote::after {
+            bottom: -25px;
+            right: -10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-title {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Certificate Mockup */
+        .certificate-container {
+            max-width: 800px;
+            margin: 4rem auto 0;
+            position: relative;
+            opacity: 0;
+            transform: perspective(1000px) rotateX(-10deg);
+            transition: all 0.8s ease;
+        }
+
+        .certificate {
+            background: linear-gradient(135deg, #1A1A2E, #16213E);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
+        }
+
+        .certificate:hover {
+            transform: perspective(1000px) rotateX(0deg) translateY(-10px);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+        }
+
+        .certificate-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .certificate-header h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .certificate-body {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .certificate-logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .certificate-logo i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .certificate-details p {
+            margin-bottom: 0.5rem;
+        }
+
+        .certificate-details strong {
+            color: var(--accent-cyan);
+        }
+
+        .certificate-footer {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .share-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            color: white;
+        }
+
+        /* Referral Program */
+        .referral-banner {
+            background: linear-gradient(135deg, #1A1A2E, #16213E);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .referral-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path fill="rgba(157, 74, 255, 0.05)" d="M0,0 L100,0 L100,100 L0,100 Z" /></svg>');
+            background-size: cover;
+            z-index: -1;
+        }
+
+        .referral-banner h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: flicker 2s infinite alternate;
+        }
+
+        .referral-banner p {
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            background: var(--glass-bg);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            border-radius: 10px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .progress-milestones {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0 10px;
+        }
+
+        .milestone {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-dark);
+            border: 2px solid var(--glass-border);
+            position: relative;
+        }
+
+        .milestone.active {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .leaderboard {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .leaderboard-user {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            width: 150px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-user:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(157, 74, 255, 0.2);
+        }
+
+        .leaderboard-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            object-fit: cover;
+            border: 2px solid var(--accent-violet);
+        }
+
+        .leaderboard-crown {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            color: gold;
+            animation: bounce 2s infinite;
+        }
+
+        /* Pricing CTA */
+        .pricing-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .pricing-container h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-container p {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .price-tag {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .highlight {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: rgba(0, 245, 255, 0.2);
+            border-radius: 50px;
+            color: var(--accent-cyan);
+            font-weight: 500;
+            margin-bottom: 2rem;
+            border: 1px solid var(--accent-cyan);
+        }
+
+        .payment-mockup {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 400px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+
+        .payment-mockup:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(157, 74, 255, 0.2);
+        }
+
+        .payment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-logo {
+            font-size: 1.5rem;
+            color: var(--accent-violet);
+        }
+
+        .payment-secure {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+        }
+
+        .payment-secure i {
+            font-size: 1rem;
+        }
+
+        .payment-amount {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-method {
+            width: 50px;
+            height: 30px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            background: white;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-code::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 48%, rgba(157, 74, 255, 0.1) 50%, transparent 52%);
+            background-size: 10px 10px;
+        }
+
+        .qr-code i {
+            font-size: 3rem;
+            color: black;
+        }
+
+        .payment-note {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(5, 5, 10, 0.8);
+            padding: 3rem 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-light);
+            text-decoration: none;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            opacity: 1;
+            color: var(--accent-cyan);
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .footer-credit {
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+
+        .footer-credit span {
+            color: var(--accent-cyan);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 0 0 10px var(--accent-violet), 0 0 20px var(--accent-cyan);
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .steps-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .step-card {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .certificate-body {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                display: block;
+                width: 100%;
+                max-width: 250px;
+                margin: 0.5rem auto;
+            }
+            
+            .features-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .price-tag {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Discover Your True Career Path with AI</h1>
+            <p>Olvera helps students unlock their born talents and make informed choices.</p>
+            <div class="hero-buttons">
+                <a href="#pricing" class="btn btn-primary">Start Test ₹49</a>
+                <a href="#features" class="btn btn-secondary">Explore Insights</a>
+            </div>
+        </div>
+        
+        <!-- Floating Chatbot Icon -->
+        <div class="chatbot-icon">
+            <i class="fas fa-robot"></i>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section" id="how-it-works">
+        <h2 class="section-title">How <span>Olvera</span> Works</h2>
+        <div class="steps-container">
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h3>Step 1: Take the Test</h3>
+                <p>Complete our 5-minute assessment designed to uncover your innate talents and preferences.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>Step 2: AI Analyzes You</h3>
+                <p>Our advanced AI evaluates your responses against thousands of successful career paths.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3>Step 3: Get Personalized Career Path</h3>
+                <p>Receive a detailed report with career recommendations tailored just for you.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Features Section -->
+    <section class="section" id="features" style="background: radial-gradient(circle at center, rgba(10, 10, 15, 0.9) 0%, var(--bg-dark) 70%);">
+        <h2 class="section-title">Our <span>AI-Powered</span> Features</h2>
+        <div class="features-container">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-gem"></i>
+                </div>
+                <h3>Born Talent Analysis</h3>
+                <p>Discover your natural strengths and abilities you were born with through our proprietary assessment.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bridge"></i>
+                </div>
+                <h3>Skill Gap Identification</h3>
+                <p>Identify exactly what skills you need to develop to succeed in your ideal career path.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <h3>AI-generated Questions</h3>
+                <p>Dynamic questioning that adapts to your responses for more accurate results.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Real-time Feedback</h3>
+                <p>Get immediate insights as you complete the assessment with our live analysis.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Student Results Section -->
+    <section class="section" id="results">
+        <h2 class="section-title">Student <span>Success Stories</span></h2>
+        <div class="testimonials-container">
+            <div class="testimonial-slide active">
+                <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Student" class="user-avatar">
+                <p class="testimonial-quote">Olvera predicted my career match perfectly! I'm now pursuing data science thanks to their accurate assessment.</p>
+                <h4 class="user-name">Priya Sharma</h4>
+                <p class="user-title">Data Science Student at IIT Delhi</p>
+            </div>
+        </div>
+
+        <!-- Certificate Mockup -->
+        <div class="certificate-container">
+            <div class="certificate">
+                <div class="certificate-header">
+                    <h3>Career Aptitude Certificate</h3>
+                    <p>This certifies that you have completed the Olvera Career Assessment</p>
+                </div>
+                <div class="certificate-body">
+                    <div class="certificate-logo">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <div class="certificate-details">
+                        <p><strong>Name:</strong> Student Name</p>
+                        <p><strong>Assessment Date:</strong> June 15, 2023</p>
+                        <p><strong>Top Career Matches:</strong> Data Scientist, UX Designer, Product Manager</p>
+                        <p><strong>Primary Talents:</strong> Analytical Thinking, Creativity, Leadership</p>
+                    </div>
+                </div>
+                <div class="certificate-footer">
+                    <p>Share your achievement with friends and family</p>
+                    <div class="share-buttons">
+                        <div class="share-btn">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div class="share-btn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </div>
+                        <div class="share-btn">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <div class="share-btn">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Referral Program -->
+    <section class="section" id="referral">
+        <div class="referral-banner">
+            <h2>Refer and Earn ₹Cash + Fame</h2>
+            <p>Invite friends to take the Olvera career test and earn rewards for each successful referral!</p>
+            
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 40%;"></div>
+                <div class="progress-milestones">
+                    <div class="milestone active"></div>
+                    <div class="milestone active"></div>
+                    <div class="milestone"></div>
+                </div>
+            </div>
+            
+            <div class="leaderboard">
+                <div class="leaderboard-user">
+                    <div class="leaderboard-crown">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Top Referrer" class="leaderboard-avatar">
+                    <h4>Rahul K.</h4>
+                    <p>₹2,450 earned</p>
+                </div>
+                <div class="leaderboard-user">
+                    <div class="leaderboard-crown">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Top Referrer" class="leaderboard-avatar">
+                    <h4>Neha P.</h4>
+                    <p>₹1,960 earned</p>
+                </div>
+                <div class="leaderboard-user">
+                    <div class="leaderboard-crown">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Top Referrer" class="leaderboard-avatar">
+                    <h4>Arjun S.</h4>
+                    <p>₹1,470 earned</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing CTA Section -->
+    <section class="section" id="pricing">
+        <div class="pricing-container">
+            <h2>Start Your Career Journey Today</h2>
+            <p>For less than the price of a coffee, discover your true potential and ideal career path.</p>
+            
+            <div class="price-tag">₹49</div>
+            <div class="highlight">Only phone number needed, no email required</div>
+            
+            <div class="payment-mockup">
+                <div class="payment-header">
+                    <div class="payment-logo">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="payment-secure">
+                        <i class="fas fa-lock"></i>
+                        <span>Secure Payment</span>
+                    </div>
+                </div>
+                <div class="payment-amount">₹49.00</div>
+                <div class="payment-methods">
+                    <div class="payment-method">
+                        <i class="fab fa-google-pay"></i>
+                    </div>
+                    <div class="payment-method">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="payment-method">
+                        <i class="fab fa-cc-visa"></i>
+                    </div>
+                    <div class="payment-method">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                </div>
+                <div class="qr-code">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <p class="payment-note">Scan to pay with any UPI app</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">Olvera</div>
+        <div class="footer-links">
+            <a href="#" class="footer-link">Home</a>
+            <a href="#how-it-works" class="footer-link">How It Works</a>
+            <a href="#features" class="footer-link">Features</a>
+            <a href="#results" class="footer-link">Results</a>
+            <a href="#referral" class="footer-link">Referral</a>
+            <a href="#pricing" class="footer-link">Pricing</a>
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <a href="#" class="footer-link">Terms</a>
+            <a href="#" class="footer-link">FAQ</a>
+            <a href="#" class="footer-link">Contact</a>
+        </div>
+        <div class="social-icons">
+            <a href="#" class="social-icon">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="social-icon">
+                <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="social-icon">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+            <a href="#" class="social-icon">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="social-icon">
+                <i class="fab fa-youtube"></i>
+            </a>
+        </div>
+        <p class="footer-credit">Made with ❤️ by <span>INZAF INDUSTRIES</span></p>
+    </footer>
+
+    <script>
+        // Scroll animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const animateOnScroll = () => {
+                const elements = document.querySelectorAll('.section-title, .step-card, .feature-card, .certificate-container, .referral-banner, .pricing-container');
+                
+                elements.forEach(element => {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (elementPosition < windowHeight - 100) {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                        
+                        if (element.classList.contains('certificate-container')) {
+                            element.style.transform = 'perspective(1000px) rotateX(0deg)';
+                        }
+                    }
+                });
+            };
+            
+            // Initial check
+            animateOnScroll();
+            
+            // Check on scroll
+            window.addEventListener('scroll', animateOnScroll);
+            
+            // Chatbot interaction
+            const chatbotIcon = document.querySelector('.chatbot-icon');
+            chatbotIcon.addEventListener('click', function() {
+                alert("Hello! I'm Olvera, your AI career guide. How can I help you today?");
+            });
+            
+            // Simple testimonial slider
+            const testimonials = [
+                {
+                    avatar: "https://randomuser.me/api/portraits/women/32.jpg",
+                    quote: "Olvera predicted my career match perfectly! I'm now pursuing data science thanks to their accurate assessment.",
+                    name: "Priya Sharma",
+                    title: "Data Science Student at IIT Delhi"
+                },
+                {
+                    avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+                    quote: "The skill gap analysis showed me exactly what I needed to work on. I landed my dream job within 3 months!",
+                    name: "Rahul Verma",
+                    title: "Software Engineer at Google"
+                },
+                {
+                    avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+                    quote: "I was confused between medicine and research. Olvera's report made the choice clear and I've never been happier.",
+                    name: "Ananya Patel",
+                    title: "Medical Researcher at AIIMS"
+                }
+            ];
+            
+            let currentTestimonial = 0;
+            const testimonialSlide = document.querySelector('.testimonial-slide');
+            
+            function changeTestimonial() {
+                testimonialSlide.classList.remove('active');
+                
+                setTimeout(() => {
+                    const testimonial = testimonials[currentTestimonial];
+                    testimonialSlide.querySelector('.user-avatar').src = testimonial.avatar;
+                    testimonialSlide.querySelector('.testimonial-quote').textContent = testimonial.quote;
+                    testimonialSlide.querySelector('.user-name').textContent = testimonial.name;
+                    testimonialSlide.querySelector('.user-title').textContent = testimonial.title;
+                    
+                    testimonialSlide.classList.add('active');
+                    
+                    currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+                }, 500);
+            }
+            
+            // Change testimonial every 5 seconds
+            setInterval(changeTestimonial, 5000);
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

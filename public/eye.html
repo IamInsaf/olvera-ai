@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Interview with Emotion Detection</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    #startContainer {
+      text-align: center;
+      margin: 40px 0;
+    }
+    #startButton {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #interviewContainer {
+      display: none;
+    }
+    #questionContainer, #answerContainer {
+      margin: 20px 0;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f5f5f5;
+    }
+    #questionText {
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    #answerText {
+      min-height: 60px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background: white;
+    }
+    #videoContainer {
+      margin: 20px 0;
+      text-align: center;
+    }
+    #video {
+      background: #000;
+      width: 320px;
+      height: 240px;
+      border-radius: 8px;
+    }
+    #canvas {
+      display: none;
+    }
+    #emotionResult {
+      font-weight: bold;
+      margin-top: 10px;
+      font-size: 1.1em;
+    }
+    #status {
+      margin-top: 10px;
+      font-style: italic;
+      color: #666;
+    }
+    #timer {
+      font-weight: bold;
+    }
+    .hidden {
+      display: none;
+    }
+    .emotion-happy { color: green; }
+    .emotion-sad { color: blue; }
+    .emotion-angry { color: red; }
+    .emotion-neutral { color: gray; }
+    .emotion-surprised { color: orange; }
+    .emotion-fearful { color: purple; }
+    .emotion-disgusted { color: brown; }
+    
+    /* Emotion Meter Styles */
+    #emotionMeter {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f0f0f0;
+      border-radius: 8px;
+    }
+    #emotionMeter h3 {
+      margin-top: 0;
+      text-align: center;
+    }
+    .emotion-bar-container {
+      margin: 10px 0;
+    }
+    .emotion-label {
+      display: inline-block;
+      width: 100px;
+      font-weight: bold;
+    }
+    .emotion-bar {
+      height: 20px;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    #emotionGraph {
+      display: flex;
+      height: 100px;
+      margin-top: 20px;
+      align-items: flex-end;
+      justify-content: space-around;
+      border-bottom: 2px solid #333;
+    }
+    .emotion-column {
+      width: 40px;
+      background: #4285f4;
+      margin: 0 2px;
+      position: relative;
+      transition: height 0.3s ease;
+    }
+    .emotion-column-label {
+      position: absolute;
+      bottom: -25px;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+    }
+    #detectionStatus {
+      margin-top: 10px;
+      padding: 5px;
+      border-radius: 4px;
+      background: #f0f0f0;
+    }
+    #restartDetection {
+      margin-top: 10px;
+      padding: 8px 15px;
+      background: #ffc107;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #sessionTimer {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      display: none;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+</head>
+<body>
+  <div id="sessionTimer">05:00</div>
+  
+  <div id="startContainer">
+    <h2>AI Interview with Emotion Detection</h2>
+    <p>Click below to start your interview session</p>
+    <button id="startButton">Start Interview</button>
+  </div>
+  
+  <div id="interviewContainer">
+    <div id="authStatus" class="hidden"></div>
+    <div id="userIdDisplay" class="hidden"></div>
+    
+    <div id="videoContainer">
+      <video id="video" width="320" height="240" autoplay muted></video>
+      <canvas id="canvas" width="320" height="240"></canvas>
+      <div id="emotionResult">Emotion detection will begin shortly...</div>
+      <div id="detectionStatus">Emotion detection: Initializing...</div>
+      <button id="restartDetection" style="display: none;">Restart Emotion Detection</button>
+    </div>
+    
+    <div id="emotionMeter">
+      <h3>Emotion Levels</h3>
+      <div id="emotionBars">
+        <div class="emotion-bar-container">
+          <span class="emotion-label happy">Happy</span>
+          <div class="emotion-bar happy" style="width: 0%; background-color: green;"></div>
+          <span class="emotion-value">0%</span>
+        </div>
+        <div class="emotion-bar-container">
+          <span class="emotion-label sad">Sad</span>
+          <div class="emotion-bar sad" style="width: 0%; background-color: blue;"></div>
+          <span class="emotion-value">0%</span>
+        </div>
+        <div class="emotion-bar-container">
+          <span class="emotion-label angry">Angry</span>
+          <div class="emotion-bar angry" style="width: 0%; background-color: red;"></div>
+          <span class="emotion-value">0%</span>
+        </div>
+        <div class="emotion-bar-container">
+          <span class="emotion-label neutral">Neutral</span>
+          <div class="emotion-bar neutral" style="width: 0%; background-color: gray;"></div>
+          <span class="emotion-value">0%</span>
+        </div>
+        <div class="emotion-bar-container">
+          <span class="emotion-label surprised">Surprised</span>
+          <div class="emotion-bar surprised" style="width: 0%; background-color: orange;"></div>
+          <span class="emotion-value">0%</span>
+        </div>
+        <div class="emotion-bar-container">
+          <span class="emotion-label fearful">Fearful</span>
+          <div class="emotion-bar fearful" style="width: 0%; background-color: purple;"></div>
+          <span class="emotion-value">0%</span>
+        </div>
+        <div class="emotion-bar-container">
+          <span class="emotion-label disgusted">Disgusted</span>
+          <div class="emotion-bar disgusted" style="width: 0%; background-color: brown;"></div>
+          <span class="emotion-value">0%</span>
+        </div>
+      </div>
+      <div id="emotionGraph">
+        <div class="emotion-column" data-emotion="happy" style="height: 0px;">
+          <div class="emotion-column-label">Happy</div>
+        </div>
+        <div class="emotion-column" data-emotion="sad" style="height: 0px;">
+          <div class="emotion-column-label">Sad</div>
+        </div>
+        <div class="emotion-column" data-emotion="angry" style="height: 0px;">
+          <div class="emotion-column-label">Angry</div>
+        </div>
+        <div class="emotion-column" data-emotion="neutral" style="height: 0px;">
+          <div class="emotion-column-label">Neutral</div>
+        </div>
+        <div class="emotion-column" data-emotion="surprised" style="height: 0px;">
+          <div class="emotion-column-label">Surprised</div>
+        </div>
+        <div class="emotion-column" data-emotion="fearful" style="height: 0px;">
+          <div class="emotion-column-label">Fearful</div>
+        </div>
+        <div class="emotion-column" data-emotion="disgusted" style="height: 0px;">
+          <div class="emotion-column-label">Disgusted</div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="questionContainer">
+      <div id="questionText">Question will appear here...</div>
+    </div>
+    
+    <div id="answerContainer">
+      <div id="answerText">Your answer will appear here as you speak...</div>
+      <div id="timer">Response time: 0.0s</div>
+      <div id="status">Press the Start button to begin</div>
+    </div>
+    
+    <div id="output"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, serverTimestamp, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-functions.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const functions = getFunctions(app);
+    const auth = getAuth(app);
+    
+    // Voice recognition variables
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'ml-IN, en-US';
+    
+    // App state variables
+    let currentUserId = null;
+    let currentAIQuestion = null;
+    let answerText = "";
+    let startTime = 0;
+    let responseTimer = null;
+    let silenceTimer = null;
+    let timeToStart = 0;
+    let responseTime = 0;
+    let isRecording = false;
+    let isSpeaking = false;
+    let currentEmotion = "neutral";
+    let emotionSamples = [];
+    let emotionDetectionInterval;
+    let videoStream;
+    let modelsLoaded = false;
+    let emotionDetectionActive = true;
+    let emotionDetectionFailures = 0;
+    let questionCounter = 0;
+    const MAX_DETECTION_FAILURES = 5;
+    let sessionTimer = null;
+    let sessionTimeLeft = 5 * 60; // 5 minutes in seconds
+
+    // DOM elements
+    const startContainer = document.getElementById('startContainer');
+    const interviewContainer = document.getElementById('interviewContainer');
+    const startButton = document.getElementById('startButton');
+    const questionText = document.getElementById('questionText');
+    const answerTextElement = document.getElementById('answerText');
+    const statusElement = document.getElementById('status');
+    const timerElement = document.getElementById('timer');
+    const outputElement = document.getElementById('output');
+    const authStatusElement = document.getElementById('authStatus');
+    const userIdDisplayElement = document.getElementById('userIdDisplay');
+    const questionContainer = document.getElementById('questionContainer');
+    const answerContainer = document.getElementById('answerContainer');
+    const videoElement = document.getElementById('video');
+    const canvasElement = document.getElementById('canvas');
+    const emotionResultElement = document.getElementById('emotionResult');
+    const detectionStatusElement = document.getElementById('detectionStatus');
+    const restartDetectionButton = document.getElementById('restartDetection');
+    const sessionTimerElement = document.getElementById('sessionTimer');
+
+    // Function to update session timer
+    function updateSessionTimer() {
+      const minutes = Math.floor(sessionTimeLeft / 60);
+      const seconds = sessionTimeLeft % 60;
+      sessionTimerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (sessionTimeLeft <= 0) {
+        endSession();
+      } else {
+        sessionTimeLeft--;
+      }
+    }
+
+    // Function to end the session
+    function endSession() {
+      clearInterval(sessionTimer);
+      
+      // Stop all recording and detection
+      if (isRecording) {
+        recognition.stop();
+      }
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+      if (emotionDetectionInterval) {
+        clearInterval(emotionDetectionInterval);
+      }
+      
+      // Redirect to certificate page
+      window.location.href = "certificate.html";
+    }
+
+    // Function to clear interactions collection
+    async function clearInteractionsCollection(userId) {
+      try {
+        questionCounter = 0; // Reset counter when clearing
+        const userRef = doc(db, "conversations", userId);
+        const interactionsRef = collection(userRef, "interactions");
+        
+        // Get all documents in the interactions collection
+        const querySnapshot = await getDocs(interactionsRef);
+        
+        // Delete each document
+        const deletePromises = [];
+        querySnapshot.forEach((doc) => {
+          deletePromises.push(deleteDoc(doc.ref));
+        });
+        
+        await Promise.all(deletePromises);
+        console.log("All interactions deleted successfully");
+      } catch (error) {
+        console.error("Error deleting interactions:", error);
+      }
+    }
+
+    // Initialize face-api.js models
+    async function loadFaceModels() {
+      try {
+        await faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models');
+        await faceapi.nets.faceLandmark68Net.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models');
+        await faceapi.nets.faceRecognitionNet.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models');
+        await faceapi.nets.faceExpressionNet.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models');
+        modelsLoaded = true;
+        detectionStatusElement.textContent = "Face models loaded successfully";
+        return true;
+      } catch (err) {
+        console.error("Error loading face models:", err);
+        emotionResultElement.textContent = "Emotion detection unavailable";
+        detectionStatusElement.textContent = "Error loading face models";
+        detectionStatusElement.style.background = "#f8d7da";
+        return false;
+      }
+    }
+
+    // Function to restart emotion detection
+    async function restartEmotionDetection() {
+      console.log("Attempting to restart emotion detection...");
+      restartDetectionButton.style.display = 'none';
+      detectionStatusElement.textContent = "Restarting emotion detection...";
+      detectionStatusElement.style.background = "#fff3cd";
+      
+      emotionDetectionActive = false;
+      
+      // Clear existing interval
+      if (emotionDetectionInterval) {
+        clearInterval(emotionDetectionInterval);
+      }
+      
+      // Stop video stream if exists
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+      
+      try {
+        // Reinitialize video
+        videoStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width: 320, height: 240 } 
+        });
+        videoElement.srcObject = videoStream;
+        
+        // Reset counters
+        emotionDetectionFailures = 0;
+        emotionDetectionActive = true;
+        
+        // Restart detection
+        emotionDetectionInterval = setInterval(detectEmotion, 200);
+        emotionResultElement.textContent = "Emotion detection active";
+        detectionStatusElement.textContent = "Emotion detection: Active";
+        detectionStatusElement.style.background = "#d4edda";
+        
+      } catch (err) {
+        console.error("Failed to restart emotion detection:", err);
+        emotionResultElement.textContent = "Emotion detection unavailable";
+        detectionStatusElement.textContent = "Failed to restart detection";
+        detectionStatusElement.style.background = "#f8d7da";
+        restartDetectionButton.style.display = 'block';
+      }
+    }
+
+    // Start video stream and emotion detection
+    async function startVideo() {
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width: 320, height: 240 } 
+        });
+        videoElement.srcObject = videoStream;
+        
+        // Add event listeners for video state
+        videoElement.addEventListener('play', () => {
+          emotionDetectionActive = true;
+          emotionResultElement.textContent = "Emotion detection active";
+          detectionStatusElement.textContent = "Emotion detection: Active";
+          detectionStatusElement.style.background = "#d4edda";
+        });
+        
+        videoElement.addEventListener('pause', () => {
+          emotionDetectionActive = false;
+          emotionResultElement.textContent = "Emotion detection paused";
+          detectionStatusElement.textContent = "Emotion detection: Paused";
+          detectionStatusElement.style.background = "#fff3cd";
+        });
+        
+        videoElement.addEventListener('error', () => {
+          emotionDetectionActive = false;
+          emotionResultElement.textContent = "Video error - detection paused";
+          detectionStatusElement.textContent = "Video error - detection paused";
+          detectionStatusElement.style.background = "#f8d7da";
+          restartEmotionDetection();
+        });
+        
+        // Start emotion detection
+        emotionDetectionInterval = setInterval(detectEmotion, 200);
+      } catch (err) {
+        console.error("Error accessing camera:", err);
+        emotionResultElement.textContent = "Camera access denied - emotion detection disabled";
+        detectionStatusElement.textContent = "Camera access denied";
+        detectionStatusElement.style.background = "#f8d7da";
+      }
+    }
+
+    // Update emotion visualization
+    function updateEmotionVisualization(expressions) {
+      // Update bars
+      for (const emotion in expressions) {
+        const percentage = Math.round(expressions[emotion] * 100);
+        const bar = document.querySelector(`.emotion-bar.${emotion}`);
+        const value = document.querySelector(`.emotion-bar-container .emotion-value`);
+        
+        if (bar) {
+          bar.style.width = `${percentage}%`;
+          bar.nextElementSibling.textContent = `${percentage}%`;
+        }
+      }
+      
+      // Update graph columns
+      const maxHeight = 100; // 100px max height
+      for (const emotion in expressions) {
+        const column = document.querySelector(`.emotion-column[data-emotion="${emotion}"]`);
+        if (column) {
+          const height = expressions[emotion] * maxHeight;
+          column.style.height = `${height}px`;
+        }
+      }
+    }
+
+    // Detect emotion from video feed
+    async function detectEmotion() {
+      if (!modelsLoaded || !emotionDetectionActive) return;
+      
+      try {
+        // Check if video is properly streaming
+        if (videoElement.readyState < 2) { // 0=HAVE_NOTHING, 1=HAVE_METADATA
+          console.warn("Video not ready for detection");
+          return;
+        }
+
+        const options = new faceapi.TinyFaceDetectorOptions({
+          inputSize: 160,
+          scoreThreshold: 0.5
+        });
+        
+        const detections = await faceapi.detectAllFaces(videoElement, options)
+          .withFaceLandmarks()
+          .withFaceExpressions();
+        
+        if (detections.length > 0) {
+          emotionDetectionFailures = 0; // Reset failure counter
+          const expressions = detections[0].expressions;
+          const emotion = Object.keys(expressions).reduce((a, b) => 
+            expressions[a] > expressions[b] ? a : b);
+          
+          updateEmotionVisualization(expressions);
+          
+          emotionSamples.push({
+            emotion,
+            timestamp: Date.now(),
+            confidence: expressions[emotion],
+            allExpressions: {
+              happy: expressions.happy,
+              sad: expressions.sad,
+              angry: expressions.angry,
+              neutral: expressions.neutral,
+              surprised: expressions.surprised,
+              fearful: expressions.fearful,
+              disgusted: expressions.disgusted
+            }
+          });
+          
+          if (emotion !== currentEmotion) {
+            currentEmotion = emotion;
+            emotionResultElement.textContent = `Current emotion: ${emotion}`;
+            emotionResultElement.className = `emotion-${emotion}`;
+          }
+        } else {
+          emotionDetectionFailures++;
+          detectionStatusElement.textContent = `Emotion detection: No faces detected (${emotionDetectionFailures}/${MAX_DETECTION_FAILURES})`;
+          detectionStatusElement.style.background = "#fff3cd";
+          
+          if (emotionDetectionFailures > MAX_DETECTION_FAILURES) {
+            restartEmotionDetection();
+          }
+        }
+      } catch (err) {
+        console.error("Emotion detection error:", err);
+        emotionDetectionFailures++;
+        detectionStatusElement.textContent = `Emotion detection error (${emotionDetectionFailures}/${MAX_DETECTION_FAILURES})`;
+        detectionStatusElement.style.background = "#f8d7da";
+        
+        if (emotionDetectionFailures > MAX_DETECTION_FAILURES) {
+          restartEmotionDetection();
+        }
+      }
+    }
+
+    // Analyze emotion samples
+    function analyzeEmotions(samples) {
+      if (samples.length === 0) return {
+        dominantEmotion: "neutral",
+        confidence: 0,
+        emotionDistribution: {
+          happy: 0,
+          sad: 0,
+          angry: 0,
+          neutral: 0,
+          surprised: 0,
+          fearful: 0,
+          disgusted: 0
+        },
+        averageExpressions: {
+          happy: 0,
+          sad: 0,
+          angry: 0,
+          neutral: 0,
+          surprised: 0,
+          fearful: 0,
+          disgusted: 0
+        }
+      };
+      
+      const emotionCount = {
+        happy: 0,
+        sad: 0,
+        angry: 0,
+        neutral: 0,
+        surprised: 0,
+        fearful: 0,
+        disgusted: 0
+      };
+      let totalConfidence = 0;
+      const averageExpressions = {
+        happy: 0,
+        sad: 0,
+        angry: 0,
+        neutral: 0,
+        surprised: 0,
+        fearful: 0,
+        disgusted: 0
+      };
+      
+      samples.forEach(sample => {
+        emotionCount[sample.emotion] = (emotionCount[sample.emotion] || 0) + 1;
+        totalConfidence += sample.confidence;
+        
+        // Sum all expression values for averaging
+        for (const emotion in sample.allExpressions) {
+          averageExpressions[emotion] += sample.allExpressions[emotion];
+        }
+      });
+      
+      // Calculate averages
+      for (const emotion in averageExpressions) {
+        averageExpressions[emotion] = averageExpressions[emotion] / samples.length;
+      }
+      
+      const dominantEmotion = Object.keys(emotionCount).reduce((a, b) => 
+        emotionCount[a] > emotionCount[b] ? a : b);
+      
+      return {
+        dominantEmotion,
+        confidence: totalConfidence / samples.length,
+        emotionDistribution: emotionCount,
+        averageExpressions
+      };
+    }
+
+    // Initialize speech recognition
+    recognition.onresult = (event) => {
+      clearTimeout(silenceTimer);
+      const transcript = Array.from(event.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join('');
+      
+      answerText = transcript;
+      answerTextElement.textContent = transcript;
+      
+      // Reset silence timer (2 seconds)
+      silenceTimer = setTimeout(stopRecording, 2000);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+      statusElement.textContent = `Error: ${event.error}`;
+      stopRecording();
+    };
+
+    recognition.onend = () => {
+      if (isRecording) {
+        recognition.start(); // Restart recognition if we're still recording
+      }
+    };
+
+    // Start interview process
+    async function startInterview() {
+      startButton.disabled = true;
+      startButton.textContent = "Starting...";
+      
+      // Show session timer
+      sessionTimerElement.style.display = 'block';
+      
+      // Start session timer
+      sessionTimer = setInterval(updateSessionTimer, 1000);
+      
+      // Load face models while waiting for auth
+      await loadFaceModels();
+      
+      // Start authentication
+      signInAnonymously(auth).catch((error) => {
+        console.error("Anonymous sign-in failed:", error);
+        startButton.textContent = "Error - Try Again";
+        startButton.disabled = false;
+      });
+    }
+
+    // Handle authentication state
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUserId = user.uid;
+        authStatusElement.textContent = "✅ Authenticated";
+        userIdDisplayElement.textContent = `User ID: ${user.uid}`;
+        
+        // Clear previous interactions
+        await clearInteractionsCollection(user.uid);
+        
+        // Show interview interface
+        startContainer.style.display = 'none';
+        interviewContainer.style.display = 'block';
+        
+        // Start video and emotion detection
+        await startVideo();
+        
+        // Start first question
+        startNewConversation();
+      }
+    });
+
+    async function startNewConversation() {
+      // Set first question
+      currentAIQuestion = "What would you like to talk about?";
+      questionText.textContent = `Question 1: ${currentAIQuestion}`;
+      speakQuestion(currentAIQuestion);
+      outputElement.textContent = "Ready for your first response!";
+    }
+
+    function speakQuestion(question) {
+      isSpeaking = true;
+      statusElement.textContent = "Please wait for the question to finish...";
+      
+      const speech = new SpeechSynthesisUtterance();
+      speech.text = question;
+      speech.rate = 1;
+      speech.pitch = 1;
+      
+      speech.onend = () => {
+        isSpeaking = false;
+        // Auto-start recording after question is read
+        setTimeout(startRecording, 300);
+      };
+      
+      window.speechSynthesis.speak(speech);
+    }
+
+    function startRecording() {
+      if (!isRecording && !isSpeaking) {
+        isRecording = true;
+        emotionDetectionActive = true;
+        emotionSamples = [];
+        answerText = "";
+        answerTextElement.textContent = "";
+        startTime = Date.now();
+        timeToStart = 0;
+        
+        // Start measuring time to first response
+        const startResponseTimer = setInterval(() => {
+          timeToStart += 0.1;
+        }, 100);
+        
+        recognition.start();
+        statusElement.textContent = "Listening... Speak now";
+        
+        // Start response timer when speech is first detected
+        recognition.onspeechstart = () => {
+          clearInterval(startResponseTimer);
+          responseTime = 0;
+          responseTimer = setInterval(() => {
+            responseTime += 0.1;
+            timerElement.textContent = `Response time: ${responseTime.toFixed(1)}s`;
+          }, 100);
+        };
+      }
+    }
+
+    function stopRecording() {
+      if (isRecording) {
+        isRecording = false;
+        emotionDetectionActive = false;
+        recognition.stop();
+        clearInterval(responseTimer);
+        statusElement.textContent = "Processing your answer...";
+        
+        if (answerText.trim()) {
+          saveInteraction();
+        } else {
+          statusElement.textContent = "No speech detected. Starting again...";
+          timerElement.textContent = "Response time: 0.0s";
+          setTimeout(startRecording, 1000);
+        }
+      }
+    }
+
+    // Function to save user interaction
+    async function saveInteraction() {
+      if (!currentUserId || !answerText.trim()) {
+        outputElement.textContent = "❌ No answer to save";
+        return;
+      }
+
+      try {
+        const emotionSummary = analyzeEmotions(emotionSamples);
+        
+        // Prepare serializable emotion data
+        const serializableEmotionData = emotionSamples.map(sample => ({
+          emotion: sample.emotion,
+          timestamp: sample.timestamp,
+          confidence: sample.confidence,
+          allExpressions: {
+            happy: sample.allExpressions.happy,
+            sad: sample.allExpressions.sad,
+            angry: sample.allExpressions.angry,
+            neutral: sample.allExpressions.neutral,
+            surprised: sample.allExpressions.surprised,
+            fearful: sample.allExpressions.fearful,
+            disgusted: sample.allExpressions.disgusted
+          }
+        }));
+
+        const userRef = doc(db, "conversations", currentUserId);
+        const interactionsRef = collection(userRef, "interactions");
+
+        await setDoc(userRef, {
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+
+        const interactionId = "question_" + (questionCounter + 1);
+        await setDoc(doc(interactionsRef, interactionId), {
+          question: currentAIQuestion,
+          answer: answerText,
+          emotion: currentEmotion,
+          emotionSummary: {
+            dominantEmotion: emotionSummary.dominantEmotion,
+            confidence: emotionSummary.confidence,
+            emotionDistribution: emotionSummary.emotionDistribution,
+            averageExpressions: {
+              happy: emotionSummary.averageExpressions.happy,
+              sad: emotionSummary.averageExpressions.sad,
+              angry: emotionSummary.averageExpressions.angry,
+              neutral: emotionSummary.averageExpressions.neutral,
+              surprised: emotionSummary.averageExpressions.surprised,
+              fearful: emotionSummary.averageExpressions.fearful,
+              disgusted: emotionSummary.averageExpressions.disgusted
+            }
+          },
+          timeToStart: parseFloat(timeToStart.toFixed(1)),
+          responseTime: parseFloat(responseTime.toFixed(1)),
+          timestamp: serverTimestamp()
+        });
+
+        questionCounter++; // Increment after saving
+        outputElement.textContent = "✅ Answer saved! Generating next question...";
+        await generateAIQuestion();
+      } catch (error) {
+        console.error("Error saving interaction:", error);
+        outputElement.textContent = "❌ Failed to save answer.";
+        setTimeout(startRecording, 1000);
+      }
+    }
+
+    // Function to generate AI question
+    async function generateAIQuestion() {
+      if (!currentUserId) {
+        outputElement.textContent = "❌ Please wait while we authenticate you...";
+        return;
+      }
+
+      outputElement.textContent = "⏳ Generating next question...";
+      
+      const generate = httpsCallable(functions, "generateAIQuestion");
+      try {
+        const result = await generate({ userId: currentUserId });
+        currentAIQuestion = result.data.question;
+        questionText.textContent = `Question ${questionCounter + 1}: ${currentAIQuestion}`;
+        speakQuestion(currentAIQuestion);
+        outputElement.textContent = "🤖 Next question ready!";
+        timerElement.textContent = "Response time: 0.0s";
+      } catch (error) {
+        console.error("Error generating question:", error);
+        outputElement.textContent = "❌ Failed to generate question.";
+        setTimeout(startRecording, 1000);
+      }
+    }
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', () => {
+      if (videoStream) {
+        videoStream.getTracks().forEach(track => track.stop());
+      }
+      if (emotionDetectionInterval) {
+        clearInterval(emotionDetectionInterval);
+      }
+      if (isRecording) {
+        recognition.stop();
+      }
+      if (sessionTimer) {
+        clearInterval(sessionTimer);
+      }
+    });
+
+    // Event listeners
+    startButton.addEventListener('click', startInterview);
+    restartDetectionButton.addEventListener('click', restartEmotionDetection);
+  </script>
+</body>
+</html>

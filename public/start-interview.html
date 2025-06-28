@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Start Interview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-functions-compat.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; max-width: 500px; margin: auto; }
+    input, select, button { width: 100%; margin: 1rem 0; padding: 0.5rem; }
+    #loading { display: none; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+  <h2>Start Your AI Interview</h2>
+
+  <form id="interviewForm">
+    <label>Website URL</label>
+    <input type="url" id="website" required placeholder="https://promgn.in" />
+    
+    <label>Role you're applying for</label>
+    <input type="text" id="role" required placeholder="e.g., Frontend Developer" />
+    
+    <button type="submit">Start Interview</button>
+  </form>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "Olvera",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+  
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const functions = firebase.functions();
+    const auth = firebase.auth();
+  
+    document.getElementById('interviewForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const button = e.target.querySelector('button[type="submit"]');
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Processing...';
+      
+      try {
+        const website = document.getElementById('website').value;
+        const role = document.getElementById('role').value;
+  
+        // Validate inputs
+        if (!website || !role) {
+          throw new Error('Please fill all fields correctly');
+        }
+  
+        console.log("Creating interview with:", { website, role });
+        
+        const createInterview = functions.httpsCallable('createInterview');
+        const result = await createInterview({
+          website: website,
+          role: role
+        });
+        
+        console.log("Interview created successfully:", result.data);
+        localStorage.setItem('sessionId', result.data.sessionId);
+        window.location.href = 'interview.html';
+        
+      } catch (error) {
+        console.error("Full error details:", error);
+        
+        let errorMessage = "Failed to start interview. Please try again.";
+        
+        if (error.code === 'invalid-argument') {
+          errorMessage = error.message;
+        } else if (error.code === 'failed-precondition') {
+          errorMessage = "Website error: " + error.message;
+        } else if (error.details) {
+          errorMessage = error.details;
+        }
+        
+        alert(errorMessage);
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dream Job Analyzer - Olvera</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .card-shadow {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .fade-in {
+      animation: fadeIn 0.5s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .progress-bar {
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body class="gradient-bg min-h-screen">
+  <!-- Header -->
+  <header class="bg-white/10 backdrop-blur-md border-b border-white/20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-4">
+        <div class="flex items-center">
+          <a href="/" class="text-white text-xl font-bold">
+            <i class="fas fa-rocket mr-2"></i>Olvera
+          </a>
+        </div>
+        <div class="flex items-center space-x-4">
+          <span id="userName" class="text-white/90 text-sm"></span>
+          <button onclick="logout()" class="text-white/90 hover:text-white text-sm">
+            <i class="fas fa-sign-out-alt mr-1"></i>Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Authentication Section -->
+    <div id="authSection" class="fade-in">
+      <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 card-shadow border border-white/20 text-center">
+        <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-lock text-3xl text-red-300"></i>
+        </div>
+        <h1 class="text-3xl font-bold text-white mb-2">Authentication Required</h1>
+        <p class="text-white/80 text-lg mb-6">Please log in to use the Dream Job Analyzer</p>
+        <a href="/login.html" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 inline-block">
+          <i class="fas fa-sign-in-alt mr-2"></i>Go to Login
+        </a>
+      </div>
+    </div>
+
+    <!-- Main Section -->
+    <div id="mainSection" class="hidden">
+      <!-- Dream Job Input Section -->
+      <div id="inputSection" class="fade-in">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 card-shadow border border-white/20">
+          <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-star text-3xl text-yellow-300"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Dream Job Analyzer</h1>
+            <p class="text-white/80 text-lg">Discover if your dream job is the perfect fit for you</p>
+          </div>
+
+          <div class="max-w-md mx-auto">
+            <div class="mb-6">
+              <label for="dreamJob" class="block text-white font-medium mb-2">
+                <i class="fas fa-briefcase mr-2"></i>Your Dream Job
+              </label>
+              <input 
+                type="text" 
+                id="dreamJob" 
+                placeholder="e.g., Software Engineer, Doctor, Entrepreneur..."
+                class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+              >
+            </div>
+
+            <button 
+              id="analyzeBtn"
+              class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <i class="fas fa-magic mr-2"></i>Analyze My Dream Job
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Questions Section -->
+      <div id="questionSection" class="hidden fade-in">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 card-shadow border border-white/20">
+          <!-- Progress Bar -->
+          <div class="mb-8">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-white/80 text-sm" id="progressText">Question 1 of 5</span>
+              <span class="text-white/80 text-sm"><span id="progressPercent">20</span>%</span>
+            </div>
+            <div class="w-full bg-white/20 rounded-full h-2">
+              <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full progress-bar" style="width: 20%"></div>
+            </div>
+          </div>
+
+          <!-- Question Display -->
+          <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-question text-2xl text-blue-300"></i>
+            </div>
+            <h2 id="questionText" class="text-xl font-semibold text-white mb-6"></h2>
+          </div>
+
+          <!-- Answer Input -->
+          <div class="max-w-lg mx-auto">
+            <div class="mb-6">
+              <label for="answerInput" class="block text-white font-medium mb-2">
+                <i class="fas fa-comment mr-2"></i>Your Answer
+              </label>
+              <textarea 
+                id="answerInput" 
+                rows="4"
+                placeholder="Share your thoughts..."
+                class="w-full px-4 py-3 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent resize-none"
+              ></textarea>
+            </div>
+
+            <button 
+              id="nextBtn"
+              class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <i class="fas fa-arrow-right mr-2"></i>Next Question
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Intermediate Analysis Section -->
+      <div id="intermediateSection" class="hidden fade-in">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 card-shadow border border-white/20">
+          <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-chart-line text-3xl text-blue-300"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Initial Analysis</h1>
+            <p class="text-white/80 text-lg">Here's your preliminary assessment</p>
+          </div>
+
+          <!-- Intermediate Results -->
+          <div id="intermediateResults" class="mb-8"></div>
+
+          <!-- Continue Button -->
+          <div class="text-center">
+            <button 
+              id="continueBtn"
+              class="bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+            >
+              <i class="fas fa-arrow-right mr-2"></i>Continue with Follow-up Questions
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Results Section -->
+      <div id="finalSection" class="hidden fade-in">
+        <div class="bg-white/10 backdrop-blur-md rounded-2xl p-8 card-shadow border border-white/20">
+          <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-trophy text-3xl text-yellow-300"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Final Analysis</h1>
+            <p class="text-white/80 text-lg">Your comprehensive career assessment</p>
+          </div>
+
+          <!-- Final Results -->
+          <div id="finalResults" class="mb-8"></div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-center space-x-4">
+            <button 
+              id="restartBtn"
+              class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <i class="fas fa-redo mr-2"></i>Analyze Another Job
+            </button>
+            <button 
+              onclick="window.location.href='/'" 
+              class="bg-white/20 hover:bg-white/30 text-white font-medium py-3 px-6 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <i class="fas fa-home mr-2"></i>Go Home
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div id="errorMessage" class="hidden mt-4 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 text-center"></div>
+    </div>
+  </main>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+  <!-- Firebase Initialization -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <!-- Dream Job Analyzer JavaScript (must be last!) -->
+  <script src="dream-job.js"></script>
+</body>
+</html> 

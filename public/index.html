@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Olvera – AI-Powered Career Guidance for Students</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-adsense-account" content="ca-pub-6090544760574516">
+  <meta name="description" content="Confused about your career? Olvera helps students discover their perfect course and career with AI-powered assessments. Take our free test today!">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white hidden" src="banner.png" alt="">
+  
+  <!-- Firebase Analytics -->
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            },
+            secondary: {
+              50: '#f5f3ff',
+              100: '#ede9fe',
+              200: '#ddd6fe',
+              300: '#c4b5fd',
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              700: '#6d28d9',
+              800: '#5b21b6',
+              900: '#4c1d95',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-white font-sans antialiased">
+
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16 items-center">
+        <div class="flex items-center">
+          <div class="flex-shrink-0 flex items-center">
+            <i class="fas fa-compass text-primary-600 text-2xl mr-2"></i>
+            <span class="text-xl font-bold text-gray-900">Olvera<span class="text-primary-600">.in</span></span>
+          </div>
+        </div>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#how-it-works" class="text-gray-700 hover:text-primary-600 transition">How It Works</a>
+          <a href="#benefits" class="text-gray-700 hover:text-primary-600 transition">Benefits</a>
+          <a href="#testimonials" class="text-gray-700 hover:text-primary-600 transition">Success Stories</a>
+          <a href="home" class="text-primary-600 hover:text-primary-800 transition">Login</a>
+        </div>
+        <div class="md:hidden">
+          <button onclick="toggleSidebar()" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700">
+            <span class="sr-only">Open main menu</span>
+            <i class="fas fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Sidebar Menu for Mobile -->
+  <div id="mobileMenu" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-300 z-50 md:hidden">
+    <div class="p-6 space-y-4">
+      <button onclick="toggleSidebar()" class="text-gray-600 hover:text-primary-600 text-xl float-right">
+        <i class="fas fa-times"></i>
+      </button>
+      <a href="#how-it-works" class="block text-gray-700 hover:text-primary-600">How It Works</a>
+      <a href="#benefits" class="block text-gray-700 hover:text-primary-600">Benefits</a>
+      <a href="#testimonials" class="block text-gray-700 hover:text-primary-600">Success Stories</a>
+      <a href="home" class="block text-primary-600 hover:text-primary-800">Login</a>
+    </div>
+  </div>
+  
+  <script>
+    function toggleSidebar() {
+      const menu = document.getElementById('mobileMenu');
+      menu.classList.toggle('-translate-x-full');
+    }
+  </script>
+  
+
+  <!-- Hero Section -->
+  <section class="py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div class="text-left">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+            Confused About Your Career? <span class="text-primary-600">Let AI Guide You.</span>
+          </h1>
+          <p class="mt-6 text-xl text-gray-600 max-w-2xl">
+            Olvera help students discover their perfect course and career with AI-powered assessments.
+          </p>
+          <div class="mt-10">
+            <a href="home" class="bg-gradient-to-r from-primary-600 to-primary-800 text-white px-8 py-4 rounded-full hover:from-primary-700 hover:to-primary-900 transition shadow-lg hover:shadow-xl font-medium text-lg">
+              Start the Test – It's Free <i class="fas fa-arrow-right ml-2"></i>
+            </a>
+          </div>
+          <div class="mt-8 flex items-center">
+            <div class="flex -space-x-2">
+              <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/12.jpg" alt="">
+              <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
+              <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
+            </div>
+            <div class="text-left ml-4">
+              <p class="text-sm text-gray-600">Trusted by <span class="font-bold">50,000+</span> students</p>
+              <div class="flex items-center">
+                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                <i class="fas fa-star text-yellow-400 mr-1"></i>
+                <span class="text-sm font-medium text-gray-700 ml-1">4.8/5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="relative rounded-xl shadow-2xl overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80" alt="Student smiling at screen" class="w-full h-auto">
+            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 p-6 text-white text-center">
+              <p class="text-lg font-medium">"From Confused to Confident – In Minutes"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Who It's For Section -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Made for students after</h2>
+      </div>
+      
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-xl shadow-md text-center hover:shadow-lg transition">
+          <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto">
+            <span class="text-2xl font-bold text-primary-600">10th</span>
+          </div>
+          <h3 class="mt-4 text-lg font-medium text-gray-900">Class 10 Students</h3>
+          <p class="mt-2 text-gray-600 text-sm">
+            Choose the right stream for your future
+          </p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md text-center hover:shadow-lg transition">
+          <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto">
+            <span class="text-2xl font-bold text-secondary-600">12th</span>
+          </div>
+          <h3 class="mt-4 text-lg font-medium text-gray-900">Class 12 Students</h3>
+          <p class="mt-2 text-gray-600 text-sm">
+            Find the perfect college course for you
+          </p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md text-center hover:shadow-lg transition">
+          <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
+            <i class="fas fa-graduation-cap text-yellow-600 text-2xl"></i>
+          </div>
+          <h3 class="mt-4 text-lg font-medium text-gray-900">College Students</h3>
+          <p class="mt-2 text-gray-600 text-sm">
+            Discover career paths matching your degree
+          </p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md text-center hover:shadow-lg transition">
+          <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto">
+            <i class="fas fa-user-graduate text-purple-600 text-2xl"></i>
+          </div>
+          <h3 class="mt-4 text-lg font-medium text-gray-900">Career Changers</h3>
+          <p class="mt-2 text-gray-600 text-sm">
+            Find new opportunities that fit your skills
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="py-16 sm:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">How Olvera Works</h2>
+        <p class="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
+          Our simple 3-step process delivers powerful career insights in just 5 minutes
+        </p>
+      </div>
+      
+      <div class="mt-16 relative">
+        <div class="hidden lg:block absolute top-0 left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-primary-100 via-primary-300 to-primary-100"></div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div class="relative bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition">
+            <div class="absolute -top-4 -left-4 w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">1</div>
+            <h3 class="text-xl font-bold text-gray-900 mt-4">Answer Smart Questions</h3>
+            <p class="mt-3 text-gray-600">
+              We ask about your interests, strengths, and goals in a simple, friendly quiz.
+            </p>
+            <div class="mt-6">
+              <img src="https://images.unsplash.com/photo-1521791055366-0d553872125f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80" alt="Person taking assessment" class="rounded-lg w-full h-48 object-cover">
+            </div>
+          </div>
+          
+          <div class="relative bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition">
+            <div class="absolute -top-4 -left-4 w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">2</div>
+            <h3 class="text-xl font-bold text-gray-900 mt-4">Let AI Analyze You</h3>
+            <p class="mt-3 text-gray-600">
+              Our AI compares your answers with thousands of career paths and success stories.
+            </p>
+            <div class="mt-6">
+              <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=765&q=80" alt="AI analysis" class="rounded-lg w-full h-48 object-cover">
+            </div>
+          </div>
+          
+          <div class="relative bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition">
+            <div class="absolute -top-4 -left-4 w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">3</div>
+            <h3 class="text-xl font-bold text-gray-900 mt-4">Get Your Career Match</h3>
+            <p class="mt-3 text-gray-600">
+              See which course and career fits you best—instantly and clearly.
+            </p>
+            <div class="mt-6">
+              <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Career report" class="rounded-lg w-full h-48 object-cover">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section id="benefits" class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Why Choose Olvera?</h2>
+      </div>
+      
+      <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-brain text-primary-600 text-xl"></i>
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-gray-900">AI-Powered Guidance</h3>
+          <p class="mt-2 text-gray-600">
+            Backed by advanced AI models to provide accurate career suggestions.
+          </p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-bolt text-green-600 text-xl"></i>
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-gray-900">Instant Results</h3>
+          <p class="mt-2 text-gray-600">
+            Get personalized recommendations in just 5 minutes.
+          </p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-user-graduate text-yellow-600 text-xl"></i>
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-gray-900">Student Focused</h3>
+          <p class="mt-2 text-gray-600">
+            Designed specifically for Indian students' needs and aspirations.
+          </p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-gray-900">Market Trends</h3>
+          <p class="mt-2 text-gray-600">
+            Recommendations based on current job market demands.
+          </p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-graduation-cap text-red-600 text-xl"></i>
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-gray-900">Course Matching</h3>
+          <p class="mt-2 text-gray-600">
+            Discover the best courses for your recommended careers.
+          </p>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
+          <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-rupee-sign text-blue-600 text-xl"></i>
+          </div>
+          <h3 class="mt-4 text-lg font-bold text-gray-900">100% Free</h3>
+          <p class="mt-2 text-gray-600">
+            No hidden charges - get started with our free assessment.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section id="testimonials" class="py-16 sm:py-24 bg-primary-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h2 class="text-3xl sm:text-4xl font-bold">What Students Say</h2>
+        <p class="mt-4 text-xl text-primary-100 max-w-3xl mx-auto">
+          Hear from students who discovered their ideal path with Olvera
+        </p>
+      </div>
+      
+      <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="bg-white p-8 rounded-xl text-gray-800">
+          <div class="flex items-center">
+            <img class="w-12 h-12 rounded-full" src="https://randomuser.me/api/portraits/women/32.jpg" alt="Riya">
+            <div class="ml-4">
+              <h4 class="font-bold">Riya Patel</h4>
+              <p class="text-sm text-gray-600">Class 12 Student</p>
+            </div>
+          </div>
+          <p class="mt-6">
+            "I had no idea what to do after 12th. Olvera showed me clear options based on my interests! The psychology-based questions really understood me better than I understood myself."
+          </p>
+          <div class="mt-4 flex">
+            <i class="fas fa-star text-yellow-400"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+          </div>
+        </div>
+        
+        <div class="bg-white p-8 rounded-xl text-gray-800">
+          <div class="flex items-center">
+            <img class="w-12 h-12 rounded-full" src="https://randomuser.me/api/portraits/men/45.jpg" alt="Arjun">
+            <div class="ml-4">
+              <h4 class="font-bold">Arjun Mehta</h4>
+              <p class="text-sm text-gray-600">Class 10 Student</p>
+            </div>
+          </div>
+          <p class="mt-6">
+            "The assessment was so easy and fun! It suggested Commerce with Data Science which I never considered. Now I'm excited about my future instead of stressed."
+          </p>
+          <div class="mt-4 flex">
+            <i class="fas fa-star text-yellow-400"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+          </div>
+        </div>
+        
+        <div class="bg-white p-8 rounded-xl text-gray-800">
+          <div class="flex items-center">
+            <img class="w-12 h-12 rounded-full" src="https://randomuser.me/api/portraits/women/68.jpg" alt="Priya">
+            <div class="ml-4">
+              <h4 class="font-bold">Mrs. Aravind</h4>
+              <p class="text-sm text-gray-600">Parent</p>
+            </div>
+          </div>
+          <p class="mt-6">
+            "As a parent, this gave me peace of mind. Finally, a reliable career tool that considers my child's personality rather than just marks. The detailed roadmap was incredibly helpful."
+          </p>
+          <div class="mt-4 flex">
+            <i class="fas fa-star text-yellow-400"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+          </div>
+        </div>
+        
+        <div class="bg-white p-8 rounded-xl text-gray-800">
+          <div class="flex items-center">
+            <img class="w-12 h-12 rounded-full" src="https://randomuser.me/api/portraits/men/22.jpg" alt="Vikram">
+            <div class="ml-4">
+              <h4 class="font-bold">Vikram Singh</h4>
+              <p class="text-sm text-gray-600">College Student</p>
+            </div>
+          </div>
+          <p class="mt-6">
+            "I was about to drop out of engineering when Olvera suggested UX Design. The career change roadmap showed me exactly how to transition. Best decision ever!"
+          </p>
+          <div class="mt-4 flex">
+            <i class="fas fa-star text-yellow-400"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+            <i class="fas fa-star text-yellow-400 ml-1"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-16 bg-gradient-to-r from-primary-600 to-primary-800 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold">Ready to Find Your Path?</h2>
+      <p class="mt-4 text-xl max-w-3xl mx-auto">
+        Take the first step toward your dream career. Our assessment takes just 5 minutes.
+      </p>
+      <div class="mt-8">
+        <a href="login" class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-full shadow-sm text-primary-700 bg-white hover:bg-gray-100 transition">
+          Take the Career Test Now <i class="fas fa-arrow-right ml-2"></i>
+        </a>
+      </div>
+      <p class="mt-4 text-sm opacity-90">
+        No credit card required. Get instant results.
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center">
+            <i class="fas fa-compass text-primary-400 text-2xl mr-2"></i>
+            <span class="text-xl font-bold text-white">Olvera<span class="text-primary-400">.in</span></span>
+          </div>
+          <p class="mt-4 text-sm">
+            AI-powered career guidance to help Indian students discover their ideal paths based on strengths and interests.
+          </p>
+          <div class="mt-6 flex space-x-4">
+            <a href="https://instagram.com/m_insaf_" class="text-gray-400 hover:text-white">
+              <i class="fab fa-instagram"></i>
+            </a>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Quick Links</h3>
+          <ul class="mt-4 space-y-2">
+            <li><a href="#" class="hover:text-white transition">Home</a></li>
+            <li><a href="#how-it-works" class="hover:text-white transition">How It Works</a></li>
+            <li><a href="#benefits" class="hover:text-white transition">Benefits</a></li>
+            <li><a href="#testimonials" class="hover:text-white transition">Testimonials</a></li>
+            <li><a href="blogs" class="hover:text-white transition">blogs</a></li>
+            <li><a href="about" class="hover:text-white transition">about</a></li>
+          </ul>
+        </div>
+        
+        <div>
+          <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Legal</h3>
+          <ul class="mt-4 space-y-2">
+            <li><a href="policies/privacy" class="hover:text-white transition">Privacy Policy</a></li>
+            <li><a href="policies/terms-and-conditions.html" class="hover:text-white transition">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+        <p class="text-sm">
+          &copy; 2025 Olvera.in. All rights reserved.
+        </p>
+        <div class="mt-4 md:mt-0 flex space-x-6">
+          <a href="policies/privacy" class="text-sm hover:text-white transition">Privacy</a>
+          <a href="policies/terms-and-conditions" class="text-sm hover:text-white transition">Terms</a>
+          <a href="contact" class="text-sm hover:text-white transition">Contact</a>
+          <a href="about" class="text-sm hover:text-white transition">About</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Sticky CTA (Mobile) -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 md:hidden z-50">
+    <a href="home" class="block w-full bg-gradient-to-r from-primary-600 to-primary-800 text-white text-center py-3 rounded-full font-medium">
+      Start Free Career Test
+    </a>
+  </div>
+
+  <!-- Firebase Analytics Implementation -->
+  <script>
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357"
+    };
+  
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics(app);
+    const auth = firebase.auth(app);
+  
+    // Check if user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (user && user.uid) {
+        console.log("User is logged in:", user.uid);
+        window.location.href = "/home"; // Redirect to home if authenticated
+      }
+      else (   console.log(" no user log"))
+    });
+  
+    // Set user properties
+    analytics.setUserProperties({
+      preferred_language: navigator.language,
+      device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+    });
+  
+    // Track page views
+    analytics.logEvent('page_view', {
+      page_title: document.title,
+      page_location: window.location.href,
+      page_path: window.location.pathname
+    });
+  
+    // Track all link clicks
+    document.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function () {
+        analytics.logEvent('select_content', {
+          content_type: 'link',
+          content_id: this.getAttribute('href') || 'unknown',
+          method: 'click'
+        });
+      });
+    });
+  
+    // Track CTA button clicks specifically
+    document.querySelectorAll('[href="index"]').forEach(button => {
+      button.addEventListener('click', function () {
+        analytics.logEvent('begin_checkout', {
+          item_name: 'Career Test',
+          item_category: 'CTA',
+          location: this.closest('section') ? this.closest('section').id || 'unknown' : 'unknown'
+        });
+      });
+    });
+  
+    // Track section visibility
+    const sections = document.querySelectorAll('section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          analytics.logEvent('view_section', {
+            section_id: entry.target.id || 'unknown',
+            section_name: entry.target.querySelector('h2') ? entry.target.querySelector('h2').textContent : 'unknown'
+          });
+        }
+      });
+    }, { threshold: 0.5 });
+  
+    sections.forEach(section => {
+      observer.observe(section);
+    });
+  
+    // Track errors
+    window.addEventListener('error', function (e) {
+      analytics.logEvent('exception', {
+        description: e.message,
+        fatal: false,
+        filename: e.filename,
+        lineno: e.lineno,
+        colno: e.colno
+      });
+    });
+  </script>
+</body>
+</html>

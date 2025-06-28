@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Talent Discovery Result</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-950 text-white min-h-screen flex items-center justify-center p-6">
+  <div class="max-w-3xl w-full bg-gray-900 p-6 rounded-xl shadow-lg">
+    <h1 class="text-3xl font-bold text-blue-400 mb-4">🎯 Talent Discovery Result</h1>
+    <div id="loading" class="text-gray-400">Loading your result...</div>
+    <pre id="result" class="whitespace-pre-wrap text-gray-200 hidden"></pre>
+  </div>
+
+  <script>
+    // ✅ Firebase Config - your project
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    // 🔧 Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        try {
+          const resultRef = db.collection("talent")
+            .doc(user.uid)
+            .collection("discovery")
+            .orderBy("createdAt", "desc")
+            .limit(1);
+
+          const snapshot = await resultRef.get();
+
+          if (snapshot.empty) {
+            document.getElementById("loading").innerText = "No talent discovery result found.";
+            return;
+          }
+
+          const data = snapshot.docs[0].data();
+          document.getElementById("result").innerText = data.insights || "No insights available.";
+          document.getElementById("loading").classList.add("hidden");
+          document.getElementById("result").classList.remove("hidden");
+
+        } catch (error) {
+          console.error("Error fetching result:", error);
+          document.getElementById("loading").innerText = "❌ Failed to load result.";
+        }
+      } else {
+        document.getElementById("loading").innerText = "🔒 Please log in to view your result.";
+      }
+    });
+  </script>
+</body>
+</html>

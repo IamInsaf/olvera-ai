@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Website Summary</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #f4f4f4;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+    }
+    #summary {
+      white-space: pre-wrap;
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Summarize a Website</h2>
+    <input type="text" id="websiteUrl" placeholder="Enter website URL (e.g., https://example.com)" />
+    <button onclick="summarize()">Get Summary</button>
+    <div id="summary"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "Olvera",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const functions = getFunctions(app);
+    const summarizeWebsite = httpsCallable(functions, 'summarizeWebsite');
+
+    window.summarize = async function () {
+      const url = document.getElementById("websiteUrl").value.trim();
+      const summaryDiv = document.getElementById("summary");
+
+      if (!url.startsWith("http")) {
+        summaryDiv.textContent = "Please enter a valid URL starting with http or https.";
+        return;
+      }
+
+      summaryDiv.textContent = "Summarizing, please wait...";
+
+      try {
+        const result = await summarizeWebsite({ url });
+        summaryDiv.textContent = result.data.summary || "No summary returned.";
+      } catch (error) {
+        console.error("Error:", error);
+        summaryDiv.textContent = "Failed to summarize. Please try again.";
+      }
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talent Analysis Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-functions.js"></script>
+    <style>
+        .analysis-section {
+            background-color: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+        }
+        .analysis-section:hover {
+            background-color: #eff6ff;
+            transform: translateX(4px);
+        }
+        .progress-bar {
+            height: 6px;
+            background-color: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Your Talent Analysis</h1>
+            <p class="text-gray-600" id="statusMessage">Loading your talent profile...</p>
+            <div class="progress-bar mt-2" id="progressBar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loading" class="text-center py-12">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p class="mt-4 text-gray-600" id="loadingMessage">Loading your analysis...</p>
+        </div>
+
+        <!-- Generate New Analysis State -->
+        <div id="generateAnalysis" class="hidden text-center py-12 bg-white rounded-lg shadow p-6">
+            <div class="text-blue-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-800 mb-2">No Analysis Found</h3>
+            <p class="text-gray-600 mb-6">We couldn't find an existing analysis for your profile. Would you like to generate one now?</p>
+            <button onclick="generateNewAnalysis()" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center mx-auto">
+                <span id="generateButtonText">Generate Analysis</span>
+                <svg id="generateSpinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Analysis Content -->
+        <div id="analysisContent" class="hidden space-y-6">
+            <!-- Dynamic content will be inserted here -->
+        </div>
+
+        <!-- Error State -->
+        <div id="errorState" class="hidden text-center py-12">
+            <div class="text-red-500 mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h3 class="text-xl font-medium text-gray-800 mb-2">Something went wrong</h3>
+            <p class="text-gray-600 mb-4" id="errorMessage"></p>
+            <button onclick="checkAnalysis()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                Try Again
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration (replace with your actual config)
+        const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        const functions = firebase.functions();
+
+        // DOM elements
+        const loadingElement = document.getElementById('loading');
+        const generateElement = document.getElementById('generateAnalysis');
+        const contentElement = document.getElementById('analysisContent');
+        const errorElement = document.getElementById('errorState');
+        const statusMessage = document.getElementById('statusMessage');
+        const loadingMessage = document.getElementById('loadingMessage');
+        const progressFill = document.getElementById('progressFill');
+
+        // Update progress bar
+        function updateProgress(percentage) {
+            progressFill.style.width = `${percentage}%`;
+        }
+
+        // Parse markdown-style content to HTML
+        function formatAnalysisContent(text) {
+            // Convert bold markers (**text**) to <strong>
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Convert list items to proper HTML lists
+            text = text.replace(/^\s*-\s+(.*$)/gm, '<li>$1</li>');
+            text = text.replace(/<li>\[(.*?)\]<\/li>/g, '<li>$1</li>');
+            
+            // Convert sections with colons to headings
+            text = text.replace(/^\s*-\s+\*\*(.*?):\*\*/gm, '</ul><h3 class="text-xl font-semibold mt-6 mb-3 text-gray-800">$1</h3><ul class="list-disc pl-5 space-y-2">');
+            
+            // Clean up any artifacts
+            text = text.replace(/<\/ul><ul>/g, '');
+            
+            return '<ul class="list-disc pl-5 space-y-2">' + text + '</ul>';
+        }
+
+        // Check for existing analysis
+        async function checkAnalysis() {
+            loadingElement.classList.remove('hidden');
+            generateElement.classList.add('hidden');
+            contentElement.classList.add('hidden');
+            errorElement.classList.add('hidden');
+            updateProgress(20);
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                updateProgress(40);
+                const docRef = db.collection('talent').doc(user.uid).collection('result').doc('analysis');
+                const doc = await docRef.get();
+                updateProgress(60);
+                
+                if (doc.exists) {
+                    // Analysis exists - display it
+                    const data = doc.data();
+                    statusMessage.textContent = `Last updated: ${new Date(data.lastUpdated.seconds * 1000).toLocaleString()}`;
+                    
+                    // Format the analysis content
+                    const formattedContent = formatAnalysisContent(data.analysis);
+                    contentElement.innerHTML = `
+                        <div class="bg-white rounded-lg shadow p-6 analysis-section">
+                            ${formattedContent}
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6 analysis-section">
+                            <button onclick="generateNewAnalysis()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                Refresh Analysis
+                            </button>
+                        </div>
+                    `;
+                    
+                    loadingElement.classList.add('hidden');
+                    contentElement.classList.remove('hidden');
+                } else {
+                    // No analysis found - show generate option
+                    statusMessage.textContent = "No analysis found for your profile";
+                    loadingElement.classList.add('hidden');
+                    generateElement.classList.remove('hidden');
+                }
+                updateProgress(100);
+            } catch (err) {
+                console.error('Error checking analysis:', err);
+                loadingElement.classList.add('hidden');
+                document.getElementById('errorMessage').textContent = err.message;
+                errorElement.classList.remove('hidden');
+                updateProgress(0);
+            }
+        }
+
+        // Generate new analysis by calling Cloud Function
+        async function generateNewAnalysis() {
+            const generateButtonText = document.getElementById('generateButtonText');
+            const generateSpinner = document.getElementById('generateSpinner');
+            
+            // Show loading state on button
+            generateButtonText.textContent = "Generating...";
+            generateSpinner.classList.remove('hidden');
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) {
+                    throw new Error('User not authenticated');
+                }
+                
+                // Call the Cloud Function
+                const analyzeTalent = functions.httpsCallable('analyzeTalentData');
+                loadingMessage.textContent = "Analyzing your talent profile...";
+                generateElement.classList.add('hidden');
+                loadingElement.classList.remove('hidden');
+                
+                const result = await analyzeTalent({});
+                
+                // Show success message briefly
+                loadingMessage.textContent = "Analysis complete! Loading results...";
+                
+                // Wait a moment then reload the analysis
+                setTimeout(() => {
+                    checkAnalysis();
+                }, 1500);
+                
+            } catch (err) {
+                console.error('Error generating analysis:', err);
+                generateButtonText.textContent = "Generate Analysis";
+                generateSpinner.classList.add('hidden');
+                document.getElementById('errorMessage').textContent = err.message;
+                loadingElement.classList.add('hidden');
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        // Listen for auth state changes
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                checkAnalysis();
+            } else {
+                // Redirect to login if not authenticated
+                window.location.href = '/login';
+            }
+        });
+    </script>
+</body>
+</html>

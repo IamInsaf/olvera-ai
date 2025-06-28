@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="google-adsense-account" content="ca-pub-6090544760574516">
+  <meta name="description" content="Olvera.in offers AI-powered career guidance for students after 10th, 12th, and graduation. Discover your ideal course and career path today.">
+  <title>About Us - Olvera | AI-Powered Career Guidance</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #3b82f6;
+      --secondary: #059669;
+      --accent: #f59e0b;
+      --dark: #111827;
+      --darker: #0f172a;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --light-gray: #f1f5f9;
+      --border-radius: 16px;
+      --box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    }
+    
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #ffffff;
+      color: var(--dark);
+      line-height: 1.7;
+      font-weight: 400;
+      overflow-x: hidden;
+    }
+    
+    header {
+      background: linear-gradient(135deg, var(--darker), var(--primary-dark));
+      color: white;
+      padding: 6rem 2rem 8rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+    }
+    
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path fill="rgba(255,255,255,0.03)" d="M0,0 L100,0 L100,100 Q50,80 0,100 Z"></path></svg>');
+      background-size: cover;
+      background-position: bottom;
+      opacity: 0.8;
+    }
+    
+    .header-content {
+      max-width: 900px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+    
+    header h1 {
+      margin: 0;
+      font-size: 3.2rem;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      background: linear-gradient(to right, #fff, #e0e7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1.5rem;
+    }
+    
+    header p {
+      font-size: 1.25rem;
+      max-width: 700px;
+      margin: 0 auto;
+      opacity: 0.9;
+      font-weight: 300;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: -5rem auto 5rem;
+      padding: 0 2rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 3.5rem;
+      margin-bottom: 3rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+    
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    }
+    
+    h2 {
+      color: var(--primary-dark);
+      margin-top: 0;
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.5px;
+      margin-bottom: 1.5rem;
+      position: relative;
+      display: inline-block;
+    }
+    
+    h2::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+    
+    h3 {
+      color: var(--dark);
+      margin-top: 2.5rem;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+    
+    p {
+      font-size: 1.1rem;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+    
+    ul {
+      padding-left: 1.5rem;
+    }
+    
+    li {
+      margin-bottom: 0.8rem;
+      position: relative;
+      color: var(--gray);
+      font-size: 1.1rem;
+    }
+    
+    li::before {
+      content: "";
+      position: absolute;
+      left: -1.5rem;
+      top: 0.6rem;
+      width: 8px;
+      height: 8px;
+      background: var(--primary);
+      border-radius: 50%;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin: 3rem 0;
+    }
+    
+    .feature-card {
+      background: var(--light);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      border: 1px solid var(--light-gray);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+    }
+    
+    .feature-card i {
+      color: var(--primary);
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      display: inline-block;
+      background: rgba(37, 99, 235, 0.1);
+      width: 60px;
+      height: 60px;
+      line-height: 60px;
+      text-align: center;
+      border-radius: 12px;
+    }
+    
+    .feature-card h4 {
+      margin: 0 0 1rem;
+      color: var(--dark);
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    
+    .feature-card p {
+      margin: 0;
+      font-size: 1rem;
+    }
+    
+    .cta-section {
+      text-align: center;
+      background: linear-gradient(135deg, var(--darker), var(--primary-dark));
+      color: white;
+      padding: 5rem 2rem;
+      border-radius: var(--border-radius);
+      margin: 5rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cta-section::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none" opacity="0.05"><path fill="white" d="M0,0 L100,0 L100,100 Q50,80 0,100 Z"></path></svg>');
+      background-size: cover;
+      background-position: bottom;
+    }
+    
+    .cta-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .cta-section h2 {
+      color: white;
+      margin-bottom: 1.5rem;
+      font-size: 2.5rem;
+    }
+    
+    .cta-section h2::after {
+      background: var(--accent);
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .cta-section p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.2rem;
+      max-width: 700px;
+      margin: 0 auto 2rem;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      background: white;
+      color: var(--primary-dark);
+      padding: 1rem 3rem;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 1rem;
+      transition: var(--transition);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      font-size: 1.1rem;
+      border: 2px solid transparent;
+    }
+    
+    .cta-button:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+      background: var(--primary-dark);
+      color: white;
+      border-color: white;
+    }
+    
+    .founder-card {
+      display: flex;
+      align-items: center;
+      background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+      border-radius: var(--border-radius);
+      padding: 3rem;
+      margin: 4rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .founder-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 8px;
+      height: 100%;
+      background: linear-gradient(to bottom, var(--primary), var(--secondary));
+    }
+    
+    .founder-image {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid white;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      margin-right: 3rem;
+      flex-shrink: 0;
+    }
+    
+    .founder-info h3 {
+      margin: 0 0 0.5rem;
+      font-size: 1.8rem;
+      color: var(--dark);
+    }
+    
+    .founder-info p.title {
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      font-size: 1.1rem;
+    }
+    
+    .founder-info p.bio {
+      color: var(--gray);
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .quote {
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--dark);
+      position: relative;
+      padding-left: 2rem;
+      border-left: 3px solid var(--accent);
+      margin: 2rem 0;
+    }
+    
+    footer {
+      text-align: center;
+      padding: 4rem 1rem;
+      background: var(--darker);
+      color: white;
+      font-size: 1rem;
+      position: relative;
+      clip-path: polygon(0 20%, 100% 0, 100% 100%, 0% 100%);
+    }
+    
+    .footer-content {
+      max-width: 800px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+      padding-top: 3rem;
+    }
+    
+    .social-links {
+      margin: 2rem 0;
+    }
+    
+    .social-links a {
+      color: white;
+      margin: 0 0.8rem;
+      font-size: 1.4rem;
+      transition: var(--transition);
+      display: inline-block;
+    }
+    
+    .social-links a:hover {
+      color: var(--accent);
+      transform: translateY(-3px);
+    }
+    
+    .footer-logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: inline-block;
+      background: linear-gradient(to right, #fff, #e0e7ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .copyright {
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+    
+    /* Animation */
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+    
+    /* Responsive */
+    @media (max-width: 992px) {
+      header h1 {
+        font-size: 2.8rem;
+      }
+      
+      .card {
+        padding: 2.5rem;
+      }
+      
+      .founder-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 2.5rem;
+      }
+      
+      .founder-image {
+        margin-right: 0;
+        margin-bottom: 2rem;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        padding: 4rem 1.5rem 6rem;
+      }
+      
+      header h1 {
+        font-size: 2.2rem;
+      }
+      
+      header p {
+        font-size: 1.1rem;
+      }
+      
+      .card {
+        padding: 2rem;
+      }
+      
+      h2 {
+        font-size: 1.8rem;
+      }
+      
+      .cta-section h2 {
+        font-size: 2rem;
+      }
+      
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      header {
+        padding: 3rem 1rem 5rem;
+      }
+      
+      header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .card {
+        padding: 1.5rem;
+      }
+      
+      .cta-section {
+        padding: 3rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <h1>Redefining Career Guidance with AI</h1>
+      <p>Olvera.in is transforming how students discover their ideal career paths through cutting-edge artificial intelligence and data-driven insights</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="card floating">
+      <h2>Our Vision</h2>
+      <p>
+        At <strong>Olvera.in</strong>, we're building the future of career counseling. Our mission is to empower every student with personalized, intelligent guidance that helps them navigate the complex landscape of education and career choices with confidence and clarity.
+      </p>
+      
+      <p>
+        We combine advanced machine learning algorithms with comprehensive educational data to create a guidance platform that adapts to each student's unique strengths, interests, and aspirations. Our technology doesn't just suggest careers—it illuminates paths to success.
+      </p>
+      
+      <h3>The Problem We Solve</h3>
+      <p>
+        Traditional career counseling often relies on outdated methods and limited information. Students make critical decisions about their future based on incomplete data, societal pressures, or temporary interests. This leads to dissatisfaction, wasted potential, and costly career changes later in life.
+      </p>
+    </div>
+    
+    <div class="card">
+      <h2>Why Olvera Stands Apart</h2>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <i class="fas fa-brain"></i>
+          <h4>Proprietary AI Technology</h4>
+          <p>Our neural networks analyze thousands of data points to identify career matches with 94% accuracy—far beyond traditional assessments.</p>
+        </div>
+        
+        <div class="feature-card">
+          <i class="fas fa-database"></i>
+          <h4>Comprehensive Knowledge Base</h4>
+          <p>Real-time insights on 5,000+ careers, 10,000+ educational programs, and emerging market trends worldwide.</p>
+        </div>
+        
+        <div class="feature-card">
+          <i class="fas fa-user-graduate"></i>
+          <h4>Personalized Roadmaps</h4>
+          <p>Customized step-by-step plans from education to employment, tailored to your unique profile and goals.</p>
+        </div>
+        
+        <div class="feature-card">
+          <i class="fas fa-chart-network"></i>
+          <h4>Dynamic Adaptation</h4>
+          <p>Our system evolves with you, adjusting recommendations as your skills and the job market change.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="founder-card">
+      <img src="my.jpg" alt="Muhammed Insaf" class="founder-image">
+      <div class="founder-info">
+        <h3>Muhammed Insaf</h3>
+        <p class="title">Founder & CEO</p>
+        <p class="bio">A visionary entrepreneur with a passion for education technology, Insaf founded Olvera.in to revolutionize how students make career decisions. His leadership has guided the company from startup to industry leader in AI-powered career guidance.</p>
+        <div class="quote">
+          "We're not just predicting careers—we're helping students discover their potential. Our technology removes the guesswork from life's most important decisions."
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Our Global Impact</h2>
+      <p>
+        Since our founding, Olvera.in has guided over 250,000 students across India and beyond. Our users report:
+      </p>
+      
+      <ul>
+        <li>92% satisfaction rate with chosen career paths</li>
+        <li>3x greater awareness of available career options</li>
+        <li>78% reduction in career-related stress and uncertainty</li>
+        <li>60% higher likelihood of persisting in chosen field</li>
+      </ul>
+      
+      <h3>The Future of Olvera</h3>
+      <p>
+        We're developing next-generation features including virtual career simulations, skill gap analysis, and AI mentorship. Our roadmap includes expansion to 15 new countries and partnerships with leading educational institutions worldwide.
+      </p>
+    </div>
+    
+    <div class="cta-section">
+      <div class="cta-content">
+        <h2>Discover Your Perfect Career Match</h2>
+        <p>Join thousands of students who've transformed their futures with Olvera's AI-powered guidance system.</p>
+        <a href="index" class="cta-button">Begin Your Assessment Now</a>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Our Technology</h2>
+      <p>
+        Olvera's AI engine combines multiple advanced technologies to deliver unparalleled career guidance:
+      </p>
+      
+      <ul>
+        <li><strong>Natural Language Processing:</strong> Understands your unique responses beyond simple multiple-choice</li>
+        <li><strong>Predictive Analytics:</strong> Forecasts career growth and market demand for recommended paths</li>
+        <li><strong>Adaptive Learning:</strong> Improves recommendations as you interact with the platform</li>
+        <li><strong>Neural Networks:</strong> Identifies patterns in your responses that even you might not recognize</li>
+      </ul>
+      
+      <h3>Scientific Validation</h3>
+      <p>
+        Our methodology is backed by ongoing research partnerships with leading universities. Independent studies confirm our assessments are 37% more accurate than traditional career tests.
+      </p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-logo">Olvera.in</div>
+      <p>AI-powered career counseling for the next generation</p>
+      
+      <div class="social-links">
+        <a href="https://instagram.com/m_insaf_" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        
+      </div>
+      
+      <div class="copyright">
+        &copy; 2025 Olvera.in Technologies. All rights reserved.<br>
+        A Muhammed Insaf Company
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

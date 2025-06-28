@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Career Quiz – CareerPathAI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google-adsense-account" content="ca-pub-6090544760574516">
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-YZQG3ZPQMJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YZQG3ZPQMJ');
+  </script>
+  <!-- End Google Analytics -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes confetti-fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+
+    .animated-bg {
+      background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+      background-size: 400% 400%;
+      animation: gradient 15s ease infinite;
+      min-height: 100vh;
+    }
+
+    .question-enter {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    .question-enter-active {
+      opacity: 1;
+      transform: translateY(0);
+      transition: all 0.3s ease-out;
+    }
+
+    .option-animation:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(99, 102, 241, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #8b5cf6);
+      transition: width 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    .floating-icon {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .radio-custom {
+      min-width: 20px;
+      min-height: 20px;
+      border: 2px solid #d1d5db;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.9);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body class="font-sans animated-bg">
+  <div class="max-w-xl mx-auto py-10 px-4">
+    <div class="glass-card rounded-2xl shadow-2xl p-6 transition-all duration-300 hover:shadow-3xl">
+      <div class="progress-bar mb-6">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+      
+      <div class="text-center mb-2">
+        <div class="floating-icon inline-block text-4xl mb-2">🚀</div>
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Career Path Finder
+        </h1>
+        <p class="text-gray-600 mt-2">Discover your ideal career in just a few questions</p>
+      </div>
+
+      <div id="quizContainer" class="relative min-h-[300px] my-6"></div>
+
+      <div class="mt-8 text-center space-x-4">
+        <button id="prevBtn" class="bg-gray-100 hover:bg-gray-200 px-6 py-2 rounded-full font-medium transform transition-all duration-200 hover:-translate-x-1 hidden shadow-sm">
+          <i class="fas fa-arrow-left mr-2"></i> Back
+        </button>
+        <button id="nextBtn" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-full font-semibold transform transition-all duration-200 hover:translate-y-[-2px] shadow-lg hover:shadow-blue-600/20">
+          Continue <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+
+      <div id="status" class="text-sm text-center text-red-500 mt-4 hidden"></div>
+      <div id="message" class="text-sm text-center p-3 rounded-lg mt-4 hidden"></div>
+    </div>
+
+    <div class="text-center mt-6 text-white/80 text-sm">
+      🎯 AI-powered career recommendations based on your skills and interests
+    </div>
+  </div>
+
+  <div id="confetti-container" class="fixed inset-0 pointer-events-none z-50"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+  
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const analytics = firebase.analytics();
+  
+    const questions = [
+      {
+        question: "🎓 What is your highest level of education?",
+        options: ["High School", "Associate Degree", "Bachelor's Degree", "Master's Degree or Higher"]
+      },
+      {
+        question: "🌟 What are your long-term career goals?",
+        options: ["Stable job with good benefits", "Creative freedom and flexibility", "High salary and executive position", "Make a positive social impact"]
+      },
+      {
+        question: "📚 Which subjects do you enjoy the most?",
+        options: ["Math & Science", "Arts & Humanities", "Business & Economics", "Technology & Engineering"]
+      },
+      {
+        question: "💪 What are your strongest skills?",
+        options: ["Problem-solving & Analysis", "Creativity & Design", "Leadership & Communication", "Organization & Planning"]
+      },
+      {
+        question: "🏢 What work environment do you prefer?",
+        options: ["Structured office setting", "Flexible remote work", "Fast-paced startup", "Outdoors or fieldwork"]
+      },
+      {
+        question: "⏳ How important is work-life balance?",
+        options: ["Extremely important", "Somewhat important", "Less important than career growth", "I'm flexible"]
+      },
+      {
+        question: "🌍 Would you consider relocating for work?",
+        options: ["Yes, anywhere", "Only within my country", "Prefer to stay local", "Remote work only"]
+      }
+    ];
+  
+    let currentIndex = 0;
+    const answers = [];
+    const container = document.getElementById("quizContainer");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
+    const status = document.getElementById("status");
+    const progressFill = document.getElementById("progressFill");
+    const message = document.getElementById("message");
+
+    function updateProgress() {
+      const progress = ((currentIndex + 1) / questions.length) * 100;
+      progressFill.style.width = `${progress}%`;
+    }
+
+    function renderQuestion(index) {
+      container.classList.add('question-enter');
+      
+      setTimeout(() => {
+        const q = questions[index];
+        container.innerHTML = `
+          <form id="careerForm" class="question-enter-active">
+            <h2 class="text-xl font-semibold mb-6 text-gray-800">${q.question}</h2>
+            <div class="space-y-3">
+              ${q.options.map((opt, i) => `
+                <label class="block p-4 bg-white border border-gray-200 rounded-xl cursor-pointer transition-all duration-200 option-animation hover:border-blue-300">
+                  <div class="flex items-center">
+                    <div class="radio-custom mr-3"></div>
+                    <span class="font-medium text-gray-700">${opt}</span>
+                  </div>
+                  <input type="radio" name="question${index}" value="${opt}" class="hidden">
+                </label>
+              `).join("")}
+              <label class="block p-4 bg-white border border-gray-200 rounded-xl cursor-pointer transition-all duration-200 option-animation hover:border-blue-300">
+                <div class="flex items-center">
+                  <div class="radio-custom mr-3"></div>
+                  <span class="font-medium text-gray-700">Other (please specify)</span>
+                </div>
+                <input type="radio" name="question${index}" value="Other" class="hidden" id="otherRadio${index}">
+              </label>
+              <div id="otherInputContainer${index}" class="mt-3 hidden">
+                <input type="text" id="otherInput${index}" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Enter your answer...">
+              </div>
+            </div>
+          </form>
+        `;
+        
+        // Add radio selection animation
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+          radio.addEventListener('change', function() {
+            const label = this.closest('label');
+            document.querySelectorAll(`input[name="question${index}"]`).forEach(r => {
+              r.closest('label').classList.remove('bg-blue-50', 'border-blue-400');
+              r.closest('label').querySelector('.radio-custom').classList.remove(
+                'bg-gradient-to-r', 'from-blue-500', 'to-purple-500', 'border-blue-500', 'ring-4', 'ring-blue-100'
+              );
+            });
+            
+            label.classList.add('bg-blue-50', 'border-blue-400');
+            label.querySelector('.radio-custom').classList.add(
+              'bg-gradient-to-r', 'from-blue-500', 'to-purple-500', 'border-blue-500', 'ring-4', 'ring-blue-100'
+            );
+            
+            if (this.id === `otherRadio${index}`) {
+              document.getElementById(`otherInputContainer${index}`).classList.remove('hidden');
+            } else {
+              document.getElementById(`otherInputContainer${index}`).classList.add('hidden');
+            }
+          });
+        });
+        
+        // Add event listener for "Other" option
+        const otherRadio = document.getElementById(`otherRadio${index}`);
+        if (otherRadio) {
+          otherRadio.addEventListener('change', function() {
+            document.getElementById(`otherInputContainer${index}`).classList.remove('hidden');
+          });
+        }
+        
+        container.classList.remove('question-enter');
+        updateProgress();
+      }, 50);
+    }
+  
+    function getSelectedAnswer() {
+      const radios = document.querySelectorAll(`input[name="question${currentIndex}"]`);
+      for (const radio of radios) {
+        if (radio.checked) {
+          if (radio.value === 'Other') {
+            const otherInput = document.getElementById(`otherInput${currentIndex}`);
+            if (!otherInput.value.trim()) {
+              status.textContent = "Please specify your answer in the 'Other' field.";
+              status.classList.remove("hidden");
+              return null;
+            }
+            return otherInput.value.trim();
+          }
+          return radio.value;
+        }
+      }
+      return null;
+    }
+  
+    function showMessage(type, text) {
+      message.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700');
+      message.classList.add(type === 'error' ? 'bg-red-100' : 'bg-green-100', type === 'error' ? 'text-red-700' : 'text-green-700');
+      message.innerHTML = `<div class="flex items-center justify-center"><i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i> ${text}</div>`;
+      setTimeout(() => {
+        message.classList.add('hidden');
+      }, 5000);
+    }
+
+    function addConfetti() {
+      const colors = ['#ff5776', '#ff884b', '#ffd384', '#94ebcd', '#35a7ff'];
+      for(let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.cssText = `
+          position: absolute;
+          width: ${8+Math.random()*8}px;
+          height: ${8+Math.random()*8}px;
+          background: ${colors[Math.floor(Math.random()*colors.length)]};
+          border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+          transform: rotate(${Math.random()*360}deg);
+          animation: confetti-fall ${2+Math.random()*3}s ease-out forwards;
+          left: ${Math.random()*100}vw;
+          top: -10px;
+          opacity: ${0.7+Math.random()*0.3};
+        `;
+        
+        document.getElementById('confetti-container').appendChild(confetti);
+        
+        setTimeout(() => confetti.remove(), 3000);
+      }
+    }
+  
+    nextBtn.addEventListener("click", () => {
+      const selected = getSelectedAnswer();
+      if (!selected) {
+        status.textContent = "Please select an answer before continuing.";
+        status.classList.remove("hidden");
+        return;
+      }
+      answers[currentIndex] = selected;
+      status.classList.add("hidden");
+  
+      if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        nextBtn.innerHTML = currentIndex === questions.length - 1 
+          ? 'Submit <i class="fas fa-paper-plane ml-2"></i>' 
+          : 'Continue <i class="fas fa-arrow-right ml-2"></i>';
+        renderQuestion(currentIndex);
+      } else {
+        submitAnswers();
+      }
+    });
+  
+    prevBtn.addEventListener("click", () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        nextBtn.innerHTML = 'Continue <i class="fas fa-arrow-right ml-2"></i>';
+        renderQuestion(currentIndex);
+      }
+    });
+  
+    async function updateQuizCounter() {
+      try {
+        const counterRef = db.collection("testCounters").doc("careerTests");
+        await db.runTransaction(async (transaction) => {
+          const doc = await transaction.get(counterRef);
+          if (doc.exists) {
+            transaction.update(counterRef, {
+              count: firebase.firestore.FieldValue.increment(1),
+              lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          } else {
+            transaction.set(counterRef, {
+              count: 1,
+              lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          }
+        });
+        console.log("Counter updated successfully");
+      } catch (error) {
+        console.error("Error updating counter:", error);
+      }
+    }
+  
+    async function submitAnswers() {
+      const data = {
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        responses: {},
+        metadata: {
+          userAgent: navigator.userAgent,
+          screenResolution: `${window.screen.width}x${window.screen.height}`,
+          completedAt: new Date().toISOString()
+        }
+      };
+  
+      questions.forEach((q, i) => {
+        data.responses[`q${i + 1}`] = {
+          question: q.question,
+          answer: answers[i]
+        };
+      });
+  
+      const submitBtn = document.getElementById("nextBtn");
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Processing...';
+      submitBtn.disabled = true;
+  
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          // Log analytics event
+          analytics.logEvent('career_quiz_completed', {
+            user_id: user.uid,
+            education_level: answers[0]
+          });
+          
+          // Save user responses
+          await db.collection("careerAssessments").doc(user.uid).set(data);
+          
+          // Update the quiz counter
+          await updateQuizCounter();
+          
+          showMessage('success', 'Your assessment has been submitted successfully!');
+          addConfetti();
+          
+          setTimeout(() => {
+            window.location.href = 'results';
+          }, 2000);
+        } else {
+          showMessage('error', 'Please log in to submit your assessment.');
+          submitBtn.innerHTML = 'Submit <i class="fas fa-paper-plane ml-2"></i>';
+          submitBtn.disabled = false;
+        }
+      } catch (err) {
+        console.error("Error saving responses:", err);
+        showMessage('error', 'An error occurred. Please try again.');
+        submitBtn.innerHTML = 'Submit <i class="fas fa-paper-plane ml-2"></i>';
+        submitBtn.disabled = false;
+      }
+    }
+  
+    // Initialize
+    renderQuestion(currentIndex);
+    updateProgress();
+  </script>
+</body>
+</html>

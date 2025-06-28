@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-6090544760574516">
+    <title>Create SEO-Optimized Blog Post</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <!-- Quill Rich Text Editor -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        #featuredImage {
+            display: none;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 10px;
+            display: none;
+        }
+        button {
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        .seo-score {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .progress-bar {
+            height: 20px;
+            border-radius: 4px;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .seo-tips {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+        /* Quill editor container */
+        #editor-container {
+            height: 300px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Create SEO-Optimized Blog Post</h1>
+    
+    <div class="form-group">
+        <label for="blogTitle">Blog Title*</label>
+        <input type="text" id="blogTitle" placeholder="How to Choose the Right Career After 12th – A Complete Guide">
+        <div class="seo-tips">Include your main keyword in the title (ideally at the beginning). Keep it under 60 characters.</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="metaDescription">Meta Description*</label>
+        <textarea id="metaDescription" placeholder="Struggling to choose a career after 12th? This complete guide helps..."></textarea>
+        <div class="seo-tips">Summarize your content in 150-160 characters. Include your main keyword naturally.</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="keywords">Focus Keywords (comma separated)</label>
+        <input type="text" id="keywords" placeholder="career after 12th, career guidance, best careers after 12th">
+    </div>
+    
+    <div class="form-group">
+        <label for="author">Author Name*</label>
+        <input type="text" id="author" placeholder="John Doe">
+    </div>
+    
+    <div class="form-group">
+        <label for="featuredImage">Featured Image*</label>
+        <input type="file" id="featuredImage" accept="image/*">
+        <button type="button" onclick="document.getElementById('featuredImage').click()">Choose Image</button>
+        <img id="imagePreview" class="image-preview" alt="Preview will appear here">
+        <div class="seo-tips">Use a high-quality image with descriptive filename (e.g., career-guidance-after-12th.jpg).</div>
+    </div>
+    
+    <div class="form-group">
+        <label for="blogContent">Blog Content*</label>
+        <div id="editor-container"></div>
+        <div class="seo-tips">
+            <p>SEO Tips:</p>
+            <ul>
+                <li>Use headings (H2, H3) to structure your content</li>
+                <li>Include your keyword in the first paragraph</li>
+                <li>Add internal links to related content</li>
+                <li>Keep paragraphs short (2-3 sentences)</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="form-group">
+        <label for="slug">URL Slug*</label>
+        <input type="text" id="slug" placeholder="how-to-choose-career-after-12th">
+        <div class="seo-tips">Use lowercase with hyphens between words. Keep it short and descriptive.</div>
+    </div>
+    
+    <div class="seo-score">
+        <h3>SEO Score</h3>
+        <div class="progress-container">
+            <div id="seoProgress" class="progress-bar"></div>
+        </div>
+        <div id="seoFeedback" class="seo-tips"></div>
+    </div>
+    
+    <button id="publishBtn">Publish Blog Post</button>
+    <div id="statusMessage" style="margin-top: 15px;"></div>
+
+    <script>
+        // Initialize Firebase (replace with your config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+            authDomain: "promgn-in.firebaseapp.com",
+            projectId: "promgn-in",
+            storageBucket: "cracksit",
+            messagingSenderId: "545429176314",
+            appId: "1:545429176314:web:5590c702b55357b4bfae43",
+            measurementId: "G-YZQG3ZPQMJ"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        
+        // Initialize Quill editor
+        const quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Write your content here...'
+        });
+        
+        // Image preview
+        document.getElementById('featuredImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = event.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // SEO Score Calculator
+        function calculateSeoScore() {
+            let score = 0;
+            const title = document.getElementById('blogTitle').value;
+            const description = document.getElementById('metaDescription').value;
+            const content = quill.root.innerHTML; // Get HTML content from Quill
+            const keywords = document.getElementById('keywords').value;
+            const slug = document.getElementById('slug').value;
+            
+            // Title check
+            if (title.length > 0) {
+                score += 10;
+                if (title.length <= 60) score += 10;
+                if (title.includes(keywords.split(',')[0])) score += 10;
+            }
+            
+            // Description check
+            if (description.length > 0) {
+                score += 10;
+                if (description.length >= 120 && description.length <= 160) score += 10;
+                if (description.includes(keywords.split(',')[0])) score += 10;
+            }
+            
+            // Content check
+            if (content.length > 300) score += 10;
+            if (content.includes('<h2') || content.includes('<h3')) score += 10;
+            
+            // Slug check
+            if (slug.length > 0 && !slug.includes(' ')) score += 10;
+            
+            // Keywords check
+            if (keywords.length > 0) score += 10;
+            
+            // Update UI
+            document.getElementById('seoProgress').style.width = score + '%';
+            
+            let feedback = '';
+            if (score < 50) feedback = 'Needs significant SEO improvements';
+            else if (score < 70) feedback = 'Good, but could be improved';
+            else if (score < 90) feedback = 'Very good SEO optimization';
+            else feedback = 'Excellent SEO optimization!';
+            
+            document.getElementById('seoFeedback').textContent = feedback;
+        }
+        
+        // Set up event listeners for SEO scoring
+        document.getElementById('blogTitle').addEventListener('input', calculateSeoScore);
+        document.getElementById('metaDescription').addEventListener('input', calculateSeoScore);
+        document.getElementById('keywords').addEventListener('input', calculateSeoScore);
+        document.getElementById('slug').addEventListener('input', calculateSeoScore);
+        
+        // Also listen for content changes in Quill
+        quill.on('text-change', calculateSeoScore);
+        
+        // Publish blog post
+        document.getElementById('publishBtn').addEventListener('click', async function() {
+            const title = document.getElementById('blogTitle').value;
+            const description = document.getElementById('metaDescription').value;
+            const keywords = document.getElementById('keywords').value;
+            const author = document.getElementById('author').value;
+            const content = quill.root.innerHTML; // Get HTML content from Quill
+            const slug = document.getElementById('slug').value;
+            const imageFile = document.getElementById('featuredImage').files[0];
+            
+            if (!title || !description || !author || !content || !slug || !imageFile) {
+                document.getElementById('statusMessage').textContent = 'Please fill all required fields';
+                document.getElementById('statusMessage').style.color = 'red';
+                return;
+            }
+            
+            try {
+                document.getElementById('publishBtn').disabled = true;
+                document.getElementById('statusMessage').textContent = 'Uploading...';
+                document.getElementById('statusMessage').style.color = 'blue';
+                
+                // Upload image to Firebase Storage
+                const storageRef = storage.ref('blog-images/' + imageFile.name);
+                const uploadTask = storageRef.put(imageFile);
+                
+                // Wait for image upload to complete
+                const snapshot = await uploadTask;
+                const imageUrl = await snapshot.ref.getDownloadURL();
+                
+                // Save blog data to Firestore
+                await db.collection('blogs').add({
+                    title,
+                    metaDescription: description,
+                    keywords: keywords.split(',').map(k => k.trim()),
+                    author,
+                    content,
+                    slug,
+                    imageUrl,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                document.getElementById('statusMessage').textContent = 'Blog published successfully!';
+                window.location.href='view-blog'
+                document.getElementById('statusMessage').style.color = 'green';
+                
+                // Reset form after 2 seconds
+                setTimeout(() => {
+                    document.getElementById('statusMessage').textContent = '';
+                    document.querySelector('form').reset();
+                    document.getElementById('imagePreview').style.display = 'none';
+                    quill.setContents([]); // Clear Quill editor
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error publishing blog:', error);
+                document.getElementById('statusMessage').textContent = 'Error: ' + error.message;
+                document.getElementById('statusMessage').style.color = 'red';
+            } finally {
+                document.getElementById('publishBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

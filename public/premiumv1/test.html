@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talent Discovery Test | Unlock Your Potential</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f9f9ff 0%, #f0f4ff 100%);
+        }
+        .title-font {
+            font-family: 'Playfair Display', serif;
+        }
+        .question-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .section-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd' opacity='0.2'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+        }
+        textarea {
+            transition: all 0.3s ease;
+            min-height: 100px;
+        }
+        textarea:focus {
+            min-height: 120px;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 8px;
+            background: linear-gradient(to right, #e0e7ff, #6366f1);
+            border-radius: 10px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4f46e5;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        /* Modal styles */
+        .modal {
+            transition: all 0.3s ease;
+        }
+        .modal-content {
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4">
+    <!-- Main Container -->
+    <div class="max-w-6xl mx-auto">
+        <!-- Hero Section -->
+        <div id="heroSection" class="text-center py-12 animate__animated animate__fadeIn">
+            <div class="floating inline-block mb-6">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 8V16" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 12H16" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h1 class="title-font text-4xl md:text-5xl font-bold text-gray-900 mb-4">Discover Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Unique Talents</span></h1>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto mb-8">Our scientifically-designed assessment will help you uncover your hidden strengths and unlock your full potential.</p>
+            
+            <!-- Start Button -->
+            <button id="startTestBtn" class="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-4 px-10 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 mx-auto">
+                <span class="flex items-center justify-center">
+                    <span>Begin Discovery</span>
+                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </span>
+            </button>
+            
+            <div class="mt-10 flex justify-center">
+                <div class="flex items-center space-x-2 text-gray-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    <span>Your responses are confidential and secure</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div id="progressSection" class="hidden mt-8 bg-white rounded-2xl shadow-lg p-6 animate__animated animate__fadeIn">
+            <div class="flex flex-col md:flex-row items-center justify-between mb-6">
+                <div>
+                    <h2 class="title-font text-2xl font-bold text-gray-800">Talent Discovery Assessment</h2>
+                    <p class="text-gray-600">Complete all sections to get your personalized talent profile</p>
+                </div>
+                <div class="mt-4 md:mt-0 relative">
+                    <svg class="w-24 h-24">
+                        <circle class="text-gray-200" stroke-width="6" stroke="currentColor" fill="transparent" r="36" cx="42" cy="42" />
+                        <circle class="text-blue-600" stroke-width="6" stroke-dasharray="226.1946710584651" stroke-dashoffset="0" stroke-linecap="round" stroke="currentColor" fill="transparent" r="36" cx="42" cy="42" id="progressRing"/>
+                    </svg>
+                    <span id="progressText" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl font-bold text-gray-800">0%</span>
+                </div>
+            </div>
+            
+            <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
+                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-sm text-gray-600">
+                <span>0 of 5 sections</span>
+                <span id="completedCount">0 completed</span>
+            </div>
+
+            <!-- Category Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
+                <!-- Cognitive Abilities Card -->
+                <div id="cognitiveCard" class="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all hover:shadow-lg" onclick="openModal('cognitiveModal')">
+                    <div class="bg-gradient-to-r from-blue-100 to-purple-100 p-4 flex items-center justify-center">
+                        <span class="text-4xl">🧠</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-1">Cognitive Abilities</h3>
+                        <p class="text-gray-600 text-sm">Problem-solving & reasoning</p>
+                        <div class="mt-3">
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="cognitiveProgress" class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="cognitiveProgressText" class="ml-2 text-xs font-medium text-gray-600">0/4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Creative Thinking Card -->
+                <div id="creativeCard" class="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all hover:shadow-lg" onclick="openModal('creativeModal')">
+                    <div class="bg-gradient-to-r from-purple-100 to-pink-100 p-4 flex items-center justify-center">
+                        <span class="text-4xl">🎨</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-1">Creative Thinking</h3>
+                        <p class="text-gray-600 text-sm">Creativity & innovation</p>
+                        <div class="mt-3">
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="creativeProgress" class="bg-purple-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="creativeProgressText" class="ml-2 text-xs font-medium text-gray-600">0/4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emotional Intelligence Card -->
+                <div id="emotionalCard" class="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all hover:shadow-lg" onclick="openModal('emotionalModal')">
+                    <div class="bg-gradient-to-r from-pink-100 to-red-100 p-4 flex items-center justify-center">
+                        <span class="text-4xl">❤️</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-1">Emotional Intelligence</h3>
+                        <p class="text-gray-600 text-sm">Interpersonal skills</p>
+                        <div class="mt-3">
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="emotionalProgress" class="bg-pink-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="emotionalProgressText" class="ml-2 text-xs font-medium text-gray-600">0/4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leadership Potential Card -->
+                <div id="leadershipCard" class="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all hover:shadow-lg" onclick="openModal('leadershipModal')">
+                    <div class="bg-gradient-to-r from-yellow-100 to-orange-100 p-4 flex items-center justify-center">
+                        <span class="text-4xl">🌟</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-1">Leadership Potential</h3>
+                        <p class="text-gray-600 text-sm">Leadership style</p>
+                        <div class="mt-3">
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="leadershipProgress" class="bg-yellow-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="leadershipProgressText" class="ml-2 text-xs font-medium text-gray-600">0/4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Values Card -->
+                <div id="valuesCard" class="bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all hover:shadow-lg" onclick="openModal('valuesModal')">
+                    <div class="bg-gradient-to-r from-green-100 to-teal-100 p-4 flex items-center justify-center">
+                        <span class="text-4xl">✨</span>
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg mb-1">Personal Values</h3>
+                        <p class="text-gray-600 text-sm">Core values & motivations</p>
+                        <div class="mt-3">
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div id="valuesProgress" class="bg-green-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                                <span id="valuesProgressText" class="ml-2 text-xs font-medium text-gray-600">0/4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="mt-12 text-center">
+            <button id="submitTestBtn" class="bg-gradient-to-r from-green-500 to-teal-600 text-white px-8 py-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 hidden">
+                <span class="flex items-center justify-center">
+                    <span>Submit Assessment</span>
+                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </span>
+            </button>
+        </div>
+
+        <!-- Modals for each category -->
+        
+        <!-- Cognitive Abilities Modal -->
+        <div id="cognitiveModal" class="modal fixed inset-0 flex items-center justify-center z-50 px-4 hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+            <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto z-10">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="title-font text-2xl font-bold text-gray-800 flex items-center">
+                            <span class="mr-3">🧠</span>
+                            Cognitive Abilities
+                        </h2>
+                        <button onclick="closeModal('cognitiveModal')" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-6">Evaluate your problem-solving and reasoning skills</p>
+                    
+                    <div id="cognitiveQuestions" class="space-y-6">
+                        <!-- Questions will be inserted here -->
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end">
+                        <button onclick="closeModal('cognitiveModal')" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium">
+                            Save & Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Creative Thinking Modal -->
+        <div id="creativeModal" class="modal fixed inset-0 flex items-center justify-center z-50 px-4 hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+            <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto z-10">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="title-font text-2xl font-bold text-gray-800 flex items-center">
+                            <span class="mr-3">🎨</span>
+                            Creative Thinking
+                        </h2>
+                        <button onclick="closeModal('creativeModal')" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-6">Explore your creativity and innovative thinking</p>
+                    
+                    <div id="creativeQuestions" class="space-y-6">
+                        <!-- Questions will be inserted here -->
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end">
+                        <button onclick="closeModal('creativeModal')" class="bg-purple-600 text-white px-6 py-2 rounded-lg font-medium">
+                            Save & Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emotional Intelligence Modal -->
+        <div id="emotionalModal" class="modal fixed inset-0 flex items-center justify-center z-50 px-4 hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+            <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto z-10">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="title-font text-2xl font-bold text-gray-800 flex items-center">
+                            <span class="mr-3">❤️</span>
+                            Emotional Intelligence
+                        </h2>
+                        <button onclick="closeModal('emotionalModal')" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-6">Assess your interpersonal skills and self-awareness</p>
+                    
+                    <div id="emotionalQuestions" class="space-y-6">
+                        <!-- Questions will be inserted here -->
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end">
+                        <button onclick="closeModal('emotionalModal')" class="bg-pink-600 text-white px-6 py-2 rounded-lg font-medium">
+                            Save & Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leadership Potential Modal -->
+        <div id="leadershipModal" class="modal fixed inset-0 flex items-center justify-center z-50 px-4 hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+            <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto z-10">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="title-font text-2xl font-bold text-gray-800 flex items-center">
+                            <span class="mr-3">🌟</span>
+                            Leadership Potential
+                        </h2>
+                        <button onclick="closeModal('leadershipModal')" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-6">Evaluate your leadership style and potential</p>
+                    
+                    <div id="leadershipQuestions" class="space-y-6">
+                        <!-- Questions will be inserted here -->
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end">
+                        <button onclick="closeModal('leadershipModal')" class="bg-yellow-600 text-white px-6 py-2 rounded-lg font-medium">
+                            Save & Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Values Modal -->
+        <div id="valuesModal" class="modal fixed inset-0 flex items-center justify-center z-50 px-4 hidden">
+            <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+            <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto z-10">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="title-font text-2xl font-bold text-gray-800 flex items-center">
+                            <span class="mr-3">✨</span>
+                            Personal Values
+                        </h2>
+                        <button onclick="closeModal('valuesModal')" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <p class="text-gray-600 mb-6">Explore your core values and motivations</p>
+                    
+                    <div id="valuesQuestions" class="space-y-6">
+                        <!-- Questions will be inserted here -->
+                    </div>
+                    
+                    <div class="mt-8 flex justify-end">
+                        <button onclick="closeModal('valuesModal')" class="bg-green-600 text-white px-6 py-2 rounded-lg font-medium">
+                            Save & Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div id="confirmationModal" class="fixed inset-0 flex items-center justify-center z-50 hidden px-4">
+            <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all animate__animated animate__zoomIn z-10 overflow-hidden">
+                <div class="p-8 text-center relative overflow-hidden">
+                    <!-- Confetti container -->
+                    <div id="confettiContainer" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+                    
+                    <!-- Success icon animation -->
+                    <div class="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-green-100 mb-6 relative">
+                        <svg class="h-10 w-10 text-green-600 animate__animated animate__bounceIn" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    
+                    <h3 class="title-font text-2xl font-bold text-gray-900 mb-2">Assessment Complete!</h3>
+                    <div class="mb-6">
+                        <p class="text-gray-600">Your talent profile is being analyzed. We'll prepare personalized insights to help you maximize your strengths.</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 rounded-lg p-4 mb-6 text-left">
+                        <div class="flex items-start">
+                            <svg class="flex-shrink-0 h-5 w-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="ml-3">
+                                <p class="text-sm text-blue-700">Your detailed report will be available within 24 hours. We'll notify you when it's ready.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button id="closeConfirmationBtn" type="button" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium py-3 rounded-lg hover:opacity-90 transition-opacity">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Motivation Messages (floating) -->
+        <div id="motivationMessage" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white shadow-lg rounded-full px-6 py-3 hidden z-30 animate__animated animate__fadeInUp">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-yellow-500 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 100-2 1 1 0 000 2zm7-1a1 1 0 11-2 0 1 1 0 012 0zm-.464 5.535a1 1 0 10-1.415-1.414 3 3 0 01-4.242 0 1 1 0 00-1.415 1.414 5 5 0 007.072 0z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-gray-800 font-medium" id="messageText">You're doing great! Keep going!</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+            authDomain: "promgn-in.firebaseapp.com",
+            projectId: "promgn-in",
+            storageBucket: "promgn-in.appspot.com",
+            messagingSenderId: "545429176314",
+            appId: "1:545429176314:web:5590c702b55357b4bfae43",
+            measurementId: "G-YZQG3ZPQMJ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+        let currentUser = null;
+
+
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                await checkPaymentStatus(currentUser);
+            } else {
+                try {
+                    const result = await auth.signInAnonymously();
+                    currentUser = result.user;
+                    await checkPaymentStatus(currentUser);
+                } catch (error) {
+                    console.error("Authentication error:", error);
+                    showAlert("Failed to initialize session. Please refresh the page.", "danger");
+                }
+            }
+        });
+
+        // All questions organized by sections
+        const questionsBySection = [
+            {
+                id: 'cognitive',
+                title: "Cognitive Abilities",
+                description: "Evaluate your problem-solving and reasoning skills",
+                icon: "🧠",
+                questions: [
+                    "How do you typically approach a new problem you've never encountered before?",
+                    "When learning something complex, what method helps you understand it best?",
+                    "What do you rely on most while making a difficult decision — logic, instinct, or past experience?",
+                    "How do you usually solve logical puzzles or challenges that require step-by-step thinking?"
+                ]
+            },
+            {
+                id: 'creative',
+                title: "Creative Thinking",
+                description: "Explore your creativity and innovative thinking",
+                icon: "🎨",
+                questions: [
+                    "When given a blank page or task, how do you generate your first few ideas?",
+                    "When are you most likely to experience creative flow — morning, night, or during pressure?",
+                    "Describe how you react when a project requires out-of-the-box thinking.",
+                    "How do you approach a task where there is no clear or correct solution?"
+                ]
+            },
+            {
+                id: 'emotional',
+                title: "Emotional Intelligence",
+                description: "Assess your interpersonal skills and self-awareness",
+                icon: "❤️",
+                questions: [
+                    "How do you usually respond when someone strongly disagrees with you?",
+                    "What clues do you pick up to understand how someone is feeling?",
+                    "How do you personally cope with emotional stress or burnout?",
+                    "When giving someone feedback, what is your usual tone or method?"
+                ]
+            },
+            {
+                id: 'leadership',
+                title: "Leadership Potential",
+                description: "Evaluate your leadership style and potential",
+                icon: "🌟",
+                questions: [
+                    "In a team setting, what role do you naturally take on?",
+                    "How do you ensure tasks are fairly and efficiently distributed in a group?",
+                    "What factors matter most to you when guiding others to a goal?",
+                    "Which best describes how you lead: inspiring, organizing, supporting, or directing?"
+                ]
+            },
+            {
+                id: 'values',
+                title: "Personal Values",
+                description: "Explore your core values and motivations",
+                icon: "✨",
+                questions: [
+                    "What values do you refuse to compromise on in your work or life?",
+                    "What kind of achievements feel most meaningful to you — personal growth, impact, rewards, or recognition?",
+                    "What does your ideal working environment look and feel like?",
+                    "What inner drive or belief pushes you to keep improving or moving forward?"
+                ]
+            }
+        ];
+
+        // Motivational messages
+        const motivationalMessages = [
+            "You're doing great! Keep going!",
+            "Your insights are valuable!",
+            "This will help uncover your unique talents!",
+            "Every answer brings you closer to self-discovery!",
+            "Your perspective matters!",
+            "Great progress! Almost there!",
+            "Your answers are helping build a clear picture!",
+            "This is really insightful! Keep it up!",
+            "You're uncovering valuable self-knowledge!",
+            "Your honesty is creating an accurate profile!"
+        ];
+
+        // DOM Elements
+        const heroSection = document.getElementById('heroSection');
+        const startTestBtn = document.getElementById('startTestBtn');
+        const progressSection = document.getElementById('progressSection');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const progressRing = document.getElementById('progressRing');
+        const completedCount = document.getElementById('completedCount');
+        const submitTestBtn = document.getElementById('submitTestBtn');
+        const confirmationModal = document.getElementById('confirmationModal');
+        const closeConfirmationBtn = document.getElementById('closeConfirmationBtn');
+        const confettiContainer = document.getElementById('confettiContainer');
+        const motivationMessage = document.getElementById('motivationMessage');
+        const messageText = document.getElementById('messageText');
+
+        // Initialize the app
+        function init() {
+            // Show test when start button is clicked
+            startTestBtn.addEventListener('click', () => {
+                heroSection.classList.add('hidden');
+                progressSection.classList.remove('hidden');
+                submitTestBtn.classList.remove('hidden');
+                renderAllQuestions();
+                updateProgress(0);
+                showMotivationalMessage();
+                
+                
+                // Start showing motivational messages periodically
+                setInterval(showMotivationalMessage, 30000);
+            });
+
+            // Handle test submission
+            submitTestBtn.addEventListener('click', submitTest);
+
+            // Handle confirmation modal close
+            closeConfirmationBtn.addEventListener('click', () => {
+                confirmationModal.classList.add('hidden');
+                resetTest();
+            });
+
+            // Initialize progress ring
+            const radius = progressRing.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            progressRing.style.strokeDasharray = circumference;
+            progressRing.style.strokeDashoffset = circumference;
+        }
+
+        // Open modal function
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        // Close modal function
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Show random motivational message
+        function showMotivationalMessage() {
+            const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+            messageText.textContent = randomMessage;
+            
+            motivationMessage.classList.remove('hidden');
+            setTimeout(() => {
+                motivationMessage.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Render all questions in their respective modals
+        function renderAllQuestions() {
+            questionsBySection.forEach((section, sectionIndex) => {
+                const questionsContainer = document.getElementById(`${section.id}Questions`);
+                let questionNumber = (sectionIndex * 4) + 1; // Calculate question number (1-20)
+                
+                section.questions.forEach((question, qIndex) => {
+                    questionsContainer.innerHTML += `
+                        <div class="question-card bg-white p-6 rounded-xl border border-gray-100">
+                            <div class="flex items-start">
+                                <span class="flex-shrink-0 bg-blue-100 text-blue-800 font-bold rounded-full w-8 h-8 flex items-center justify-center mr-4 mt-1">${questionNumber}</span>
+                                <div class="flex-1">
+                                    <label class="block text-lg font-semibold text-gray-800 mb-3">${question}</label>
+                                    <div class="space-y-4">
+                                        <textarea id="q${questionNumber}" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="Share your thoughts..."></textarea>
+                                        <div class="mt-3">
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">How confident are you in this answer?</label>
+                                            <div class="flex items-center space-x-4">
+                                                <input type="range" id="c${questionNumber}" min="1" max="10" value="5" class="flex-1">
+                                                <span id="confidenceValue${questionNumber}" class="text-sm font-medium text-gray-700 w-8 text-center">5</span>
+                                            </div>
+                                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                                <span>Not confident</span>
+                                                <span>Very confident</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add event listener for confidence slider
+                    const confidenceSlider = document.getElementById(`c${questionNumber}`);
+                    const confidenceValue = document.getElementById(`confidenceValue${questionNumber}`);
+                    
+                    confidenceSlider.addEventListener('input', () => {
+                        confidenceValue.textContent = confidenceSlider.value;
+                        updateSectionProgress(section.id);
+                        checkCompletion();
+                    });
+                    
+                    // Add event listener for textarea
+                    const textarea = document.getElementById(`q${questionNumber}`);
+                    textarea.addEventListener('input', () => {
+                        updateSectionProgress(section.id);
+                        checkCompletion();
+                    });
+                    
+                    questionNumber++;
+                });
+            });
+        }
+
+        // Update progress for a specific section
+        function updateSectionProgress(sectionId) {
+            const section = questionsBySection.find(s => s.id === sectionId);
+            if (!section) return;
+            
+            const startQuestion = questionsBySection.findIndex(s => s.id === sectionId) * 4 + 1;
+            const endQuestion = startQuestion + 3;
+            
+            let answeredCount = 0;
+            for (let i = startQuestion; i <= endQuestion; i++) {
+                const answerElement = document.getElementById(`q${i}`);
+                if (answerElement && answerElement.value.trim() !== '') {
+                    answeredCount++;
+                }
+            }
+            
+            const progressPercentage = (answeredCount / 4) * 100;
+            
+            // Update section progress bar
+            const progressBar = document.getElementById(`${sectionId}Progress`);
+            const progressText = document.getElementById(`${sectionId}ProgressText`);
+            
+            if (progressBar && progressText) {
+                progressBar.style.width = `${progressPercentage}%`;
+                progressText.textContent = `${answeredCount}/4`;
+                
+                // Update card border based on completion
+                const card = document.getElementById(`${sectionId}Card`);
+                if (progressPercentage === 100) {
+                    card.classList.add('border-2', 'border-green-500');
+                } else {
+                    card.classList.remove('border-2', 'border-green-500');
+                }
+            }
+        }
+
+        // Check completion status of all questions
+        function checkCompletion() {
+            let answeredSections = 0;
+            const totalSections = 5;
+            
+            questionsBySection.forEach(section => {
+                const startQuestion = questionsBySection.findIndex(s => s.id === section.id) * 4 + 1;
+                const endQuestion = startQuestion + 3;
+                let sectionComplete = true;
+                
+                for (let i = startQuestion; i <= endQuestion; i++) {
+                    const answerElement = document.getElementById(`q${i}`);
+                    if (!answerElement || answerElement.value.trim() === '') {
+                        sectionComplete = false;
+                        break;
+                    }
+                }
+                
+                if (sectionComplete) {
+                    answeredSections++;
+                }
+            });
+            
+            const completionPercentage = Math.round((answeredSections / totalSections) * 100);
+            updateProgress(completionPercentage);
+            
+            // Update completed count text
+            completedCount.textContent = `${answeredSections} of ${totalSections} completed`;
+            
+            // Enable/disable submit button based on completion
+            submitTestBtn.disabled = answeredSections < totalSections;
+            submitTestBtn.classList.toggle('opacity-50', answeredSections < totalSections);
+            submitTestBtn.classList.toggle('cursor-not-allowed', answeredSections < totalSections);
+        }
+
+        // Update progress indicators
+        function updateProgress(percentage) {
+            // Smooth progress bar animation
+            progressBar.style.width = `${percentage}%`;
+            progressText.textContent = `${percentage}%`;
+            
+            // Animate progress ring
+            const radius = progressRing.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (percentage / 100) * circumference;
+            progressRing.style.strokeDashoffset = offset;
+            
+            // Change color based on progress
+            if (percentage < 30) {
+                progressBar.classList.remove('from-blue-500', 'to-purple-600', 'from-green-500', 'to-teal-600');
+                progressBar.classList.add('from-blue-500', 'to-purple-600');
+                progressRing.classList.remove('text-green-500', 'text-blue-600');
+                progressRing.classList.add('text-blue-600');
+            } else if (percentage < 70) {
+                progressBar.classList.remove('from-blue-500', 'to-purple-600', 'from-green-500', 'to-teal-600');
+                progressBar.classList.add('from-blue-500', 'to-purple-600');
+                progressRing.classList.remove('text-green-500', 'text-blue-600');
+                progressRing.classList.add('text-blue-600');
+            } else {
+                progressBar.classList.remove('from-blue-500', 'to-purple-600', 'from-green-500', 'to-teal-600');
+                progressBar.classList.add('from-green-500', 'to-teal-600');
+                progressRing.classList.remove('text-blue-600', 'text-green-500');
+                progressRing.classList.add('text-green-500');
+            }
+        }
+
+        // Create confetti effect
+        function createConfetti() {
+            const colors = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = -10 + 'px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = Math.random() * 8 + 4 + 'px';
+                confetti.style.height = Math.random() * 8 + 4 + 'px';
+                confetti.style.opacity = Math.random() + 0.5;
+                confetti.style.transform = 'rotate(' + Math.random() * 360 + 'deg)';
+                
+                const animationDuration = Math.random() * 3 + 2 + 's';
+                confetti.style.animation = `fall ${animationDuration} linear forwards`;
+                
+                // Add animation styles dynamically
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    @keyframes fall {
+                        to {
+                            transform: translateY(calc(100vh + 20px)) rotate(360deg);
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                confettiContainer.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                    style.remove();
+                }, 3000);
+            }
+        }
+
+        // Submit test to Firestore
+// Submit test to Firestore
+async function submitTest() {
+    try {
+        submitTestBtn.disabled = true;
+        submitTestBtn.innerHTML = `
+            <span class="flex items-center justify-center">
+                <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+            </span>
+        `;
+        
+        const user = auth.currentUser;
+        if (!user) {
+            alert('Please log in to submit the test.');
+            return;
+        }
+
+        // Collect all questions and answers
+        const testData = {
+            userId: user.uid,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            questions: {},
+            confidenceScores: {},
+            status: 'completed'
+        };
+
+        // Get all 20 questions
+        for (let i = 1; i <= 20; i++) {
+            const answerElement = document.getElementById(`q${i}`);
+            const confidenceElement = document.getElementById(`c${i}`);
+
+            if (answerElement && confidenceElement) {
+                // Find the question text
+                let questionText = "";
+                let sectionIndex = Math.floor((i-1)/4);
+                let questionIndex = (i-1) % 4;
+                
+                if (questionsBySection[sectionIndex] && 
+                    questionsBySection[sectionIndex].questions[questionIndex]) {
+                    questionText = questionsBySection[sectionIndex].questions[questionIndex];
+                }
+
+                testData.questions[`q${i}`] = {
+                    q: questionText,
+                    a: answerElement.value.trim()
+                };
+                testData.confidenceScores[`q${i}`] = parseInt(confidenceElement.value) || 5;
+            }
+        }
+
+        // Save to Firestore
+        await db.collection('talent')
+            .doc(user.uid)
+            .set({
+                talenttest: testData
+            }, { merge: true });  // Using merge to preserve other fields if they exist
+
+        // Show confirmation with confetti
+        progressSection.classList.add('hidden');
+        confirmationModal.classList.remove('hidden');
+        createConfetti();
+
+        // Redirect to resultsai.html after 3 seconds
+        setTimeout(() => {
+            window.location.href = 'premiumresults.html';
+        }, 3000);
+
+    } catch (error) {
+        console.error('Error submitting test:', error);
+        alert('There was an error submitting your test. Please try again.');
+        submitTestBtn.disabled = false;
+        submitTestBtn.innerHTML = `
+            <span class="flex items-center justify-center">
+                <span>Submit Assessment</span>
+                <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </span>
+        `;
+    }
+}
+        // Reset the test
+        function resetTest() {
+            heroSection.classList.remove('hidden');
+            progressSection.classList.add('hidden');
+            submitTestBtn.classList.add('hidden');
+            
+            // Reset progress
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+            const radius = progressRing.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            progressRing.style.strokeDashoffset = circumference;
+            
+            // Reset all textareas and sliders
+            for (let i = 1; i <= 20; i++) {
+                const answerElement = document.getElementById(`q${i}`);
+                const confidenceElement = document.getElementById(`c${i}`);
+                const confidenceValue = document.getElementById(`confidenceValue${i}`);
+                
+                if (answerElement) answerElement.value = '';
+                if (confidenceElement) confidenceElement.value = '5';
+                if (confidenceValue) confidenceValue.textContent = '5';
+            }
+            
+            // Reset section progress
+            questionsBySection.forEach(section => {
+                const progressBar = document.getElementById(`${section.id}Progress`);
+                const progressText = document.getElementById(`${section.id}ProgressText`);
+                const card = document.getElementById(`${section.id}Card`);
+                
+                if (progressBar) progressBar.style.width = '0%';
+                if (progressText) progressText.textContent = '0/4';
+                if (card) card.classList.remove('border-2', 'border-green-500');
+            });
+        }
+
+        async function checkPaymentStatus(user) {
+  if (!user?.uid) {
+    console.error("No user provided");
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    const userRef = db.collection("Olverausers").doc(user.uid);
+    const doc = await userRef.get();
+
+    if (!doc.exists || doc.data()?.hasPaid !== true) {
+      console.log("❌ User has not paid or record not found:", user.uid);
+      window.location.href = "/payments";
+    } else {
+      console.log("✅ Payment verified via olverausers. Access granted.");
+      // Continue to dashboard or unlock access
+    }
+  } catch (error) {
+    console.error("Error checking payment status:", error);
+    window.location.href = "/payments";
+  }
+}
+
+
+        // Initialize the application on DOM load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

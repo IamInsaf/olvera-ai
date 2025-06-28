@@ -1,0 +1,356 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
+
+(
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+    import { getFirestore, collection, doc, setDoc, serverTimestamp, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-functions.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const functions = getFunctions(app);
+    const auth = getAuth(app);
+    
+    // Voice recognition variables
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    // App state variables
+    let currentUserId = null;
+    let currentAIQuestion = null;
+    let answerText = "";
+    let startTime = 0;
+    let responseTimer = null;
+    let silenceTimer = null;
+    let timeToStart = 0;
+    let responseTime = 0;
+    let isRecording = false;
+    let isSpeaking = false;
+    let questionCounter = 0;
+    let sessionTimer = null;
+    let sessionTimeLeft = 5 * 60; // 5 minutes in seconds
+    let selectedLanguage = 'hi-IN'; // Default language
+
+    // DOM elements
+    const startContainer = document.getElementById('startContainer');
+    const interviewContainer = document.getElementById('interviewContainer');
+    const startButton = document.getElementById('startButton');
+    const questionText = document.getElementById('questionText');
+    const answerTextElement = document.getElementById('answerText');
+    const statusElement = document.getElementById('status');
+    const timerElement = document.getElementById('timer');
+    const outputElement = document.getElementById('output');
+    const authStatusElement = document.getElementById('authStatus');
+    const userIdDisplayElement = document.getElementById('userIdDisplay');
+    const questionContainer = document.getElementById('questionContainer');
+    const answerContainer = document.getElementById('answerContainer');
+    const sessionTimerElement = document.getElementById('sessionTimer');
+    const languageOptions = document.querySelectorAll('input[name="language"]');
+
+    // Set up language selection
+    languageOptions.forEach(option => {
+      option.addEventListener('change', (e) => {
+        selectedLanguage = e.target.value;
+        console.log('Language selected:', selectedLanguage);
+      });
+    });
+
+    // Function to update session timer
+    function updateSessionTimer() {
+      const minutes = Math.floor(sessionTimeLeft / 60);
+      const seconds = sessionTimeLeft % 60;
+      sessionTimerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (sessionTimeLeft <= 0) {
+        endSession();
+      } else {
+        sessionTimeLeft--;
+      }
+    }
+
+    // Function to end the session
+    function endSession() {
+      clearInterval(sessionTimer);
+      
+      // Stop all recording
+      if (isRecording) {
+        recognition.stop();
+      }
+      
+      // Redirect to certificate page
+      window.location.href = "certificate.html";
+    }
+
+    // Function to clear interactions collection
+    async function clearInteractionsCollection(userId) {
+      try {
+        questionCounter = 0; // Reset counter when clearing
+        const userRef = doc(db, "conversations", userId);
+        const interactionsRef = collection(userRef, "interactions");
+        
+        // Get all documents in the interactions collection
+        const querySnapshot = await getDocs(interactionsRef);
+        
+        // Delete each document
+        const deletePromises = [];
+        querySnapshot.forEach((doc) => {
+          deletePromises.push(deleteDoc(doc.ref));
+        });
+        
+        await Promise.all(deletePromises);
+        console.log("All interactions deleted successfully");
+      } catch (error) {
+        console.error("Error deleting interactions:", error);
+      }
+    }
+
+    // Initialize speech recognition
+    recognition.onresult = (event) => {
+      clearTimeout(silenceTimer);
+      const transcript = Array.from(event.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join('');
+      
+      answerText = transcript;
+      answerTextElement.textContent = transcript;
+      
+      // Reset silence timer (2 seconds)
+      silenceTimer = setTimeout(stopRecording, 2000);
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+      statusElement.textContent = `Error: ${event.error}`;
+      stopRecording();
+    };
+
+    recognition.onend = () => {
+      if (isRecording) {
+        recognition.start(); // Restart recognition if we're still recording
+      }
+    };
+
+    // Start interview process
+    async function startInterview() {
+      startButton.disabled = true;
+      startButton.textContent = "Starting...";
+      
+      // Set the selected language for recognition
+      recognition.lang = selectedLanguage;
+      console.log('Setting recognition language to:', selectedLanguage);
+      
+      // Show session timer
+      sessionTimerElement.style.display = 'block';
+      
+      // Start session timer
+      sessionTimer = setInterval(updateSessionTimer, 1000);
+      
+      // Start authentication
+      signInAnonymously(auth).catch((error) => {
+        console.error("Anonymous sign-in failed:", error);
+        startButton.textContent = "Error - Try Again";
+        startButton.disabled = false;
+      });
+    }
+
+    // Handle authentication state
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUserId = user.uid;
+        authStatusElement.textContent = "✅ Authenticated";
+        userIdDisplayElement.textContent = `User ID: ${user.uid}`;
+        
+        // Clear previous interactions
+        await clearInteractionsCollection(user.uid);
+        
+        // Show interview interface
+       // startContainer.style.display = 'none';
+        //interviewContainer.style.display = 'block';
+        
+        // Start first question
+        //startNewConversation();
+      }
+    });
+
+    async function startNewConversation() {
+
+      recognition.lang = selectedLanguage;
+      console.log('Setting recognition language to:', selectedLanguage);
+
+      startContainer.style.display = 'none';
+      interviewContainer.style.display = 'block';
+      // Set first question
+      currentAIQuestion = "What would you like to talk about?";
+      questionText.textContent = `Question 1: ${currentAIQuestion}`;
+      speakQuestion(currentAIQuestion);
+      outputElement.textContent = "Ready for your first response!";
+    }
+
+    function speakQuestion(question) {
+      isSpeaking = true;
+      statusElement.textContent = "Please wait for the question to finish...";
+      
+      const speech = new SpeechSynthesisUtterance();
+      speech.text = question;
+      speech.rate = 1;
+      speech.pitch = 1;
+      speech.lang = selectedLanguage; // Set the language for speech synthesis
+      
+      speech.onend = () => {
+        isSpeaking = false;
+        // Auto-start recording after question is read
+        setTimeout(startRecording, 300);
+      };
+      
+      window.speechSynthesis.speak(speech);
+    }
+
+    function startRecording() {
+      if (!isRecording && !isSpeaking) {
+        isRecording = true;
+        answerText = "";
+        answerTextElement.textContent = "";
+        startTime = Date.now();
+        timeToStart = 0;
+        
+        // Start measuring time to first response
+        const startResponseTimer = setInterval(() => {
+          timeToStart += 0.1;
+        }, 100);
+        
+        recognition.lang = selectedLanguage;
+      console.log('Setting recognition language to:', selectedLanguage);
+        recognition.start();
+        statusElement.textContent = "Listening... Speak now";
+        
+        // Start response timer when speech is first detected
+        recognition.onspeechstart = () => {
+          clearInterval(startResponseTimer);
+          responseTime = 0;
+          responseTimer = setInterval(() => {
+            responseTime += 0.1;
+            timerElement.textContent = `Response time: ${responseTime.toFixed(1)}s`;
+          }, 100);
+        };
+      }
+    }
+
+    function stopRecording() {
+      if (isRecording) {
+        isRecording = false;
+        recognition.stop();
+        clearInterval(responseTimer);
+        statusElement.textContent = "Processing your answer...";
+        
+        if (answerText.trim()) {
+          saveInteraction();
+        } else {
+          statusElement.textContent = "No speech detected. Starting again...";
+          timerElement.textContent = "Response time: 0.0s";
+          setTimeout(startRecording, 1000);
+        }
+      }
+    }
+
+    // Function to save user interaction
+    async function saveInteraction() {
+      if (!currentUserId || !answerText.trim()) {
+        outputElement.textContent = "❌ No answer to save";
+        window.location.href = 'login'
+        return;
+      }
+
+      try {
+        const userRef = doc(db, "conversations", currentUserId);
+        const interactionsRef = collection(userRef, "interactions");
+
+        await setDoc(userRef, {
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          language: selectedLanguage
+        }, { merge: true });
+
+        const interactionId = "question_" + (questionCounter + 1);
+        await setDoc(doc(interactionsRef, interactionId), {
+          question: currentAIQuestion,
+          answer: answerText,
+          timeToStart: parseFloat(timeToStart.toFixed(1)),
+          responseTime: parseFloat(responseTime.toFixed(1)),
+          timestamp: serverTimestamp()
+        });
+
+        questionCounter++; // Increment after saving
+        outputElement.textContent = "✅ Answer saved! Generating next question...";
+        await generateAIQuestion();
+      } catch (error) {
+        console.error("Error saving interaction:", error);
+        outputElement.textContent = "❌ Failed to save answer.";
+        setTimeout(startRecording, 1000);
+      }
+    }
+
+    // Function to generate AI question
+    async function generateAIQuestion() {
+      if (!currentUserId) {
+        outputElement.textContent = "❌ Please wait while we authenticate you...";
+        return;
+      }
+
+      outputElement.textContent = "⏳ Generating next question...";
+      
+      const generate = httpsCallable(functions, "generateAIhinQuestion");
+      try {
+        const result = await generate({ 
+          userId: currentUserId,
+          language: selectedLanguage 
+        });
+        currentAIQuestion = result.data.question;
+        questionText.textContent = `Question ${questionCounter + 1}: ${currentAIQuestion}`;
+        speakQuestion(currentAIQuestion);
+        outputElement.textContent = "🤖 Next question ready!";
+        timerElement.textContent = "Response time: 0.0s";
+      } catch (error) {
+        console.error("Error generating question:", error);
+        outputElement.textContent = "❌ Failed to generate question.";
+        setTimeout(startRecording, 1000);
+      }
+    }
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', () => {
+      if (isRecording) {
+        recognition.stop();
+      }
+      if (sessionTimer) {
+        clearInterval(sessionTimer);
+      }
+    });
+
+    // Event listeners
+    startButton.addEventListener('click', startNewConversation);
+  </script>) this a code for my web app, can you check is there is any problem because when i try to use my app and when i start speaking the result will showing like i said everything twice. if there is anything like that solve it & return the full code.
+
+

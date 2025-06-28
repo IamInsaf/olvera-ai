@@ -1,0 +1,487 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   Find Your Potential
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+   <meta name="description" content="Confused about your career? Olvera helps students discover their perfect course and career with AI-powered assessments. Take our free test today!">
+   <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&amp;display=swap" rel="stylesheet"/>
+  <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white hidden" src="banner.png" alt="">
+  
+  <style>
+   body {
+      font-family: 'Poppins', sans-serif;
+    }
+    /* Glowing effect */
+    .glowing-feature {
+      animation: glow 2s infinite alternate;
+    }
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 5px -5px rgba(59, 130, 246, 0.5);
+      }
+      to {
+        box-shadow: 0 0 10px 5px rgba(59, 130, 246, 0.5);
+      }
+    }
+    /* Side menu styles */
+    .side-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      transition: right 0.3s ease;
+      z-index: 1000;
+      padding: 20px;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+    }
+    .side-menu.open {
+      right: 0;
+    }
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .menu-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .menu-item {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      transition: background 0.2s ease;
+      cursor: pointer;
+    }
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .menu-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    .menu-btn i {
+      font-size: 1.2rem;
+    }
+    .user-name {
+      font-weight: bold;
+      cursor: default;
+    }
+    .user-name:hover {
+      background: transparent !important;
+    }
+    .new-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      background-color: #f59e0b;
+      color: white;
+      border-radius: 9999px;
+      padding: 2px 8px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .feature-card {
+      position: relative;
+    }
+  </style>
+ </head>
+ <body class="bg-gradient-to-tr from-indigo-600 via-purple-700 to-pink-600 min-h-screen flex flex-col justify-center items-center px-6 py-12 text-white">
+  <!-- Menu Button -->
+  <div class="menu-btn" onclick="toggleMenu()">
+    <i class="fas fa-bars"></i>
+  </div>
+
+  <!-- Side Menu -->
+  <div class="side-menu" id="sideMenu">
+    <div class="flex justify-between items-center mb-8">
+      <h3 class="text-xl font-bold">Menu</h3>
+      <button onclick="toggleMenu()" class="text-2xl">&times;</button>
+    </div>
+    <div class="menu-item user-name" id="userNameDisplay">
+      <i class="fas fa-user mr-3"></i> Loading...
+    </div>
+    <div class="menu-item" onclick="navigateTo('/vresults')">
+      <i class="fas fa-chart-bar mr-3"></i> Your results
+    </div>
+    <div class="menu-item" onclick="navigateTo('/premiumresults')">
+      <i class="fas fa-chart-line mr-3"></i> premium results
+    </div>
+    <div class="menu-item" onclick="navigateTo('/privacy-policy')">
+      <i class="fas fa-shield-alt mr-3"></i> Privacy Policy
+    </div>
+    <div class="menu-item" onclick="navigateTo('/terms-and-conditions')">
+      <i class="fas fa-file-contract mr-3"></i> Terms and Conditions
+    </div>
+    <div class="menu-item" onclick="navigateTo('/about')">
+      <i class="fas fa-info-circle mr-3"></i> About
+    </div>
+    <div class="menu-item" onclick="logout()">
+      <i class="fas fa-sign-out-alt mr-3"></i> Logout
+    </div>
+  </div>
+
+  <!-- Menu Overlay -->
+  <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-messaging-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
+  
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+    
+    const firebaseApp = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const analytics = firebase.analytics();
+    
+    // Log home page view
+    analytics.logEvent('page_view_home');
+
+    analytics.logEvent('page_view_homeo', {
+      page_title: 'home page',
+      page_location: window.location.href,
+      page_path: window.location.pathname
+    });
+    
+    // Check authentication state
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        // User is not signed in, redirect to login page
+        window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+      } else {
+        // Set user properties for analytics
+        analytics.setUserId(user.uid);
+        analytics.setUserProperties({
+          email: user.email,
+          provider: user.providerData[0]?.providerId
+        });
+        
+        // Fetch user name from Firestore
+        fetchUserName(user.uid);
+      }
+    });
+
+    // Function to fetch user name from Firestore
+    async function fetchUserName(userId) {
+      try {
+        const userDoc = await db.collection('Olverauser').doc(userId).get();
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          const userName = userData.name || userData.email || 'User';
+          document.getElementById('userNameDisplay').innerHTML = `<i class="fas fa-user mr-3"></i> ${userName}`;
+        } else {
+          // If no name in Firestore, use email
+          const user = auth.currentUser;
+          document.getElementById('userNameDisplay').innerHTML = `<i class="fas fa-user mr-3"></i> ${user.email || 'User'}`;
+        }
+      } catch (error) {
+        console.error('Error fetching user name:', error);
+        const user = auth.currentUser;
+        document.getElementById('userNameDisplay').innerHTML = `<i class="fas fa-user mr-3"></i> ${user.email || 'User'}`;
+      }
+    }
+
+    // Function to toggle menu
+    function toggleMenu() {
+      const sideMenu = document.getElementById('sideMenu');
+      const overlay = document.getElementById('menuOverlay');
+      sideMenu.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+
+    // Function to logout
+    function logout() {
+      auth.signOut().then(() => {
+        analytics.logEvent('logout');
+        window.location.href = '/login.html';
+      }).catch((error) => {
+        console.error('Logout error:', error);
+        analytics.logEvent('logout_error', { error: error.message });
+      });
+    }
+
+    // Function to request notification permission
+    async function requestNotificationPermission(featureName) {
+      try {
+        const user = auth.currentUser;
+        if (!user) {
+          window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+          return;
+        }
+        
+        // Log analytics event
+        analytics.logEvent('notification_permission_requested', {
+          feature: featureName
+        });
+        
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          // Get FCM token
+          const messaging = firebase.messaging();
+          const token = await messaging.getToken({ vapidKey: 'BPI_5gy3RD_RJV8Zy56VDIS1rFJ3vyyiyc6CS0wD0iGGJrqAoVRkS7c9CxozuniEcSxd6IkVdSn8tfobdWgjSQU' });
+          
+          // Save token to Firestore with user ID
+          await db.collection('notify').add({
+            userId: user.uid,
+            token: token,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            featureRequested: featureName
+          });
+          
+          // Log success event
+          analytics.logEvent('notification_permission_granted', {
+            feature: featureName
+          });
+          
+          alert('Thank you! We will notify you when this feature is available.');
+        } else {
+          // Log denied event
+          analytics.logEvent('notification_permission_denied', {
+            feature: featureName
+          });
+          alert('Notifications were denied. You can enable them later in your browser settings.');
+        }
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+        analytics.logEvent('notification_error', {
+          error: error.message,
+          feature: featureName
+        });
+        alert('An error occurred while setting up notifications.');
+      }
+    }
+
+    // Function to handle navigation with auth check
+    function navigateTo(path) {
+      const user = auth.currentUser;
+      if (!user) {
+        window.location.href = '/login.html?redirect=' + encodeURIComponent(path);
+      } else {
+        // Log navigation event
+        analytics.logEvent('navigation', {
+          destination: path
+        });
+        window.location.href = path;
+      }
+    }
+
+    // Track button clicks
+    document.addEventListener('DOMContentLoaded', function() {
+      const buttons = document.querySelectorAll('button');
+      buttons.forEach(button => {
+        button.addEventListener('click', function() {
+          const buttonText = this.innerText || this.textContent;
+          const buttonAriaLabel = this.getAttribute('aria-label') || buttonText;
+          analytics.logEvent('button_click', {
+            button_text: buttonText.trim(),
+            aria_label: buttonAriaLabel.trim(),
+            page_path: window.location.pathname
+          });
+        });
+      });
+    });
+  </script>
+
+  <main class="max-w-5xl w-full space-y-20">
+   <!-- Section 1: Find Your Potential 
+   <section class="bg-white bg-opacity-10 rounded-3xl p-10 md:p-16 shadow-lg backdrop-blur-md">
+    <h1 class="text-4xl md:text-5xl font-extrabold mb-6 text-center">
+     Find Your self
+    </h1>
+    <p class="text-center text-lg md:text-xl max-w-3xl mx-auto mb-12">
+     Find your next step using our AI voice friend.
+    </p>
+    <div class="flex flex-col sm:flex-row justify-center gap-8">
+     <button aria-label="Go to Smart Voice page" class="flex-1 bg-white bg-opacity-20 hover:bg-opacity-40 transition rounded-xl py-5 px-8 text-xl font-semibold shadow-md flex items-center justify-center gap-4" onclick="navigateTo('/smart-voice')" type="button">
+      <i class="fas fa-microphone-alt text-2xl">
+      </i>
+      Smart-Suggest
+     </button>
+    </div>
+   </section> -->
+   
+   <!-- Section 2: Unlocked Options - Horizontal Layout -->
+   <section class="bg-white bg-opacity-10 rounded-3xl p-10 md:p-16 shadow-lg backdrop-blur-md">
+      <h2 class="text-3xl md:text-4xl font-extrabold mb-10 text-center">
+       Discover Your Potential
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <div class="bg-white bg-opacity-20 rounded-xl p-8 shadow-md transition hover:bg-opacity-30 feature-card relative">
+          <span class="new-badge">NEW</span>
+          <div class="flex flex-col items-center text-center">
+            <img alt="Illustration of AI analysis" class="mb-6 rounded-lg shadow-lg" height="150" loading="lazy" src="https://storage.googleapis.com/a1aa/image/d041e392-9348-4e96-e5ae-4c915dc2e035.jpg" width="150"/>
+            <h3 class="text-2xl font-semibold mb-3">
+             AI Personality Match
+            </h3>
+            <p class="text-white/90 text-base mb-6">
+              Olvera’s Talent Discovery Test unlocks your true potential with psychologist-designed questions. Get personalized insights, career paths, and strengths in minutes. Affordable, accurate, and life-changing self-discovery begins here.
+            </p>
+            <button onclick="navigateTo('/premiumv1')" class="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition">
+              Try Now
+            </button>
+          </div>
+        </div>
+
+        
+        <!-- Option 1 -->
+        <div class="bg-white bg-opacity-20 rounded-xl p-8 shadow-md transition hover:bg-opacity-30 feature-card">
+          <div class="flex flex-col items-center text-center">
+            <div class="mb-6 w-[150px] h-[150px] flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+                <rect x="4" y="2" width="16" height="16" rx="2" ry="2"></rect>
+                <path d="M8 6h8"></path>
+                <path d="M16 14v4"></path>
+                <path d="M16 10v4"></path>
+                <path d="M12 14v4"></path>
+                <path d="M8 10v4"></path>
+                <path d="M12 18h.01"></path>
+                <path d="M8 18h.01"></path>
+                <path d="M16 18h.01"></path>
+                <path d="M12 6h.01"></path>
+                <path d="M8 6h.01"></path>
+                <path d="M16 6h.01"></path>
+                <circle cx="12" cy="10" r="1"></circle>
+                <path d="M12 14v-4"></path>
+                <path d="M12 10h.01"></path>
+              </svg>
+            </div>
+            <h3 class="text-2xl font-semibold mb-3">
+              Smart Analyze (mini model)
+            </h3>
+            <p class="text-white/90 text-base mb-6">
+              Discover your unique skills and strengths with our smart analysis tools voice and chat.
+            </p>
+            <button onclick="navigateTo('/smart-voice')" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition">
+              Start Now
+            </button>
+          </div>
+        </div>
+        
+        <!-- Option 2 - Marked as NEW 
+        <div class="bg-white bg-opacity-20 rounded-xl p-8 shadow-md transition hover:bg-opacity-30 feature-card relative">
+          <span class="new-badge">NEW</span>
+          <div class="flex flex-col items-center text-center">
+            <img alt="Illustration of AI analysis" class="mb-6 rounded-lg shadow-lg" height="150" loading="lazy" src="https://storage.googleapis.com/a1aa/image/d041e392-9348-4e96-e5ae-4c915dc2e035.jpg" width="150"/>
+            <h3 class="text-2xl font-semibold mb-3">
+             AI Personality Match
+            </h3>
+            <p class="text-white/90 text-base mb-6">
+             Find careers that match your personality with our advanced AI.
+            </p>
+            <button onclick="navigateTo('/premiumv1')" class="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition">
+              Try Now
+            </button>
+          </div>
+        </div> -->
+      </div>
+   </section>
+
+   <section class="bg-white bg-opacity-10 rounded-3xl p-10 md:p-16 shadow-lg backdrop-blur-md">
+    <h2 class="text-3xl md:text-4xl font-extrabold mb-6 text-center">
+     Dream Job Analyzer
+    </h2>
+    <p class="text-center text-lg md:text-xl max-w-3xl mx-auto mb-12">
+     Discover if your dream job is the perfect fit for you with our AI-powered analysis.
+    </p>
+    <div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+      <div class="bg-white bg-opacity-20 rounded-xl p-6 text-center shadow-md">
+        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-question text-2xl text-white"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3">Personalized Questions</h3>
+        <p class="text-white/90 text-sm">Answer 10 AI-generated questions tailored to your dream job and profile</p>
+      </div>
+      <div class="bg-white bg-opacity-20 rounded-xl p-6 text-center shadow-md">
+        <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-chart-line text-2xl text-white"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3">Smart Analysis</h3>
+        <p class="text-white/90 text-sm">Get detailed insights about your eligibility, strengths, and areas for improvement</p>
+      </div>
+      <div class="bg-white bg-opacity-20 rounded-xl p-6 text-center shadow-md">
+        <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-lightbulb text-2xl text-white"></i>
+        </div>
+        <h3 class="text-xl font-semibold mb-3">Actionable Recommendations</h3>
+        <p class="text-white/90 text-sm">Receive personalized advice on skills to develop and next steps to take</p>
+      </div>
+    </div>
+    <div class="text-center">
+      <button onclick="navigateTo('/premiumv1/premiumresults/dream-job')" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition transform hover:scale-105 flex items-center gap-3 mx-auto">
+        <i class="fas fa-star text-xl"></i>
+        Analyze My Dream Job
+      </button>
+    </div>
+   </section>
+   
+   <!-- Section 3: Coming Soon Feature -->
+   <section class="bg-white bg-opacity-10 rounded-3xl p-10 md:p-16 shadow-lg backdrop-blur-md text-center max-w-3xl mx-auto">
+      <h2 class="text-3xl md:text-4xl font-extrabold mb-6">
+       AI-Analyze + Smart-Analyze
+      </h2>
+      <p class="text-lg mb-8">This feature is coming soon!</p>
+      
+      <button class="mt-6 inline-flex items-center gap-4 bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-white font-bold text-xl rounded-xl px-10 py-5 shadow-lg opacity-75 cursor-not-allowed">
+       <i class="fas fa-robot text-2xl">
+       </i>
+       AI Interview
+      </button>
+      
+      <div class="text-center mt-10">
+        <button onclick="requestNotificationPermission('AI-Analyze+Smart-Analyze')" class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition flex items-center gap-2 mx-auto">
+          <i class="fas fa-bell"></i>
+          Notify Me When Available
+        </button>
+      </div>
+      
+      <p class="mt-8 text-white/90 text-lg max-w-xl mx-auto">
+       Let AI train you for your next job interview (Coming Soon).
+      </p>
+   </section>
+  </main>
+ </body>
+</html>
