@@ -5,16 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Talent Assessment | Discover Your Potential</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <style>
         :root {
-            --primary: #5e35b1;
-            --secondary: #7e57c2;
-            --accent: #ff7043;
-            --dark: #263238;
-            --light: #f5f5f5;
-            --gradient: linear-gradient(135deg, #5e35b1 0%, #7e57c2 100%);
-            --shadow: 0 10px 20px rgba(0,0,0,0.1);
+            --primary: #FFD700; /* Gold */
+            --secondary: #C5A100; /* Darker gold */
+            --accent: #FFFFFF; /* White */
+            --dark: #000000; /* Black */
+            --darker: #111111; /* Slightly lighter black */
+            --light: #FFFFFF; /* White */
+            --lighter: #F5F5F5; /* Off-white */
+            --gradient: linear-gradient(135deg, #FFD700 0%, #C5A100 100%); /* Gold gradient */
+            --shadow: 0 10px 20px rgba(0,0,0,0.3);
             --radius: 12px;
+            --card-bg: #1A1A1A; /* Dark gray */
+            --text-muted: #AAAAAA; /* Gray */
         }
         
         * {
@@ -25,8 +34,8 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light);
-            color: var(--dark);
+            background-color: var(--dark);
+            color: var(--light);
             min-height: 100vh;
             display: flex;
             overflow-x: hidden;
@@ -35,21 +44,22 @@
         /* Sidebar Styles */
         .sidebar {
             width: 400px;
-            background-color: white;
+            background-color: var(--darker);
             padding: 2rem;
             display: flex;
             flex-direction: column;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.05);
+            box-shadow: 5px 0 15px rgba(0,0,0,0.3);
             position: relative;
             z-index: 10;
             height: 100vh;
             overflow: hidden;
+            border-right: 1px solid rgba(255,255,255,0.05);
         }
         
         .sidebar-header {
             margin-bottom: 2rem;
             padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         
         .sidebar-header h2 {
@@ -64,14 +74,29 @@
             flex-grow: 1;
             overflow-y: auto;
             padding-right: 0.5rem;
-            max-height: calc(100vh - 160px); /* Adjust based on header size */
+            max-height: calc(100vh - 160px);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--darker);
+        }
+        
+        .feature-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .feature-list::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+        
+        .feature-list::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 3px;
         }
         
         .feature-item {
             margin-bottom: 1.5rem;
             padding: 1.25rem;
             border-radius: var(--radius);
-            background: white;
+            background: var(--card-bg);
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
             border-left: 4px solid var(--primary);
@@ -79,12 +104,13 @@
         
         .feature-item:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+            background: #252525;
         }
         
         .feature-icon {
             background: var(--gradient);
-            color: white;
+            color: var(--dark);
             width: 2.5rem;
             height: 2.5rem;
             border-radius: 50%;
@@ -98,11 +124,11 @@
         .feature-text h3 {
             font-size: 1.1rem;
             margin-bottom: 0.5rem;
-            color: var(--dark);
+            color: var(--primary);
         }
         
         .feature-text p {
-            color: #546e7a;
+            color: var(--text-muted);
             font-size: 0.95rem;
             line-height: 1.5;
         }
@@ -114,7 +140,7 @@
             flex-direction: column;
             min-height: 100vh;
             position: relative;
-            background-color: #f9f9f9;
+            background-color: var(--dark);
         }
         
         .container {
@@ -137,11 +163,12 @@
             background-clip: text;
             color: transparent;
             margin-bottom: 1rem;
+            text-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
         }
         
         .tagline {
             font-size: 1.2rem;
-            color: #546e7a;
+            color: var(--text-muted);
             margin-bottom: 3rem;
             font-weight: 400;
         }
@@ -150,7 +177,7 @@
             font-size: 2.8rem;
             margin-bottom: 1.5rem;
             line-height: 1.2;
-            color: var(--dark);
+            color: var(--light);
         }
         
         .hero-text h1 span {
@@ -158,6 +185,10 @@
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+        }
+        
+        .hero-text p {
+            color: var(--text-muted);
         }
         
         .options {
@@ -185,12 +216,12 @@
         
         .btn-test {
             background: var(--gradient);
-            color: white;
+            color: var(--dark);
             box-shadow: var(--shadow);
         }
         
         .btn-insight {
-            background-color: white;
+            background-color: var(--card-bg);
             color: var(--primary);
             border: 2px solid var(--primary);
             box-shadow: var(--shadow);
@@ -198,11 +229,26 @@
         
         .btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
         }
         
         .btn:active {
             transform: translateY(-1px);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
         }
         
         .particles {
@@ -406,10 +452,10 @@
             </div>
             
             <div class="options">
-                <button class="btn btn-test" onclick="window.location.href='premiumv1/test.html'">
+                <button class="btn btn-test" id="getTestBtn">
                     <i class="fas fa-clipboard-list"></i> GET YOUR TEST
                 </button>
-                <button class="btn btn-insight" onclick="window.location.href='premiumv1/premiumresults.html'">
+                <button class="btn btn-insight" id="getInsightBtn">
                     <i class="fas fa-chart-pie"></i> YOUR INSIGHT
                 </button>
             </div>
@@ -418,7 +464,30 @@
     
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script>
-        // Initialize particles.js
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+            authDomain: "promgn-in.firebaseapp.com",
+            projectId: "promgn-in",
+            storageBucket: "Olvera",
+            messagingSenderId: "545429176314",
+            appId: "1:545429176314:web:5590c702b55357b4bfae43",
+            measurementId: "G-YZQG3ZPQMJ"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.analytics();
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        // Track page view
+        analytics.logEvent('page_view', {
+            page_title: 'Talent Assessment Home',
+            page_location: window.location.href
+        });
+        
+        // Initialize particles.js with gold color scheme
         window.onload = function() {
             particlesJS('particles-js', {
                 "particles": {
@@ -430,7 +499,7 @@
                         }
                     },
                     "color": {
-                        "value": "#5e35b1"
+                        "value": "#FFD700" /* Gold */
                     },
                     "shape": {
                         "type": "circle",
@@ -450,7 +519,7 @@
                     "line_linked": {
                         "enable": true,
                         "distance": 150,
-                        "color": "#7e57c2",
+                        "color": "#C5A100", /* Darker gold */
                         "opacity": 0.2,
                         "width": 1
                     },
@@ -487,6 +556,50 @@
                     }
                 },
                 "retina_detect": true
+            });
+            
+            // Set up button event listeners
+            document.getElementById('getTestBtn').addEventListener('click', function() {
+                // Track test button click
+                analytics.logEvent('get_test_click', {
+                    button_id: 'getTestBtn',
+                    button_text: 'GET YOUR TEST'
+                });
+                
+                // Redirect to test page
+                window.location.href = 'premiumv1/test.html';
+            });
+            
+            document.getElementById('getInsightBtn').addEventListener('click', function() {
+                // Track insight button click
+                analytics.logEvent('get_insight_click', {
+                    button_id: 'getInsightBtn',
+                    button_text: 'YOUR INSIGHT'
+                });
+                
+                // Check if user is authenticated
+                auth.onAuthStateChanged(function(user) {
+                    if (user) {
+                        // User is signed in, check if they have completed the test
+                        db.collection("talent").doc(user.uid).get()
+                            .then((querySnapshot) => {
+                                if (!querySnapshot.empty) {
+                                    // User has completed the test, redirect to results
+                                    window.location.href = 'premiumv1/premiumresults.html';
+                                } else {
+                                    // User hasn't completed the test
+                                    alert("You haven't completed the test yet. Please complete the test first to view your insights.");
+                                }
+                            })
+                            .catch((error) => {
+                                console.error("Error checking test completion: ", error);
+                                alert("Error checking your test status. Please try again later.");
+                            });
+                    } else {
+                        // No user is signed in
+                        alert("Please sign in first to view your insights.");
+                    }
+                });
             });
         }
     </script>

@@ -8,6 +8,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+      <!-- Firebase Analytics -->
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
     <style>
         :root {
             --bg-dark: #0A0A0F;
@@ -922,7 +928,7 @@
             <h1>Discover Your True Career Path with AI</h1>
             <p>Olvera helps students unlock their born talents and make informed choices.</p>
             <div class="hero-buttons">
-                <a href="#pricing" class="btn btn-primary">Start Test ₹49</a>
+                <a href="/home" class="btn btn-primary">Start Test ₹49</a>
                 <a href="#features" class="btn btn-secondary">Explore Insights</a>
             </div>
         </div>
@@ -1143,27 +1149,16 @@
             <a href="#results" class="footer-link">Results</a>
             <a href="#referral" class="footer-link">Referral</a>
             <a href="#pricing" class="footer-link">Pricing</a>
-            <a href="#" class="footer-link">Privacy Policy</a>
-            <a href="#" class="footer-link">Terms</a>
-            <a href="#" class="footer-link">FAQ</a>
-            <a href="#" class="footer-link">Contact</a>
+            <a href="policies/privacy.html" class="footer-link">Privacy Policy</a>
+            <a href="policies/terms-and-conditions.html" class="footer-link">Terms</a>
+            <a href="policies/faq.html" class="footer-link">FAQ</a>
+            <a href="contact.html" class="footer-link">Contact</a>
         </div>
         <div class="social-icons">
-            <a href="#" class="social-icon">
+            <a href="https://instagram.com/m_insaf_" class="social-icon">
                 <i class="fab fa-instagram"></i>
             </a>
-            <a href="#" class="social-icon">
-                <i class="fab fa-twitter"></i>
-            </a>
-            <a href="#" class="social-icon">
-                <i class="fab fa-linkedin-in"></i>
-            </a>
-            <a href="#" class="social-icon">
-                <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="#" class="social-icon">
-                <i class="fab fa-youtube"></i>
-            </a>
+            
         </div>
         <p class="footer-credit">Made with ❤️ by <span>INZAF INDUSTRIES</span></p>
     </footer>
@@ -1263,6 +1258,93 @@
                 });
             });
         });
-    </script>
+   
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357"
+    };
+  
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics(app);
+    const auth = firebase.auth(app);
+  
+    // Check if user is authenticated
+    auth.onAuthStateChanged(user => {
+      if (user && user.uid) {
+        console.log("User is logged in:", user.uid);
+        window.location.href = "/home"; // Redirect to home if authenticated
+      }
+      else (   console.log(" no user log"))
+    });
+  
+    // Set user properties
+    analytics.setUserProperties({
+      preferred_language: navigator.language,
+      device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+    });
+  
+    // Track page views
+    analytics.logEvent('page_view', {
+      page_title: document.title,
+      page_location: window.location.href,
+      page_path: window.location.pathname
+    });
+  
+    // Track all link clicks
+    document.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function () {
+        analytics.logEvent('select_content', {
+          content_type: 'link',
+          content_id: this.getAttribute('href') || 'unknown',
+          method: 'click'
+        });
+      });
+    });
+  
+    // Track CTA button clicks specifically
+    document.querySelectorAll('[href="index"]').forEach(button => {
+      button.addEventListener('click', function () {
+        analytics.logEvent('begin_checkout', {
+          item_name: 'Career Test',
+          item_category: 'CTA',
+          location: this.closest('section') ? this.closest('section').id || 'unknown' : 'unknown'
+        });
+      });
+    });
+  
+    // Track section visibility
+    const sections = document.querySelectorAll('section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          analytics.logEvent('view_section', {
+            section_id: entry.target.id || 'unknown',
+            section_name: entry.target.querySelector('h2') ? entry.target.querySelector('h2').textContent : 'unknown'
+          });
+        }
+      });
+    }, { threshold: 0.5 });
+  
+    sections.forEach(section => {
+      observer.observe(section);
+    });
+  
+    // Track errors
+    window.addEventListener('error', function (e) {
+      analytics.logEvent('exception', {
+        description: e.message,
+        fatal: false,
+        filename: e.filename,
+        lineno: e.lineno,
+        colno: e.colno
+      });
+    });
+  </script>
 </body>
 </html>

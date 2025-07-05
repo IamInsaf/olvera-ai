@@ -11,39 +11,44 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-functions.js"></script>
     <style>
+        body {
+            background-color: #111827;
+            color: #e5e7eb;
+        }
         .analysis-section {
-            background-color: #ffffff;
+            background-color: #1f2937;
             border-left: 4px solid #089201;
             transition: all 0.3s ease;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
         .analysis-section:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border-left-color: #4ade80;
         }
         .progress-bar {
             height: 8px;
-            background-color: #e5e7eb;
+            background-color: #374151;
             border-radius: 4px;
             overflow: hidden;
         }
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #00ba0d, #60a5fa);
+            background: linear-gradient(90deg, #10b981, #3b82f6);
             width: 0%;
             transition: width 0.6s ease;
         }
         .strength-tag {
-            background-color: #dbeafe;
-            color: #1e40af;
+            background-color: #1e3a8a;
+            color: #93c5fd;
         }
         .opportunity-tag {
-            background-color: #f0fdf4;
-            color: #166534;
+            background-color: #064e3b;
+            color: #6ee7b7;
         }
         .suggestion-tag {
-            background-color: #fef2f2;
-            color: #991b1b;
+            background-color: #7f1d1d;
+            color: #fca5a5;
         }
         .fade-in {
             animation: fadeIn 0.5s ease-in;
@@ -62,19 +67,19 @@
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-900">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Header -->
         <header class="mb-8">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">Your Talent Analysis</h1>
-                    <p class="text-gray-600 flex items-center" id="statusMessage">
+                    <h1 class="text-3xl font-bold text-gray-100">Your Talent Analysis</h1>
+                    <p class="text-gray-400 flex items-center" id="statusMessage">
                         <span id="statusText">Loading your talent profile...</span>
                         <span id="statusDot" class="ml-2 h-2 w-2 rounded-full bg-blue-500 pulse-dot"></span>
                     </p>
                 </div>
-                <button onclick="generateNewAnalysis()" class="text-blue-500 hover:text-blue-700 transition">
+                <button onclick="generateNewAnalysis()" class="text-blue-400 hover:text-blue-300 transition">
                     <i class="fas fa-sync-alt"></i> Refresh
                 </button>
             </div>
@@ -86,32 +91,32 @@
         <!-- Loading State -->
         <div id="loading" class="text-center py-12 fade-in">
             <div class="relative mx-auto w-24 h-24">
-                <div class="absolute inset-0 rounded-full border-4 border-green-100"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-gray-700"></div>
                 <div class="absolute inset-2 rounded-full border-t-4 border-green-500 animate-spin"></div>
                 <div class="absolute inset-4 flex items-center justify-center">
                     <i class="fas fa-user-tie text-green-400 text-2xl"></i>
                 </div>
             </div>
-            <p class="mt-6 text-gray-600" id="loadingMessage">Analyzing your unique talents and strengths...</p>
+            <p class="mt-6 text-gray-400" id="loadingMessage">Analyzing your unique talents and strengths...</p>
             <div class="mt-4 text-sm text-gray-500 flex justify-center space-x-2">
-                <span id="loadingStep1" class="text-green-500">✓ Gathering data</span>
-                <span class="text-gray-300">•</span>
+                <span id="loadingStep1" class="text-green-400">✓ Gathering data</span>
+                <span class="text-gray-600">•</span>
                 <span id="loadingStep2">Processing skills</span>
-                <span class="text-gray-300">•</span>
+                <span class="text-gray-600">•</span>
                 <span id="loadingStep3">Generating insights</span>
             </div>
         </div>
 
         <!-- Generate New Analysis State -->
-        <div id="generateAnalysis" class="hidden text-center py-12 bg-white rounded-lg shadow p-6 fade-in">
-            <div class="inline-block p-4 bg-green-50 rounded-full mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div id="generateAnalysis" class="hidden text-center py-12 bg-gray-800 rounded-lg shadow p-6 fade-in border border-gray-700">
+            <div class="inline-block p-4 bg-gray-700 rounded-full mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             </div>
-            <h3 class="text-xl font-medium text-gray-800 mb-2">Ready for Your Talent Insights</h3>
-            <p class="text-gray-600 mb-6 max-w-md mx-auto">We'll analyze your skills, experiences, and potential to provide personalized recommendations for your career growth.</p>
-            <button onclick="generateNewAnalysis()" class="px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition shadow-md flex items-center mx-auto">
+            <h3 class="text-xl font-medium text-gray-100 mb-2">Ready for Your Talent Insights</h3>
+            <p class="text-gray-400 mb-6 max-w-md mx-auto">We'll analyze your skills, experiences, and potential to provide personalized recommendations for your career growth.</p>
+            <button onclick="generateNewAnalysis()" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition shadow-md flex items-center mx-auto">
                 <span id="generateButtonText">Generate My Talent Analysis</span>
                 <svg id="generateSpinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -127,19 +132,19 @@
         </div>
 
         <!-- Error State -->
-        <div id="errorState" class="hidden text-center py-12 fade-in">
-            <div class="inline-block p-4 bg-red-50 rounded-full mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div id="errorState" class="hidden text-center py-12 fade-in bg-gray-800 rounded-lg border border-gray-700">
+            <div class="inline-block p-4 bg-gray-700 rounded-full mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <h3 class="text-xl font-medium text-gray-800 mb-2">Oops! Something went wrong</h3>
-            <p class="text-gray-600 mb-6 max-w-md mx-auto" id="errorMessage"></p>
+            <h3 class="text-xl font-medium text-gray-100 mb-2">Oops! Something went wrong</h3>
+            <p class="text-gray-400 mb-6 max-w-md mx-auto" id="errorMessage"></p>
             <div class="flex justify-center space-x-4">
-                <button onclick="checkAnalysis()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition shadow">
+                <button onclick="checkAnalysis()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition shadow">
                     <i class="fas fa-redo mr-2"></i> Try Again
                 </button>
-                <button onclick="location.reload()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition">
+                <button onclick="location.reload()" class="px-4 py-2 bg-gray-700 text-gray-200 rounded hover:bg-gray-600 transition">
                     <i class="fas fa-home mr-2"></i> Return Home
                 </button>
             </div>
@@ -183,15 +188,15 @@
             
             // Update loading steps based on progress
             if (percentage >= 33) {
-                loadingStep1.classList.add('text-blue-500');
-                loadingStep2.classList.add('text-blue-400');
+                loadingStep1.classList.add('text-blue-400');
+                loadingStep2.classList.add('text-blue-300');
             }
             if (percentage >= 66) {
-                loadingStep2.classList.add('text-blue-500');
-                loadingStep3.classList.add('text-blue-400');
+                loadingStep2.classList.add('text-blue-400');
+                loadingStep3.classList.add('text-blue-300');
             }
             if (percentage >= 100) {
-                loadingStep3.classList.add('text-blue-500');
+                loadingStep3.classList.add('text-blue-400');
             }
         }
 
@@ -208,17 +213,17 @@
                 
                 // Check for section headers
                 if (section.includes('Strengths:')) {
-                    htmlContent += createSectionCard('Strengths', section, 'strength-tag', 'text-green-600', 'fa-star');
+                    htmlContent += createSectionCard('Strengths', section, 'strength-tag', 'text-green-400', 'fa-star');
                 } 
                 else if (section.includes('Growth Opportunities:')) {
-                    htmlContent += createSectionCard('Growth Opportunities', section, 'opportunity-tag', 'text-green-600', 'fa-seedling');
+                    htmlContent += createSectionCard('Growth Opportunities', section, 'opportunity-tag', 'text-green-400', 'fa-seedling');
                 }
                 else if (section.includes('Recommendations:')) {
-                    htmlContent += createSectionCard('Recommendations', section, 'suggestion-tag', 'text-red-600', 'fa-lightbulb');
+                    htmlContent += createSectionCard('Recommendations', section, 'suggestion-tag', 'text-red-400', 'fa-lightbulb');
                 }
                 else {
                     // Default section
-                    htmlContent += createSectionCard('Analysis', section, '', 'text-gray-600', 'fa-chart-line');
+                    htmlContent += createSectionCard('Analysis', section, '', 'text-gray-400', 'fa-chart-line');
                 }
             });
             
@@ -228,7 +233,7 @@
         function createSectionCard(title, content, tagClass, textColor, icon) {
             // Process content
             let processedContent = content
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-gray-100">$1</strong>')
                 .replace(/-\s+(.*?)(?=\n|$)/g, '<li>$1</li>')
                 .replace(/\d+\.\s+(.*?)(?=\n|$)/g, '<li>$1</li>');
                 
@@ -236,10 +241,10 @@
             if (!processedContent.includes('<li>')) {
                 processedContent = processedContent.split('\n')
                     .filter(line => line.trim())
-                    .map(line => `<p class="mb-3">${line}</p>`)
+                    .map(line => `<p class="mb-3 text-gray-300">${line}</p>`)
                     .join('');
             } else {
-                processedContent = `<ul class="list-disc pl-5 space-y-2 mb-4">${processedContent}</ul>`;
+                processedContent = `<ul class="list-disc pl-5 space-y-2 mb-4 text-gray-300">${processedContent}</ul>`;
             }
             
             return `
@@ -248,9 +253,9 @@
                         <div class="mr-3 ${textColor}">
                             <i class="fas ${icon} fa-lg"></i>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-800">${title}</h3>
+                        <h3 class="text-xl font-semibold text-gray-100">${title}</h3>
                     </div>
-                    <div class="text-gray-700">
+                    <div class="text-gray-300">
                         ${processedContent}
                     </div>
                 </div>
@@ -291,12 +296,12 @@
                     const formattedContent = formatAnalysisContent(data.analysis);
                     contentElement.innerHTML = `
                         ${formattedContent}
-                        <div class="bg-white rounded-lg shadow p-6 analysis-section flex justify-between items-center">
+                        <div class="bg-gray-800 rounded-lg shadow p-6 analysis-section flex justify-between items-center border border-gray-700">
                             <div>
-                                <h3 class="font-medium text-gray-800">Need an updated analysis?</h3>
-                                <p class="text-sm text-gray-600">Generate a fresh analysis with your latest data</p>
+                                <h3 class="font-medium text-gray-100">Need an updated analysis?</h3>
+                                <p class="text-sm text-gray-400">Generate a fresh analysis with your latest data</p>
                             </div>
-                            <button onclick="generateNewAnalysis()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded transition shadow flex items-center">
+                            <button onclick="generateNewAnalysis()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition shadow flex items-center">
                                 <i class="fas fa-sync-alt mr-2"></i> Refresh Analysis
                             </button>
                         </div>

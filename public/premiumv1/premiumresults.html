@@ -15,18 +15,20 @@
   <style>
     body {
       font-family: 'Inter', sans-serif;
+      background-color: #111827;
+      color: #e5e7eb;
     }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
-  <header class="bg-white shadow-md py-8 px-6 sm:px-12 flex items-center justify-between">
+<body class="min-h-screen flex flex-col">
+  <header class="bg-gray-800 shadow-md py-8 px-6 sm:px-12 flex items-center justify-between border-b border-gray-700">
     <div>
-      <h1 class="text-3xl sm:text-4xl font-semibold text-gray-900">Self-Discovery Dashboard v1</h1>
-      <p class="mt-2 text-gray-600 text-sm sm:text-base max-w-xl">
+      <h1 class="text-3xl sm:text-4xl font-semibold text-gray-100">Self-Discovery Dashboard v1</h1>
+      <p class="mt-2 text-gray-400 text-sm sm:text-base max-w-xl">
         Explore insights and tools to understand and improve yourself
       </p>
     </div>
-    <a href="/home" class="text-gray-700 hover:text-blue-600 transition" title="Home">
+    <a href="/home" class="text-gray-400 hover:text-blue-400 transition" title="Home">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z" />
       </svg>
@@ -41,98 +43,96 @@
     >
       <a
         href="premiumresults/positive"
-        class="group bg-green-50 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-300"
+        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-900 border border-gray-700 hover:border-green-500"
         role="listitem"
         aria-label="Your Positive - Understand your top strengths"
       >
         <div class="text-4xl mb-4 select-none" aria-hidden="true">🟢</div>
-        <h2 class="text-lg font-semibold text-green-900 mb-1">Your Positive</h2>
-        <p class="text-green-800 text-sm">Understand your top strengths</p>
+        <h2 class="text-lg font-semibold text-green-400 mb-1">Your Positive</h2>
+        <p class="text-green-300 text-sm">Understand your top strengths</p>
       </a>
 
       <a
         href="premiumresults/negative"
-        class="group bg-red-50 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-300"
+        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-900 border border-gray-700 hover:border-red-500"
         role="listitem"
         aria-label="Your Negative - Identify areas to work on"
       >
         <div class="text-4xl mb-4 select-none" aria-hidden="true">🔴</div>
-        <h2 class="text-lg font-semibold text-red-900 mb-1">Your Negative</h2>
-        <p class="text-red-800 text-sm">Identify areas to work on</p>
+        <h2 class="text-lg font-semibold text-red-400 mb-1">Your Negative</h2>
+        <p class="text-red-300 text-sm">Identify areas to work on</p>
       </a>
 
       <a
-        href="premiumresults/tjobf"
-        class="group bg-blue-50 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300"
+        href="premiumresults/advance-job-analyze"
+        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-900 border border-gray-700 hover:border-blue-500"
         role="listitem"
         aria-label="Find Job - Explore careers that suit your profile"
       >
         <div class="text-4xl mb-4 select-none" aria-hidden="true">💼</div>
-        <h2 class="text-lg font-semibold text-blue-900 mb-1">Find Job</h2>
-        <p class="text-blue-800 text-sm">Explore careers that suit your profile</p>
+        <h2 class="text-lg font-semibold text-blue-400 mb-1">Find Job</h2>
+        <p class="text-blue-300 text-sm">Explore careers that suit your profile</p>
       </a>
 
       <a
         href="premiumresults/jobs"
-        class="group bg-purple-50 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-purple-300"
+        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-purple-900 border border-gray-700 hover:border-purple-500"
         role="listitem"
         aria-label="Job Suggestion - AI-powered career suggestions"
       >
         <div class="text-4xl mb-4 select-none" aria-hidden="true">🧭</div>
-        <h2 class="text-lg font-semibold text-purple-900 mb-1">Job Suggestion</h2>
-        <p class="text-purple-800 text-sm">AI-powered career suggestions</p>
+        <h2 class="text-lg font-semibold text-purple-400 mb-1">Job Suggestion</h2>
+        <p class="text-purple-300 text-sm">AI-powered career suggestions</p>
       </a>
-
-      
 
       <a
         href="premiumresults/borntalent"
-        class="group bg-pink-50 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-pink-300"
+        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-pink-900 border border-gray-700 hover:border-pink-500"
         role="listitem"
         aria-label="Born Talent - Discover your natural strengths"
       >
         <div class="text-4xl mb-4 select-none" aria-hidden="true">🌟</div>
-        <h2 class="text-lg font-semibold text-pink-900 mb-1">Born Talent</h2>
-        <p class="text-pink-800 text-sm">Discover your natural strengths</p>
+        <h2 class="text-lg font-semibold text-pink-400 mb-1">Born Talent</h2>
+        <p class="text-pink-300 text-sm">Discover your natural strengths</p>
       </a>
 
       <a
         href="premiumresults/improve"
-        class="group bg-teal-50 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-teal-300"
+        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-teal-900 border border-gray-700 hover:border-teal-500"
         role="listitem"
         aria-label="Personality Improvement - Suggestions to grow and improve"
       >
         <div class="text-4xl mb-4 select-none" aria-hidden="true">🧠</div>
-        <h2 class="text-lg font-semibold text-teal-900 mb-1">Personality Improvement</h2>
-        <p class="text-teal-800 text-sm">Suggestions to grow and improve</p>
+        <h2 class="text-lg font-semibold text-teal-400 mb-1">Personality Improvement</h2>
+        <p class="text-teal-300 text-sm">Suggestions to grow and improve</p>
       </a>
 
       <a
         href="premiumresults/skills"
-        class="group bg-yellow-50 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-teal-300"
+        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-yellow-900 border border-gray-700 hover:border-yellow-500"
         role="listitem"
         aria-label="Personality Improvement - Suggestions to grow and improve"
       >
         <div class="text-4xl mb-4 select-none" aria-hidden="true">🧠🤹</div>
-        <h2 class="text-lg font-semibold text-teal-900 mb-1">search-skill </h2>
-        <p class="text-teal-800 text-sm">Suggestions to grow and improve</p>
+        <h2 class="text-lg font-semibold text-yellow-400 mb-1">search-skill</h2>
+        <p class="text-yellow-300 text-sm">Suggestions to grow and improve</p>
       </a>
 
       <a
         href="premiumresults/askany"
-        class="group bg-green-50 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-teal-300"
+        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-900 border border-gray-700 hover:border-green-500"
         role="listitem"
         aria-label="Improvement - Suggestions to grow and improve"
       >
         <div class="text-4xl mb-4 select-none" aria-hidden="true">🔎</div>
-        <h2 class="text-lg font-semibold text-teal-900 mb-1">ASK anything</h2>
-        <p class="text-teal-800 text-sm">Suggestions to find your self</p>
+        <h2 class="text-lg font-semibold text-green-400 mb-1">ASK anything</h2>
+        <p class="text-green-300 text-sm">Suggestions to find your self</p>
       </a>
     </section>
   </main>
 
-  <footer class="bg-white shadow-inner py-6 px-6 sm:px-12 flex justify-center">
-    
+  <footer class="bg-gray-800 shadow-inner py-6 px-6 sm:px-12 flex justify-center border-t border-gray-700">
+    <!-- Footer content can be added here -->
   </footer>
 </body>
 </html>
