@@ -94,7 +94,7 @@ User Profile Data:
 ` : 'No user profile data available.';
 
   const prompt = `
-You are a friendly expert career counselor and job analyst. Generate exactly 5 personalized questions to assess a person's compatibility with their dream job.
+You are an expert career counselor and job analyst. Generate exactly 5 personalized questions to assess a person's compatibility with their dream job.
 
 Dream Job: ${dreamJob}
 
@@ -156,7 +156,7 @@ User Profile Data:
 ` : 'No user profile data available.';
 
   const prompt = `
-You are a friendly expert career counselor. Based on the user's previous answers, generate exactly 5 follow-up questions to further assess their compatibility with their dream job.
+You are an expert career counselor. Based on the user's previous answers, generate exactly 5 follow-up questions to further assess their compatibility with their dream job.
 
 Dream Job: ${dreamJob}
 
@@ -221,7 +221,7 @@ User Profile Data:
   const qaContext = questions.map((q, i) => `Q${i + 1}: ${q}\nA${i + 1}: ${answers[i]}`).join('\n\n');
 
   const prompt = `
-You are a friendly expert career counselor. Provide an initial assessment based on the user's first 5 responses.
+You are an expert career counselor. Provide an initial assessment based on the user's first 5 responses.
 
 Dream Job: ${dreamJob}
 
@@ -290,7 +290,7 @@ User Profile Data:
   const qaContext = questions.map((q, i) => `Q${i + 1}: ${q}\nA${i + 1}: ${answers[i]}`).join('\n\n');
 
   const prompt = `
-You are a friendly expert career counselor and job analyst. Analyze the user's compatibility with their dream job based on their profile and responses.
+You are an expert career counselor and job analyst. Analyze the user's compatibility with their dream job based on their profile and responses.
 
 Dream Job: ${dreamJob}
 

@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Olvera - self finder</title>
+  <title>Olvera - Self Discovery Tool</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -32,58 +33,58 @@
 
     let currentUser = null;
 
-
-
     // Handle login
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-       
+        document.getElementById('authStatus').innerHTML = '<i class="fas fa-circle-check text-success me-1"></i> Session active';
       } else {
         try {
           const result = await signInAnonymously(auth);
           currentUser = result.user;
-          
+          document.getElementById('authStatus').innerHTML = '<i class="fas fa-circle-check text-success me-1"></i> Session active';
         } catch (error) {
           console.error("Authentication error:", error);
+          document.getElementById('authStatus').innerHTML = '<i class="fas fa-circle-exclamation text-danger me-1"></i> Session error';
           showAlert("Failed to initialize session. Please refresh the page.", "danger");
         }
       }
     });
 
-    // Save and analyze job
+    // Save and analyze input
     window.saveAndAnalyze = async function () {
-      const jobText = document.getElementById("jobInput").value.trim();
-      if (!jobText) {
-        showAlert("Please enter job data.", "warning");
+      const inputText = document.getElementById("selfInput").value.trim();
+      if (!inputText) {
+        showAlert("Please enter your information to analyze.", "warning");
         return;
       }
 
       // Show loading state
       const analyzeBtn = document.getElementById("analyzeBtn");
+      const originalBtnText = analyzeBtn.innerHTML;
       analyzeBtn.disabled = true;
       analyzeBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Analyzing...';
 
       try {
-        let jobData;
+        let inputData;
         try {
-          jobData = JSON.parse(jobText);
+          inputData = JSON.parse(inputText);
         } catch (e) {
-          jobData = { description: jobText };
+          inputData = { description: inputText };
         }
 
         if (!currentUser) {
-          showAlert("User not authenticated. Please try again.", "danger");
+          showAlert("Session not active. Please try again.", "danger");
           return;
         }
 
-        // Save job data
+        // Save input data
         const savedRef = doc(collection(doc(db, "talent", currentUser.uid), "any"), "saved");
-        await setDoc(savedRef, jobData);
+        await setDoc(savedRef, inputData);
 
         // Call analysis function
-        const analyzeJob = httpsCallable(functions, "askany");
-        const response = await analyzeJob();
+        const analyzeInput = httpsCallable(functions, "askany");
+        const response = await analyzeInput();
 
         // Update score display
         updateScoreDisplay(response.data.compatibilityScore);
@@ -96,11 +97,11 @@
         
       } catch (error) {
         console.error("Analysis error:", error);
-        showAlert("Failed to analyze skill. Please try again.", "danger");
+        showAlert("Failed to analyze your information. Please try again.", "danger");
       } finally {
         // Reset button state
         analyzeBtn.disabled = false;
-        analyzeBtn.innerHTML = '<i class="fas fa-search me-2"></i> Save & Analyze Job';
+        analyzeBtn.innerHTML = originalBtnText;
       }
     };
 
@@ -108,28 +109,53 @@
       const scoreElement = document.getElementById("score");
       const scoreBar = document.getElementById("scoreBar");
       
-      scoreElement.textContent = `${score}%`;
-      scoreBar.style.width = `${score}%`;
-      scoreBar.setAttribute('aria-valuenow', score);
+      // Animate score increase
+      let start = 0;
+      const duration = 1500;
+      const startTime = performance.now();
+      
+      const animateScore = (timestamp) => {
+        const progress = Math.min((timestamp - startTime) / duration, 1);
+        const currentScore = Math.floor(progress * score);
+        
+        scoreElement.textContent = `${currentScore}%`;
+        scoreBar.style.width = `${currentScore}%`;
+        scoreBar.setAttribute('aria-valuenow', currentScore);
 
-      // Update color based on score
-      scoreBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
-      if (score >= 75) {
-        scoreBar.classList.add('bg-success');
-      } else if (score >= 50) {
-        scoreBar.classList.add('bg-warning');
-      } else {
-        scoreBar.classList.add('bg-danger');
-      }
+        // Update color based on score
+        scoreBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+        if (currentScore >= 75) {
+          scoreBar.classList.add('bg-success');
+        } else if (currentScore >= 50) {
+          scoreBar.classList.add('bg-warning');
+        } else {
+          scoreBar.classList.add('bg-danger');
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(animateScore);
+        }
+      };
+      
+      requestAnimationFrame(animateScore);
     }
 
     // Helper function to format analysis text
     function formatAnalysisText(text) {
-      return text
+      // Convert markdown-like formatting to HTML
+      let html = text
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/\*(.*?)\*/g, '<em>$1</em>')
         .replace(/- (.*?)(?:\n|$)/g, '<li>$1</li>')
+        .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br>');
+      
+      // Wrap in paragraphs if needed
+      if (!html.startsWith('<p>') && !html.startsWith('<li>')) {
+        html = '<p>' + html + '</p>';
+      }
+      
+      return html;
     }
 
     // Show alert message
@@ -150,193 +176,429 @@
         bsAlert.close();
       }, 5000);
     }
+    
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    });
   </script>
 
   <style>
     :root {
-      --primary-color: #4e73df;
-      --success-color: #1cc88a;
-      --info-color: #36b9cc;
-      --warning-color: #f6c23e;
-      --danger-color: #e74a3b;
-      --light-color: #f8f9fc;
-      --dark-color: #5a5c69;
+      --primary-color: #6c8eff;
+      --secondary-color: #9d7dff;
+      --success-color: #00e676;
+      --info-color: #00e5ff;
+      --warning-color: #ffc400;
+      --danger-color: #ff6659;
+      --light-color: #1e1e2d;
+      --dark-color: #f8f9fc;
+      --gradient-start: #6c8eff;
+      --gradient-end: #9d7dff;
+      --bg-color: #121218;
+      --card-bg: #1e1e2d;
+      --text-muted: #a1a1c2;
     }
     
     body {
       font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background-color: #f8f9fc;
-      color: #333;
+      background-color: var(--bg-color);
+      color: var(--dark-color);
       line-height: 1.6;
     }
     
     .container {
       max-width: 800px;
       margin-top: 2rem;
+      margin-bottom: 3rem;
     }
     
     .header {
-      background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+      background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
       color: white;
-      padding: 2rem;
+      padding: 2.5rem 2rem;
       border-radius: 15px;
       margin-bottom: 2rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 30px rgba(108, 142, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      transform: rotate(30deg);
+    }
+    
+    .header h1 {
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    
+    .header .lead {
+      opacity: 0.9;
+      font-weight: 400;
+      position: relative;
     }
     
     .card {
       border: none;
       border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
       margin-bottom: 2rem;
       overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background-color: var(--card-bg);
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
     
     .card-header {
-      background-color: white;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      font-weight: 600;
+      background-color: var(--card-bg);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-weight: 700;
+      padding: 1.25rem 1.5rem;
+      color: var(--dark-color);
     }
     
     textarea {
-      min-height: 200px;
-      border-radius: 10px !important;
-      border: 1px solid #ddd;
+      min-height: 220px;
+      border-radius: 12px !important;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       resize: vertical;
+      padding: 1.25rem !important;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--dark-color);
     }
     
     textarea:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+      box-shadow: 0 0 0 0.25rem rgba(108, 142, 255, 0.25);
+      outline: none;
+      background-color: rgba(0, 0, 0, 0.3);
     }
     
     .btn-primary {
-      background-color: var(--primary-color);
-      border-color: var(--primary-color);
-      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+      border: none;
+      padding: 0.85rem 1.75rem;
       font-weight: 600;
-      border-radius: 10px;
+      border-radius: 12px;
       transition: all 0.3s;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(108, 142, 255, 0.3);
     }
     
     .btn-primary:hover {
-      background-color: #2e59d9;
-      border-color: #2653d4;
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4);
+      box-shadow: 0 8px 25px rgba(108, 142, 255, 0.4);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-outline-primary:hover {
+      background-color: var(--primary-color);
+      color: white;
     }
     
     .result-box {
-      background: white;
-      padding: 2rem;
+      background: var(--card-bg);
+      padding: 2.5rem;
       border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
       margin-top: 2rem;
+      animation: fadeIn 0.6s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     
     .score-container {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      margin-bottom: 1.5rem;
+      background: var(--card-bg);
+      padding: 1.75rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
     .score-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
     }
 
     .score-header h5 {
       margin: 0;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--dark-color);
+      font-size: 1.1rem;
     }
 
     .score-value {
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: var(--primary-color);
+      font-weight: 800;
+      font-size: 1.4rem;
+      background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
     .progress {
-      border-radius: 10px;
-      background-color: #f0f0f0;
+      border-radius: 12px;
+      background-color: rgba(0, 0, 0, 0.3);
       overflow: visible;
-      height: 20px;
+      height: 12px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
     }
 
     .progress-bar {
-      border-radius: 10px;
+      border-radius: 12px;
       transition: width 1s ease-in-out;
       position: relative;
+      box-shadow: 0 2px 10px rgba(108, 142, 255, 0.3);
     }
 
     .progress-bar::after {
       content: '';
       position: absolute;
-      right: -8px;
+      right: -6px;
       top: 50%;
       transform: translateY(-50%);
-      width: 16px;
-      height: 16px;
-      background: white;
-      border: 3px solid currentColor;
+      width: 12px;
+      height: 12px;
+      background: var(--card-bg);
+      border: 2px solid currentColor;
       border-radius: 50%;
     }
 
     .score-labels {
       display: flex;
       justify-content: space-between;
-      margin-top: 0.5rem;
-    }
-
-    .score-labels span {
+      margin-top: 0.75rem;
       font-size: 0.8rem;
-      color: var(--dark-color);
+      color: var(--text-muted);
     }
     
     .analysis-section {
-      background-color: var(--light-color);
-      border-radius: 10px;
-      padding: 1.5rem;
+      background-color: rgba(108, 142, 255, 0.1);
+      border-radius: 12px;
+      padding: 1.75rem;
       margin-top: 1.5rem;
+      border: 1px solid rgba(108, 142, 255, 0.1);
     }
     
     .analysis-section h5 {
       color: var(--primary-color);
+      margin-bottom: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+    }
+    
+    .analysis-section h5 i {
+      margin-right: 10px;
+    }
+    
+    .analysis-content {
+      line-height: 1.7;
+      color: var(--dark-color);
+    }
+    
+    .analysis-content p {
       margin-bottom: 1rem;
+    }
+    
+    .analysis-content ul {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+    
+    .analysis-content li {
+      margin-bottom: 0.5rem;
     }
     
     .example-text {
       font-size: 0.9rem;
-      color: var(--dark-color);
+      color: var(--primary-color);
       cursor: pointer;
-      text-decoration: underline;
-      margin-top: 0.5rem;
+      text-decoration: none;
+      margin-top: 0.75rem;
+      display: inline-block;
+      transition: all 0.2s;
+      font-weight: 500;
     }
     
     .example-text:hover {
-      color: var(--primary-color);
+      color: var(--secondary-color);
+      text-decoration: underline;
+    }
+    
+    .example-text i {
+      margin-right: 5px;
     }
     
     footer {
       text-align: center;
-      margin-top: 3rem;
-      padding: 1rem 0;
-      color: var(--dark-color);
+      margin-top: 4rem;
+      padding: 1.5rem 0;
+      color: var(--text-muted);
       font-size: 0.9rem;
+    }
+    
+    .session-status {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      font-size: 0.8rem;
+      font-weight: 500;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      color: var(--dark-color);
+    }
+    
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, rgba(108, 142, 255, 0.1) 0%, rgba(157, 125, 255, 0.1) 100%);
+      color: var(--primary-color);
+    }
+    
+    .feature-card {
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: var(--card-bg);
+      height: 100%;
+      transition: all 0.3s;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
+    .feature-card h5 {
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--dark-color);
+    }
+    
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    
+    .tab-content {
+      padding: 1.5rem 0;
+    }
+    
+    .nav-tabs .nav-link {
+      border: none;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 0.75rem 1.25rem;
+      position: relative;
+      background: transparent;
+    }
+    
+    .nav-tabs .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+      transition: width 0.3s;
+    }
+    
+    .nav-tabs .nav-link.active {
+      color: var(--primary-color);
+      background: transparent;
+    }
+    
+    .nav-tabs .nav-link.active::after {
+      width: 100%;
+    }
+    
+    .nav-tabs {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .form-label {
+      color: var(--dark-color);
+    }
+    
+    .text-muted {
+      color: var(--text-muted) !important;
+    }
+    
+    .modal-content {
+      background-color: var(--card-bg);
+      color: var(--dark-color);
+    }
+    
+    .modal-header {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .modal-footer {
+      border-top: 1px solid rgba(255,255,255,0.1);
     }
     
     @media (max-width: 768px) {
       .header {
-        padding: 1.5rem;
+        padding: 1.75rem 1.5rem;
       }
       
       .container {
         padding: 0 1rem;
+      }
+      
+      .result-box {
+        padding: 1.5rem;
+      }
+      
+      .header h1 {
+        font-size: 1.8rem;
+      }
+      
+      .header .lead {
+        font-size: 1rem;
       }
     }
   </style>
@@ -344,134 +606,204 @@
 <body>
   <div class="container">
     <div class="header text-center">
-      <h1><i class="fas fa-briefcase me-2"></i> self Analyzer</h1>
-      <p class="lead">Get AI-powered insights on yourself</p>
+      <h1><i class="fas fa-search-location me-2"></i> Self Discovery Tool</h1>
+      <p class="lead">AI-powered insights to help you find your path</p>
     </div>
     
-    <div class="card">
-      <div class="card-header">
-        <h5 class="mb-0"><i class="fas fa-paste me-2"></i>  Details</h5>
-      </div>
-      <div class="card-body">
-        <div class="mb-3">
-          <label for="jobInput" class="form-label">what do you want to find</label>
-          <textarea class="form-control" id="jobInput" rows="8" placeholder='Example JSON format:
+    <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="analyze-tab" data-bs-toggle="tab" data-bs-target="#analyze" type="button" role="tab">Analyze</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="features-tab" data-bs-toggle="tab" data-bs-target="#features" type="button" role="tab">How It Works</button>
+      </li>
+    </ul>
+    
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="analyze" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-user-circle me-2"></i> Your Information</h5>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label for="selfInput" class="form-label">Tell us about yourself and what you're looking for</label>
+              <textarea class="form-control" id="selfInput" rows="8" placeholder='Example format:
 {
-    
-    "right now i am":" 12th pass"
-    
-    "I need to find i do next" 
-  
-  
+  "current_situation": "12th pass",
+  "interests": ["technology", "design"],
+  "strengths": ["problem solving", "creativity"],
+  "goals": "Find a career path that matches my skills"
 }
 
-Or paste plain text description'></textarea>
-          <small class="text-muted">For best results, explain your everything</small>
-        </div>
-        
-        <div class="d-grid gap-2">
-          <button id="analyzeBtn" class="btn btn-primary" onclick="saveAndAnalyze()">
-            <i class="fas fa-search me-2"></i> Save & Analyze 
-          </button>
-        </div>
-        
-        <div class="example-text text-center mt-2" onclick="loadExample()">
-          <i class="fas fa-lightbulb me-1"></i> Load example description
-        </div>
-      </div>
-    </div>
-    
-    <div class="result-box" id="resultBox" style="display:none;">
-      <div class="text-center mb-4">
-        <h2><i class="fas fa-chart-line me-2"></i> Analysis Results</h2>
-        <p class="text-muted">Your compatibility with this</p>
-      </div>
-      
-      <div class="score-container hidden">
-        <div class="score-header hidden">
-          <h5><i class="fas fa-percentage me-2 hidden"></i> Compatibility Score</h5>
-          <span id="score" class="score-value hidden">0%</span>
-        </div>
-        <div class="progress hidden">
-          <div id="scoreBar" 
-               class="progress-bar progress-bar-striped progress-bar-animated" 
-               role="progressbar" 
-               style="width: 0%" 
-               aria-valuenow="0" 
-               aria-valuemin="0" 
-               aria-valuemax="100">
+Or simply describe your situation in plain text'></textarea>
+              <small class="text-muted">For best results, provide details about your education, skills, interests, and goals</small>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button id="analyzeBtn" class="btn btn-primary" onclick="saveAndAnalyze()">
+                <i class="fas fa-search me-2"></i> Analyze My Profile
+              </button>
+            </div>
+            
+            <div class="text-center mt-3">
+              <span class="example-text" onclick="loadExample()">
+                <i class="fas fa-lightbulb me-1"></i> Load example profile
+              </span>
+              <span class="mx-2">•</span>
+              <span class="example-text" data-bs-toggle="tooltip" data-bs-placement="top" title="We use anonymous authentication to save your data without personal information">
+                <i class="fas fa-shield-alt me-1"></i> Privacy Protected
+              </span>
+            </div>
           </div>
         </div>
-        <div class="score-labels hidden">
-          <span>Low</span>
-          <span>Medium</span>
-          <span>High</span>
+        
+        <div class="result-box" id="resultBox" style="display:none;">
+          <div class="text-center mb-4">
+            <h2><i class="fas fa-chart-pie me-2"></i> Analysis Results</h2>
+            <p class="text-muted">Your personalized path discovery</p>
+          </div>
+          
+          <div class="score-container">
+            <div class="score-header">
+              <h5><i class="fas fa-percentage me-2"></i> Path Match Score</h5>
+              <span id="score" class="score-value">0%</span>
+            </div>
+            <div class="progress">
+              <div id="scoreBar" 
+                   class="progress-bar progress-bar-striped" 
+                   role="progressbar" 
+                   style="width: 0%" 
+                   aria-valuenow="0" 
+                   aria-valuemin="0" 
+                   aria-valuemax="100">
+              </div>
+            </div>
+            <div class="score-labels">
+              <span>Needs Work</span>
+              <span>Good Match</span>
+              <span>Excellent Fit</span>
+            </div>
+          </div>
+          
+          <div class="analysis-section">
+            <h5><i class="fas fa-comment-alt me-2"></i> Personalized Analysis</h5>
+            <div id="analysisText" class="analysis-content"></div>
+          </div>
+          
+          <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-outline-primary" onclick="window.print()">
+              <i class="fas fa-print me-2"></i> Print Results
+            </button>
+          </div>
         </div>
       </div>
       
-      <div class="analysis-section">
-        <h5><i class="fas fa-comment-alt me-2"></i> Detailed Analysis</h5>
-        <div id="analysisText" class="analysis-content"></div>
-      </div>
-      
-      <div class="d-grid gap-2 mt-3">
-        <button class="btn btn-outline-primary" onclick="window.print()">
-          <i class="fas fa-print me-2"></i> Print Results
-        </button>
+      <div class="tab-pane fade" id="features" role="tabpanel">
+        <div class="row">
+          <div class="col-md-4 mb-4">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-brain fa-lg"></i>
+              </div>
+              <h5>AI-Powered Analysis</h5>
+              <p>Our advanced algorithms analyze your profile to provide personalized recommendations based on your unique skills and interests.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-chart-line fa-lg"></i>
+              </div>
+              <h5>Compatibility Scoring</h5>
+              <p>Get a clear match score that shows how well different paths align with your profile, helping you make informed decisions.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4">
+            <div class="feature-card">
+              <div class="feature-icon">
+                <i class="fas fa-lock fa-lg"></i>
+              </div>
+              <h5>Privacy Focused</h5>
+              <p>We use anonymous authentication to protect your privacy. Your data is never shared or used for advertising purposes.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i> How To Use This Tool</h5>
+          </div>
+          <div class="card-body">
+            <ol class="mb-0">
+              <li class="mb-2">Describe your current situation (education, skills, experience)</li>
+              <li class="mb-2">Share your interests and passions</li>
+              <li class="mb-2">Mention any specific goals or constraints</li>
+              <li class="mb-2">Click "Analyze My Profile" to get personalized insights</li>
+              <li>Review your compatibility score and detailed analysis</li>
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
     
     <footer>
-      <p>Olvera self Analyzer &copy; 2025</p>
+      <p>Olvera Self Discovery Tool &copy; 2025 | <a href="#" class="text-decoration-none" onclick="showAbout()" style="color: var(--primary-color)">About</a></p>
     </footer>
+  </div>
+
+  <div class="session-status" id="authStatus">
+    <i class="fas fa-circle-notch fa-spin me-1"></i> Connecting...
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   
   <script>
-    // Load example job description
+    // Load example profile
     function loadExample() {
       const exampleText = `{
-        "right now i am ":" 12th pass"
-    
-    "I need to find i do next" 
-        
+  "current_situation": "Recently completed 12th grade with 85% marks",
+  "subjects": ["Mathematics", "Physics", "Computer Science"],
+  "skills": ["Problem solving", "Basic programming", "Teamwork"],
+  "interests": ["Technology", "Artificial Intelligence", "Robotics"],
+  "goals": "Find a career path that combines my technical skills with creative problem solving",
+  "constraints": "Prefer not to pursue medical field, limited budget for education"
+}`;
       
-      }`;
-      
-      document.getElementById("jobInput").value = exampleText;
+      document.getElementById("selfInput").value = exampleText;
     }
     
     // Show about modal
     function showAbout() {
-      const aboutModal = new bootstrap.Modal(document.createElement('div'));
-      
-      const modalContent = `
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">About skill Analyzer</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <p>This tool uses AI to analyze skills and provide:</p>
-              <ul>
-                <li>Compatibility score based on your profile</li>
-                <li>Detailed analysis of requirements</li>
-                <li>Strengths and gaps in your qualifications</li>
-              </ul>
-              <p>All data is processed securely and anonymously.</p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      aboutModal._element.innerHTML = modalContent;
+      const aboutModal = new bootstrap.Modal(document.getElementById('aboutModal'));
       aboutModal.show();
     }
   </script>
+  
+  <!-- About Modal -->
+  <div class="modal fade" id="aboutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-info-circle me-2"></i> About Self Discovery Tool</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>This tool helps you discover potential career paths and educational directions based on your unique profile.</p>
+          <p><strong>Key features:</strong></p>
+          <ul>
+            <li>AI-powered analysis of your skills and interests</li>
+            <li>Personalized compatibility scoring for different paths</li>
+            <li>Detailed recommendations for next steps</li>
+            <li>Anonymous usage with no personal data collection</li>
+          </ul>
+          <p>Simply describe your current situation, skills, and goals to get started.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

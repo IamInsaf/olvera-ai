@@ -1,32 +1,62 @@
 {
   "hosting": {
+    "public": "public",
     "site": "proway",
-    "public": "public",  
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
     "cleanUrls": true,
     "rewrites": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/api/**",
+        "function": "api"
+      },
+      {
+        "source": "/vresults",
+        "destination": "/smart-voice/vresults.html"
+      },
+      {
+        "source": "/premiumresults",
+        "destination": "/premiumv1/premiumresults.html"
+      },
+      {
+        "source": "/privacy-policy",
+        "destination": "/policies/privacy.html"
+      },
+      {
+        "source": "/terms-and-conditions",
+        "destination": "/policies/terms-and-conditions.html"
+      },
+      {
+        "source": "/searchJob",
+        "function": "searchJob"
       }
     ]
   },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs18"
-  },
+  "functions": [
+    {
+      "source": "functions",
+      "runtime": "nodejs18",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ],
   "firestore": {
+    "database": "(default)",
+    "location": "nam5",
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
   "storage": {
-    "rules": "storage.rules",
-    "cors": [
-      {
-        "origin": ["http://127.0.0.1:5500"],
-        "method": ["GET", "POST", "DELETE", "PUT"],
-        "maxAgeSeconds": 3600
-      }
-    ]
+    "rules": "storage.rules"
   },
   "emulators": {
     "firestore": {
@@ -39,9 +69,5 @@
       "enabled": true
     }
   }
-
-  
-
-  }
-  
+}
 

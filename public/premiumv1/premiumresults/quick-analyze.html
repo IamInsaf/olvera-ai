@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Olvera - Analyze Job Opportunity</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -32,12 +34,10 @@
 
     let currentUser = null;
 
-  
     // Handle login
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        
       } else {
         try {
           const result = await signInAnonymously(auth);
@@ -62,6 +62,9 @@
       analyzeBtn.disabled = true;
       analyzeBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Analyzing...';
 
+      // Add animation to button
+      analyzeBtn.classList.add('animate__animated', 'animate__pulse');
+      
       try {
         let jobData;
         try {
@@ -83,14 +86,22 @@
         const analyzeJob = httpsCallable(functions, "analyzeJobOpportunity");
         const response = await analyzeJob();
 
-        // Update score display
+        // Update score display with animation
         updateScoreDisplay(response.data.compatibilityScore);
         
-        document.getElementById("analysisText").innerHTML = formatAnalysisText(response.data.analysis);
-        document.getElementById("resultBox").style.display = "block";
+        // Animate the result box appearance
+        const resultBox = document.getElementById("resultBox");
+        resultBox.style.display = "block";
+        resultBox.classList.add('animate__animated', 'animate__fadeInUp');
+        
+        // Format and display analysis text with typing animation
+        const analysisText = formatAnalysisText(response.data.analysis);
+        typeWriter(document.getElementById("analysisText"), analysisText);
         
         // Scroll to results
-        document.getElementById("resultBox").scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => {
+          resultBox.scrollIntoView({ behavior: 'smooth' });
+        }, 300);
         
       } catch (error) {
         console.error("Analysis error:", error);
@@ -99,26 +110,46 @@
         // Reset button state
         analyzeBtn.disabled = false;
         analyzeBtn.innerHTML = '<i class="fas fa-search me-2"></i> Save & Analyze Job';
+        analyzeBtn.classList.remove('animate__animated', 'animate__pulse');
       }
     };
+
+    // Typewriter effect for analysis text
+    function typeWriter(element, text, i = 0) {
+      if (i < text.length) {
+        element.innerHTML = text.substring(0, i + 1);
+        setTimeout(() => typeWriter(element, text, i + 1), 20);
+      }
+    }
 
     function updateScoreDisplay(score) {
       const scoreElement = document.getElementById("score");
       const scoreBar = document.getElementById("scoreBar");
       
-      scoreElement.textContent = `${score}%`;
-      scoreBar.style.width = `${score}%`;
-      scoreBar.setAttribute('aria-valuenow', score);
+      // Animate the score change
+      let currentScore = 0;
+      const increment = score / 20;
+      const timer = setInterval(() => {
+        currentScore += increment;
+        if (currentScore >= score) {
+          currentScore = score;
+          clearInterval(timer);
+        }
+        
+        scoreElement.textContent = `${Math.round(currentScore)}%`;
+        scoreBar.style.width = `${currentScore}%`;
+        scoreBar.setAttribute('aria-valuenow', currentScore);
 
-      // Update color based on score
-      scoreBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
-      if (score >= 75) {
-        scoreBar.classList.add('bg-success');
-      } else if (score >= 50) {
-        scoreBar.classList.add('bg-warning');
-      } else {
-        scoreBar.classList.add('bg-danger');
-      }
+        // Update color based on score
+        scoreBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+        if (currentScore >= 75) {
+          scoreBar.classList.add('bg-success');
+        } else if (currentScore >= 50) {
+          scoreBar.classList.add('bg-warning');
+        } else {
+          scoreBar.classList.add('bg-danger');
+        }
+      }, 30);
     }
 
     // Helper function to format analysis text
@@ -130,10 +161,10 @@
         .replace(/\n/g, '<br>');
     }
 
-    // Show alert message
+    // Show alert message with animation
     function showAlert(message, type) {
       const alertDiv = document.createElement("div");
-      alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3 animate__animated animate__fadeInDown`;
       alertDiv.role = "alert";
       alertDiv.innerHTML = `
         ${message}
@@ -148,23 +179,38 @@
         bsAlert.close();
       }, 5000);
     }
+
+    // Initialize animations on load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Add animation to header
+      const header = document.querySelector('.header');
+      header.classList.add('animate__animated', 'animate__fadeInDown');
+      
+      // Add animation to card
+      const card = document.querySelector('.card');
+      card.classList.add('animate__animated', 'animate__fadeInUp');
+    });
   </script>
 
   <style>
     :root {
-      --primary-color: #4e73df;
-      --success-color: #1cc88a;
-      --info-color: #36b9cc;
-      --warning-color: #f6c23e;
-      --danger-color: #e74a3b;
-      --light-color: #f8f9fc;
-      --dark-color: #5a5c69;
+      --primary-color: #6c8eff;
+      --success-color: #2ecc9a;
+      --info-color: #48d1e0;
+      --warning-color: #ffd166;
+      --danger-color: #ff6b6b;
+      --light-color: #2d3748;
+      --dark-color: #f8f9fa;
+      --body-bg: #1a202c;
+      --card-bg: #2d3748;
+      --text-color: #f8f9fa;
+      --border-color: #4a5568;
     }
     
     body {
       font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-      background-color: #f8f9fc;
-      color: #333;
+      background-color: var(--body-bg);
+      color: var(--text-color);
       line-height: 1.6;
     }
     
@@ -174,38 +220,45 @@
     }
     
     .header {
-      background: linear-gradient(135deg, var(--primary-color) 0%, #224abe 100%);
+      background: linear-gradient(135deg, var(--primary-color) 0%, #4a6bff 100%);
       color: white;
       padding: 2rem;
       border-radius: 15px;
       margin-bottom: 2rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
     
     .card {
       border: none;
       border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       margin-bottom: 2rem;
       overflow: hidden;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
     }
     
     .card-header {
-      background-color: white;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border-color);
       font-weight: 600;
+      color: var(--dark-color);
     }
     
     textarea {
       min-height: 200px;
       border-radius: 10px !important;
-      border: 1px solid #ddd;
+      border: 1px solid var(--border-color);
       resize: vertical;
+      background-color: var(--card-bg);
+      color: var(--text-color);
     }
     
     textarea:focus {
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+      box-shadow: 0 0 0 0.25rem rgba(108, 142, 255, 0.25);
+      background-color: var(--card-bg);
+      color: var(--text-color);
     }
     
     .btn-primary {
@@ -218,26 +271,38 @@
     }
     
     .btn-primary:hover {
-      background-color: #2e59d9;
-      border-color: #2653d4;
+      background-color: #5a7eff;
+      border-color: #5a7eff;
       transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(78, 115, 223, 0.4);
+      box-shadow: 0 4px 15px rgba(108, 142, 255, 0.4);
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-outline-primary:hover {
+      background-color: var(--primary-color);
+      color: white;
     }
     
     .result-box {
-      background: white;
+      background: var(--card-bg);
       padding: 2rem;
       border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       margin-top: 2rem;
+      border: 1px solid var(--border-color);
     }
     
     .score-container {
-      background: white;
+      background: var(--card-bg);
       padding: 1.5rem;
       border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
       margin-bottom: 1.5rem;
+      border: 1px solid var(--border-color);
     }
 
     .score-header {
@@ -261,7 +326,7 @@
 
     .progress {
       border-radius: 10px;
-      background-color: #f0f0f0;
+      background-color: var(--body-bg);
       overflow: visible;
       height: 20px;
     }
@@ -280,7 +345,7 @@
       transform: translateY(-50%);
       width: 16px;
       height: 16px;
-      background: white;
+      background: var(--card-bg);
       border: 3px solid currentColor;
       border-radius: 50%;
     }
@@ -297,15 +362,26 @@
     }
     
     .analysis-section {
-      background-color: var(--light-color);
+      background-color: var(--body-bg);
       border-radius: 10px;
       padding: 1.5rem;
       margin-top: 1.5rem;
+      border: 1px solid var(--border-color);
     }
     
     .analysis-section h5 {
       color: var(--primary-color);
       margin-bottom: 1rem;
+    }
+    
+    .analysis-content {
+      opacity: 0;
+      animation: fadeIn 0.5s forwards;
+      animation-delay: 0.3s;
+    }
+    
+    @keyframes fadeIn {
+      to { opacity: 1; }
     }
     
     .example-text {
@@ -314,10 +390,12 @@
       cursor: pointer;
       text-decoration: underline;
       margin-top: 0.5rem;
+      transition: all 0.3s ease;
     }
     
     .example-text:hover {
       color: var(--primary-color);
+      transform: translateX(5px);
     }
     
     footer {
@@ -326,6 +404,15 @@
       padding: 1rem 0;
       color: var(--dark-color);
       font-size: 0.9rem;
+    }
+    
+    .form-label {
+      color: var(--dark-color);
+    }
+    
+    .text-muted {
+      color: var(--dark-color) !important;
+      opacity: 0.7;
     }
     
     @media (max-width: 768px) {
@@ -356,8 +443,6 @@
           <textarea class="form-control" id="jobInput" rows="8" placeholder='Example JSON format:
 {
   "title": "Frontend Developer",
-  "company": "Tech Corp Inc.",
-  
 }
 
 Or paste plain text description'></textarea>
@@ -432,10 +517,16 @@ Or paste plain text description'></textarea>
         "location": "Remote",
         "salary": "$120,000 - $150,000",
         
-      
       }`;
       
-      document.getElementById("jobInput").value = exampleText;
+      const textarea = document.getElementById("jobInput");
+      textarea.value = exampleText;
+      
+      // Add animation to textarea
+      textarea.classList.add('animate__animated', 'animate__pulse');
+      setTimeout(() => {
+        textarea.classList.remove('animate__animated', 'animate__pulse');
+      }, 1000);
     }
     
     // Show about modal

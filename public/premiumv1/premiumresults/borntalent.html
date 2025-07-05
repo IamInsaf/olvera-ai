@@ -11,17 +11,17 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-functions.js"></script>
     <style>
         .analysis-section {
-            background-color: #f8fafc;
+            background-color: #1e293b;
             border-left: 4px solid #3b82f6;
             transition: all 0.3s ease;
         }
         .analysis-section:hover {
-            background-color: #eff6ff;
+            background-color: #334155;
             transform: translateX(4px);
         }
         .progress-bar {
             height: 6px;
-            background-color: #e5e7eb;
+            background-color: #334155;
             border-radius: 3px;
             overflow: hidden;
         }
@@ -31,14 +31,18 @@
             width: 0%;
             transition: width 0.3s ease;
         }
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-900">
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Header -->
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Your Talent Analysis</h1>
-            <p class="text-gray-600" id="statusMessage">Loading your talent profile...</p>
+            <h1 class="text-3xl font-bold text-gray-100">Your Talent Analysis</h1>
+            <p class="text-gray-400" id="statusMessage">Loading your talent profile...</p>
             <div class="progress-bar mt-2" id="progressBar">
                 <div class="progress-fill" id="progressFill"></div>
             </div>
@@ -47,19 +51,19 @@
         <!-- Loading State -->
         <div id="loading" class="text-center py-12">
             <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-            <p class="mt-4 text-gray-600" id="loadingMessage">Loading your analysis...</p>
+            <p class="mt-4 text-gray-400" id="loadingMessage">Loading your analysis...</p>
         </div>
 
         <!-- Generate New Analysis State -->
-        <div id="generateAnalysis" class="hidden text-center py-12 bg-white rounded-lg shadow p-6">
+        <div id="generateAnalysis" class="hidden text-center py-12 bg-gray-800 rounded-lg shadow p-6">
             <div class="text-blue-500 mb-4">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             </div>
-            <h3 class="text-xl font-medium text-gray-800 mb-2">No Analysis Found</h3>
-            <p class="text-gray-600 mb-6">We couldn't find an existing analysis for your profile. Would you like to generate one now?</p>
-            <button onclick="generateNewAnalysis()" class="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition flex items-center mx-auto">
+            <h3 class="text-xl font-medium text-gray-100 mb-2">No Analysis Found</h3>
+            <p class="text-gray-400 mb-6">We couldn't find an existing analysis for your profile. Would you like to generate one now?</p>
+            <button onclick="generateNewAnalysis()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center mx-auto">
                 <span id="generateButtonText">Generate Analysis</span>
                 <svg id="generateSpinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -80,9 +84,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <h3 class="text-xl font-medium text-gray-800 mb-2">Something went wrong</h3>
-            <p class="text-gray-600 mb-4" id="errorMessage"></p>
-            <button onclick="checkAnalysis()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+            <h3 class="text-xl font-medium text-gray-100 mb-2">Something went wrong</h3>
+            <p class="text-gray-400 mb-4" id="errorMessage"></p>
+            <button onclick="checkAnalysis()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                 Try Again
             </button>
         </div>
@@ -91,13 +95,13 @@
     <script>
         // Firebase configuration (replace with your actual config)
         const firebaseConfig = {
-      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
-      authDomain: "promgn-in.firebaseapp.com",
-      projectId: "promgn-in",
-      storageBucket: "promgn-in.appspot.com",
-      messagingSenderId: "545429176314",
-      appId: "1:545429176314:web:5590c702b55357b4bfae43",
-      measurementId: "G-YZQG3ZPQMJ"
+            apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+            authDomain: "promgn-in.firebaseapp.com",
+            projectId: "promgn-in",
+            storageBucket: "promgn-in.appspot.com",
+            messagingSenderId: "545429176314",
+            appId: "1:545429176314:web:5590c702b55357b4bfae43",
+            measurementId: "G-YZQG3ZPQMJ"
         };
 
         // Initialize Firebase
@@ -122,65 +126,125 @@
 
         // Parse markdown-style content to HTML
         function formatAnalysisContent(text) {
-    // Convert main headers
-    text = text.replace(/^-\s*\*\*Innate Talents\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-purple-800 border-b-2 border-purple-200 pb-2">Innate Talents</h2>');
-    text = text.replace(/^-\s*\*\*Unique Natural Abilities\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-teal-800 border-b-2 border-teal-200 pb-2">Unique Natural Abilities</h2>');
-    text = text.replace(/^-\s*\*\*Career Alignment with Talents\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-blue-800 border-b-2 border-blue-200 pb-2">Career Alignment with Talents</h2>');
-    text = text.replace(/^-\s*\*\*Market Advantage\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-indigo-800 border-b-2 border-indigo-200 pb-2">Market Advantage</h2>');
-    text = text.replace(/^-\s*\*\*Development Opportunities\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-green-800 border-b-2 border-green-200 pb-2">Development Opportunities</h2>');
-    text = text.replace(/^-\s*\*\*Future Potential\*\*:/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-amber-800 border-b-2 border-amber-200 pb-2">Future Potential</h2>');
+            // Convert main headers with icons and better hierarchy
+            text = text.replace(/^-\s*\*\*Innate Talents\*\*:/gm, 
+                '<h2 class="text-2xl font-bold mt-12 mb-6 text-purple-300 border-b-2 border-purple-700 pb-3 flex items-center gap-3">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />' +
+                '</svg>Innate Talents</h2>');
+            
+            text = text.replace(/^-\s*\*\*Unique Natural Abilities\*\*:/gm, 
+                '<h2 class="text-2xl font-bold mt-12 mb-6 text-teal-300 border-b-2 border-teal-700 pb-3 flex items-center gap-3">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />' +
+                '</svg>Unique Natural Abilities</h2>');
+            
+            text = text.replace(/^-\s*\*\*Career Alignment with Talents\*\*:/gm, 
+                '<h2 class="text-2xl font-bold mt-12 mb-6 text-blue-300 border-b-2 border-blue-700 pb-3 flex items-center gap-3">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />' +
+                '</svg>Career Alignment with Talents</h2>');
+            
+            text = text.replace(/^-\s*\*\*Market Advantage\*\*:/gm, 
+                '<h2 class="text-2xl font-bold mt-12 mb-6 text-indigo-300 border-b-2 border-indigo-700 pb-3 flex items-center gap-3">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />' +
+                '</svg>Market Advantage</h2>');
+            
+            text = text.replace(/^-\s*\*\*Development Opportunities\*\*:/gm, 
+                '<h2 class="text-2xl font-bold mt-12 mb-6 text-green-300 border-b-2 border-green-700 pb-3 flex items-center gap-3">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />' +
+                '</svg>Development Opportunities</h2>');
+            
+            text = text.replace(/^-\s*\*\*Future Potential\*\*:/gm, 
+                '<h2 class="text-2xl font-bold mt-12 mb-6 text-amber-300 border-b-2 border-amber-700 pb-3 flex items-center gap-3">' +
+                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />' +
+                '</svg>Future Potential</h2>');
 
-    // Convert bold and italic
-    text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>');
-    text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            // Convert bold and italic with better semantics
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-100">$1</strong>');
+            text = text.replace(/\*(.*?)\*/g, '<em class="italic text-gray-300">$1</em>');
 
-    // Convert numbered development opportunities
-    text = text.replace(/^\s*(\d+)\.\s+\[Opportunity \d+:\s*(.*?)\]/gm, '<div class="opportunity-box bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500 mb-4"><span class="text-lg font-bold text-green-700">$1. $2</span></div>');
+            // Enhanced development opportunities with progress indicators
+            text = text.replace(/^\s*(\d+)\.\s+\[Opportunity \d+:\s*(.*?)\]/gm, 
+                `<div class="opportunity-box group relative bg-gray-800 p-6 rounded-xl shadow-sm border-l-4 border-green-500 mb-6 hover:shadow-md transition-shadow">
+                    <span class="text-lg font-bold text-green-300">$1. $2</span>
+                    <div class="progress-bar mt-3 h-2 bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-green-500 rounded-full w-0 group-hover:w-full transition-all duration-500"></div>
+                    </div>
+                </div>`);
 
-    // Convert bullet points to talent cards
-    text = text.replace(/^\s*-\s+\[(.*?)\]/gm, '<li class="talent-card bg-gray-50 p-3 rounded-lg mb-2 border border-gray-200">$1</li>');
+            // Enhanced talent cards with hover effects and badges
+            text = text.replace(/^\s*-\s+\[(.*?)\]/gm, 
+                `<li class="talent-card bg-gray-800 p-4 rounded-lg mb-3 border border-gray-700 hover:border-purple-500 hover:shadow-sm transition-all">
+                    <div class="flex items-start">
+                        <span class="talent-badge bg-purple-900 text-purple-300 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full mt-0.5">Talent</span>
+                        <span>$1</span>
+                    </div>
+                </li>`);
 
-    // Highlight innate talents with special styling
-    text = text.replace(/(Natural Talent:|Innate Ability:|Distinctive Quality:)/g, '<span class="talent-label font-bold text-purple-600">$1</span>');
+            // Highlight innate talents with badges and tooltips
+            text = text.replace(/(Natural Talent:|Innate Ability:|Distinctive Quality:)/g, 
+                `<span class="talent-label relative inline-block font-bold text-purple-400 group">
+                    <span class="badge bg-purple-900 text-purple-300 text-xs font-semibold px-2 py-0.5 rounded ml-1">!</span>
+                    <span class="tooltip invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap">Key Strength</span>
+                    $1
+                </span>`);
 
-    // Convert lists to proper HTML
-    let inList = false;
-    let lines = text.split('\n');
-    let newText = [];
-    
-    for (let i = 0; i < lines.length; i++) {
-        if (/^\s*[-•]/.test(lines[i])) {
-            if (!inList) {
-                newText.push('<ul class="talent-list space-y-3 mb-6">');
-                inList = true;
+            // Convert lists to proper HTML with animated checkmarks
+            let inList = false;
+            let lines = text.split('\n');
+            let newText = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                if (/^\s*[-•]/.test(lines[i])) {
+                    if (!inList) {
+                        newText.push('<ul class="talent-list space-y-3 mb-8 pl-5">');
+                        inList = true;
+                    }
+                    // Convert list items with animation
+                    newText.push(lines[i].replace(/^\s*[-•]\s*(.*)/, 
+                        `<li class="relative pl-7 before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-purple-500 before:rounded-full before:transition-all before:hover:scale-150">
+                            <span class="list-item-content">$1</span>
+                        </li>`));
+                } else {
+                    if (inList) {
+                        newText.push('</ul>');
+                        inList = false;
+                    }
+                    newText.push(lines[i]);
+                }
             }
-            newText.push(lines[i]);
-        } else {
-            if (inList) {
-                newText.push('</ul>');
-                inList = false;
-            }
-            newText.push(lines[i]);
-        }
-    }
-    
-    if (inList) newText.push('</ul>');
-    text = newText.join('\n');
+            
+            if (inList) newText.push('</ul>');
+            text = newText.join('\n');
 
-    // Convert milestone items
-    text = text.replace(/^\s*-\s+\[Milestone:\s*(.*?)\]/gm, '<li class="milestone-item flex items-start mb-3"><span class="milestone-icon bg-amber-100 text-amber-800 rounded-full w-6 h-6 flex items-center justify-center mr-2 mt-0.5 flex-shrink-0">✓</span><span>$1</span></li>');
+            // Enhanced milestone items with animated checkmarks
+            text = text.replace(/^\s*-\s+\[Milestone:\s*(.*?)\]/gm, 
+                `<li class="milestone-item flex items-start mb-4 group">
+                    <span class="milestone-icon bg-amber-900 text-amber-300 rounded-full w-7 h-7 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 transition-all group-hover:bg-amber-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </span>
+                    <span class="milestone-text text-gray-300 group-hover:text-gray-100 transition-colors">$1</span>
+                </li>`);
 
-    // Add visual separation between sections
-    text = text.replace(/(<\/h2>)/g, '$1<div class="section-content pl-4">');
-    text = text.replace(/(<h2)/g, '</div>$1');
+            // Add visual separation between sections with gradient backgrounds
+            text = text.replace(/(<\/h2>)/g, '$1<div class="section-content pl-6 pr-4 py-2 bg-gradient-to-r from-transparent to-gray-800/30 rounded-lg">');
+            text = text.replace(/(<h2)/g, '</div>$1');
 
-    // Final cleanup
-    text = text.replace(/<div class="section-content pl-4"><\/div>/g, '');
+            // Final cleanup
+            text = text.replace(/<div class="section-content pl-6 pr-4 py-2 bg-gradient-to-r from-transparent to-gray-800\/30 rounded-lg"><\/div>/g, '');
+            text = text.replace(/<\/div><h2/g, '</div>\n<h2');
 
-    return `<div class="talent-analysis-container space-y-8 text-gray-800 leading-relaxed">
-                ${text}
-            </div>`;
-}        // Check for existing analysis
+            return `<div class="talent-analysis-container space-y-10 text-gray-300 leading-relaxed max-w-4xl mx-auto px-4">
+                        ${text}
+                    </div>`;
+        }  
+
         async function checkAnalysis() {
             loadingElement.classList.remove('hidden');
             generateElement.classList.add('hidden');
@@ -207,11 +271,11 @@
                     // Format the analysis content
                     const formattedContent = formatAnalysisContent(data.analysis);
                     contentElement.innerHTML = `
-                        <div class="bg-white rounded-lg shadow p-6 analysis-section">
+                        <div class="bg-gray-800 rounded-lg shadow p-6 analysis-section">
                             ${formattedContent}
                         </div>
-                        <div class="bg-white rounded-lg shadow p-6 analysis-section">
-                            <button onclick="generateNewAnalysis()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                        <div class="bg-gray-800 rounded-lg shadow p-6 analysis-section">
+                            <button onclick="generateNewAnalysis()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                                 Refresh Analysis
                             </button>
                         </div>

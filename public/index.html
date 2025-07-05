@@ -1,508 +1,1264 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Olvera – AI-Powered Career Guidance for Students</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="google-adsense-account" content="ca-pub-6090544760574516">
-  <meta name="description" content="Confused about your career? Olvera helps students discover their perfect course and career with AI-powered assessments. Take our free test today!">
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white hidden" src="banner.png" alt="">
-  
-  <!-- Firebase Analytics -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Olvera - AI Career Guidance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+      <!-- Firebase Analytics -->
   <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              200: '#bae6fd',
-              300: '#7dd3fc',
-              400: '#38bdf8',
-              500: '#0ea5e9',
-              600: '#0284c7',
-              700: '#0369a1',
-              800: '#075985',
-              900: '#0c4a6e',
-            },
-            secondary: {
-              50: '#f5f3ff',
-              100: '#ede9fe',
-              200: '#ddd6fe',
-              300: '#c4b5fd',
-              400: '#a78bfa',
-              500: '#8b5cf6',
-              600: '#7c3aed',
-              700: '#6d28d9',
-              800: '#5b21b6',
-              900: '#4c1d95',
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-          }
+    <style>
+        :root {
+            --bg-dark: #0A0A0F;
+            --accent-violet: #9D4AFF;
+            --accent-cyan: #00F5FF;
+            --text-light: #FFFFFF;
+            --glass-bg: rgba(15, 15, 25, 0.8);
+            --glass-border: rgba(157, 74, 255, 0.3);
         }
-      }
-    }
-  </script>
-  
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Sora', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            padding: 0 2rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(157, 74, 255, 0.2) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            z-index: 2;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 1s ease forwards 0.5s;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(157, 74, 255, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            color: white;
+            box-shadow: 0 4px 20px rgba(157, 74, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(157, 74, 255, 0.6);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            border: 2px solid var(--accent-cyan);
+            color: var(--accent-cyan);
+            background: transparent;
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-cyan);
+            color: var(--bg-dark);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+        }
+
+        /* Floating Chatbot */
+        .chatbot-icon {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(157, 74, 255, 0.4);
+            z-index: 100;
+            animation: float 3s ease-in-out infinite;
+            transition: all 0.3s ease;
+        }
+
+        .chatbot-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(157, 74, 255, 0.6);
+        }
+
+        .chatbot-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        /* How It Works Section */
+        .section {
+            padding: 6rem 2rem;
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+            font-size: 2.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .section-title span {
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .steps-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 300px;
+            text-align: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(157, 74, 255, 0.1) 0%, transparent 70%);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .step-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(157, 74, 255, 0.2);
+        }
+
+        .step-card:hover::before {
+            opacity: 1;
+            transform: rotate(0deg);
+        }
+
+        .step-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            border-radius: 50%;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 4px 15px rgba(157, 74, 255, 0.4);
+        }
+
+        .step-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .step-card p {
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+
+        /* AI Features Section */
+        .features-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(157, 74, 255, 0.2);
+            border-color: rgba(157, 74, 255, 0.6);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .feature-card p {
+            opacity: 0.8;
+            font-size: 0.95rem;
+        }
+
+        /* Student Results Section */
+        .testimonials-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .testimonial-slide {
+            background: var(--glass-bg);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 0 1rem;
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.9);
+            transition: all 0.5s ease;
+        }
+
+        .testimonial-slide.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            border: 2px solid var(--accent-violet);
+            object-fit: cover;
+        }
+
+        .testimonial-quote {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .testimonial-quote::before,
+        .testimonial-quote::after {
+            content: '"';
+            font-size: 2rem;
+            color: var(--accent-cyan);
+            opacity: 0.5;
+            position: absolute;
+        }
+
+        .testimonial-quote::before {
+            top: -15px;
+            left: -10px;
+        }
+
+        .testimonial-quote::after {
+            bottom: -25px;
+            right: -10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-title {
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        /* Certificate Mockup */
+        .certificate-container {
+            max-width: 800px;
+            margin: 4rem auto 0;
+            position: relative;
+            opacity: 0;
+            transform: perspective(1000px) rotateX(-10deg);
+            transition: all 0.8s ease;
+        }
+
+        .certificate {
+            background: linear-gradient(135deg, #1A1A2E, #16213E);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            transform-style: preserve-3d;
+            transition: all 0.5s ease;
+        }
+
+        .certificate:hover {
+            transform: perspective(1000px) rotateX(0deg) translateY(-10px);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+        }
+
+        .certificate-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .certificate-header h3 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .certificate-body {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .certificate-logo {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .certificate-logo i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .certificate-details p {
+            margin-bottom: 0.5rem;
+        }
+
+        .certificate-details strong {
+            color: var(--accent-cyan);
+        }
+
+        .certificate-footer {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .share-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .share-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            color: white;
+        }
+
+        /* Referral Program */
+        .referral-banner {
+            background: linear-gradient(135deg, #1A1A2E, #16213E);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .referral-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path fill="rgba(157, 74, 255, 0.05)" d="M0,0 L100,0 L100,100 L0,100 Z" /></svg>');
+            background-size: cover;
+            z-index: -1;
+        }
+
+        .referral-banner h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: flicker 2s infinite alternate;
+        }
+
+        .referral-banner p {
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            background: var(--glass-bg);
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            border-radius: 10px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .progress-milestones {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 0 10px;
+        }
+
+        .milestone {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-dark);
+            border: 2px solid var(--glass-border);
+            position: relative;
+        }
+
+        .milestone.active {
+            background: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .leaderboard {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .leaderboard-user {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            width: 150px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .leaderboard-user:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(157, 74, 255, 0.2);
+        }
+
+        .leaderboard-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            object-fit: cover;
+            border: 2px solid var(--accent-violet);
+        }
+
+        .leaderboard-crown {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            color: gold;
+            animation: bounce 2s infinite;
+        }
+
+        /* Pricing CTA */
+        .pricing-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .pricing-container h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-container p {
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .price-tag {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        .highlight {
+            display: inline-block;
+            padding: 0.3rem 1rem;
+            background: rgba(0, 245, 255, 0.2);
+            border-radius: 50px;
+            color: var(--accent-cyan);
+            font-weight: 500;
+            margin-bottom: 2rem;
+            border: 1px solid var(--accent-cyan);
+        }
+
+        .payment-mockup {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 2rem;
+            max-width: 400px;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+
+        .payment-mockup:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(157, 74, 255, 0.2);
+        }
+
+        .payment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-logo {
+            font-size: 1.5rem;
+            color: var(--accent-violet);
+        }
+
+        .payment-secure {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--accent-cyan);
+            font-size: 0.9rem;
+        }
+
+        .payment-secure i {
+            font-size: 1rem;
+        }
+
+        .payment-amount {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .payment-method {
+            width: 50px;
+            height: 30px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .qr-code {
+            width: 150px;
+            height: 150px;
+            background: white;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .qr-code::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 48%, rgba(157, 74, 255, 0.1) 50%, transparent 52%);
+            background-size: 10px 10px;
+        }
+
+        .qr-code i {
+            font-size: 3rem;
+            color: black;
+        }
+
+        .payment-note {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(5, 5, 10, 0.8);
+            padding: 3rem 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-light);
+            text-decoration: none;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .footer-link:hover {
+            opacity: 1;
+            color: var(--accent-cyan);
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .footer-credit {
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+
+        .footer-credit span {
+            color: var(--accent-cyan);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow: 0 0 10px var(--accent-violet), 0 0 20px var(--accent-cyan);
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .steps-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .step-card {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .certificate-body {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .btn {
+                display: block;
+                width: 100%;
+                max-width: 250px;
+                margin: 0.5rem auto;
+            }
+            
+            .features-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .price-tag {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
 </head>
-<body class="bg-white font-sans antialiased">
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Discover Your True Career Path with AI</h1>
+            <p>Olvera helps students unlock their born talents and make informed choices.</p>
+            <div class="hero-buttons">
+                <a href="/home" class="btn btn-primary">Start</a>
+                <a href="#features" class="btn btn-secondary">Explore Insights</a>
+            </div>
+        </div>
+        
+        <!-- Floating Chatbot Icon -->
+        <div class="chatbot-icon">
+            <i class="fas fa-robot"></i>
+        </div>
+    </section>
 
-  <!-- Navigation -->
-  <nav class="bg-white shadow-sm sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between h-16 items-center">
-        <div class="flex items-center">
-          <div class="flex-shrink-0 flex items-center">
-            <i class="fas fa-compass text-primary-600 text-2xl mr-2"></i>
-            <span class="text-xl font-bold text-gray-900">Olvera<span class="text-primary-600">.in</span></span>
-          </div>
+    <!-- How It Works Section -->
+    <section class="section" id="how-it-works">
+        <h2 class="section-title">How <span>Olvera</span> Works</h2>
+        <div class="steps-container">
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h3>Step 1: Take the Test</h3>
+                <p>Complete our 5-minute assessment designed to uncover your innate talents and preferences.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>Step 2: AI Analyzes You</h3>
+                <p>Our advanced AI evaluates your responses against thousands of successful career paths.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                <h3>Step 3: Get Personalized Career Path</h3>
+                <p>Receive a detailed report with career recommendations tailored just for you.</p>
+            </div>
         </div>
-        <div class="hidden md:flex items-center space-x-8">
-          <a href="#how-it-works" class="text-gray-700 hover:text-primary-600 transition">How It Works</a>
-          <a href="#benefits" class="text-gray-700 hover:text-primary-600 transition">Benefits</a>
-          <a href="#testimonials" class="text-gray-700 hover:text-primary-600 transition">Success Stories</a>
-          <a href="home" class="text-primary-600 hover:text-primary-800 transition">Login</a>
-        </div>
-        <div class="md:hidden">
-          <button onclick="toggleSidebar()" class="inline-flex items-center justify-center p-2 rounded-md text-gray-700">
-            <span class="sr-only">Open main menu</span>
-            <i class="fas fa-bars"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </nav>
-  
-  <!-- Sidebar Menu for Mobile -->
-  <div id="mobileMenu" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full transition-transform duration-300 z-50 md:hidden">
-    <div class="p-6 space-y-4">
-      <button onclick="toggleSidebar()" class="text-gray-600 hover:text-primary-600 text-xl float-right">
-        <i class="fas fa-times"></i>
-      </button>
-      <a href="#how-it-works" class="block text-gray-700 hover:text-primary-600">How It Works</a>
-      <a href="#benefits" class="block text-gray-700 hover:text-primary-600">Benefits</a>
-      <a href="#testimonials" class="block text-gray-700 hover:text-primary-600">Success Stories</a>
-      <a href="home" class="block text-primary-600 hover:text-primary-800">Login</a>
-    </div>
-  </div>
-  
-  <script>
-    function toggleSidebar() {
-      const menu = document.getElementById('mobileMenu');
-      menu.classList.toggle('-translate-x-full');
-    }
-  </script>
-  
+    </section>
 
-  <!-- Hero Section -->
-  <section class="py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div class="text-left">
-          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-            Confused About Your Career? <span class="text-primary-600">Let AI Guide You.</span>
-          </h1>
-          <p class="mt-6 text-xl text-gray-600 max-w-2xl">
-            Olvera help students discover their perfect course and career with AI-powered assessments.
-          </p>
-          <div class="mt-10">
-            <a href="home" class="bg-gradient-to-r from-primary-600 to-primary-800 text-white px-8 py-4 rounded-full hover:from-primary-700 hover:to-primary-900 transition shadow-lg hover:shadow-xl font-medium text-lg">
-              Start the Test – It's Free <i class="fas fa-arrow-right ml-2"></i>
+    <!-- AI Features Section -->
+    <section class="section" id="features" style="background: radial-gradient(circle at center, rgba(10, 10, 15, 0.9) 0%, var(--bg-dark) 70%);">
+        <h2 class="section-title">Our <span>AI-Powered</span> Features</h2>
+        <div class="features-container">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-gem"></i>
+                </div>
+                <h3>Born Talent Analysis</h3>
+                <p>Discover your natural strengths and abilities you were born with through our proprietary assessment.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bridge"></i>
+                </div>
+                <h3>Skill Gap Identification</h3>
+                <p>Identify exactly what skills you need to develop to succeed in your ideal career path.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <h3>AI-generated Questions</h3>
+                <p>Dynamic questioning that adapts to your responses for more accurate results.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Real-time Feedback</h3>
+                <p>Get immediate insights as you complete the assessment with our live analysis.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Student Results Section -->
+    <section class="section" id="results">
+        <h2 class="section-title">Student <span>Success Stories</span></h2>
+        <div class="testimonials-container">
+            <div class="testimonial-slide active">
+                <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Student" class="user-avatar">
+                <p class="testimonial-quote">Olvera predicted my career match perfectly! I'm now pursuing data science thanks to their accurate assessment.</p>
+                <h4 class="user-name">Priya Sharma</h4>
+                <p class="user-title">Data Science Student at IIT Delhi</p>
+            </div>
+        </div>
+
+        <!-- Certificate Mockup -->
+        <div class="certificate-container">
+            <div class="certificate">
+                <div class="certificate-header">
+                    <h3>Career Aptitude Certificate</h3>
+                    <p>This certifies that you have completed the Olvera Career Assessment</p>
+                </div>
+                <div class="certificate-body">
+                    <div class="certificate-logo">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <div class="certificate-details">
+                        <p><strong>Name:</strong> Student Name</p>
+                        <p><strong>Assessment Date:</strong> June 15, 2023</p>
+                        <p><strong>Top Career Matches:</strong> Data Scientist, UX Designer, Product Manager</p>
+                        <p><strong>Primary Talents:</strong> Analytical Thinking, Creativity, Leadership</p>
+                    </div>
+                </div>
+                <div class="certificate-footer">
+                    <p>Share your achievement with friends and family</p>
+                    <div class="share-buttons">
+                        <div class="share-btn">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div class="share-btn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </div>
+                        <div class="share-btn">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <div class="share-btn">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Referral Program -->
+    <section class="section" id="referral">
+        <div class="referral-banner">
+            <h2>Refer and Earn ₹Cash + Fame</h2>
+            <p>Invite friends to take the Olvera career test and earn rewards for each successful referral!</p>
+            
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 40%;"></div>
+                <div class="progress-milestones">
+                    <div class="milestone active"></div>
+                    <div class="milestone active"></div>
+                    <div class="milestone"></div>
+                </div>
+            </div>
+            
+            <div class="leaderboard">
+                <div class="leaderboard-user">
+                    <div class="leaderboard-crown">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Top Referrer" class="leaderboard-avatar">
+                    <h4>Rahul K.</h4>
+                    <p>₹2,450 earned</p>
+                </div>
+                <div class="leaderboard-user">
+                    <div class="leaderboard-crown">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Top Referrer" class="leaderboard-avatar">
+                    <h4>Neha P.</h4>
+                    <p>₹1,960 earned</p>
+                </div>
+                <div class="leaderboard-user">
+                    <div class="leaderboard-crown">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Top Referrer" class="leaderboard-avatar">
+                    <h4>Arjun S.</h4>
+                    <p>₹1,470 earned</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing CTA Section -->
+    <section class="section" id="pricing">
+        <div class="pricing-container">
+            <h2>Start Your Career Journey Today</h2>
+            <p>For less than the price of a coffee, discover your true potential and ideal career path.</p>
+            
+            <div class="price-tag">₹49</div>
+            <div class="highlight">Only phone number needed, no email required</div>
+            
+            <div class="payment-mockup">
+                <div class="payment-header">
+                    <div class="payment-logo">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="payment-secure">
+                        <i class="fas fa-lock"></i>
+                        <span>Secure Payment</span>
+                    </div>
+                </div>
+                <div class="payment-amount">₹49.00</div>
+                <div class="payment-methods">
+                    <div class="payment-method">
+                        <i class="fab fa-google-pay"></i>
+                    </div>
+                    <div class="payment-method">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div class="payment-method">
+                        <i class="fab fa-cc-visa"></i>
+                    </div>
+                    <div class="payment-method">
+                        <i class="fas fa-qrcode"></i>
+                    </div>
+                </div>
+                <div class="qr-code">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <p class="payment-note">Scan to pay with any UPI app</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-logo">Olvera</div>
+        <div class="footer-links">
+            <a href="#" class="footer-link">Home</a>
+            <a href="#how-it-works" class="footer-link">How It Works</a>
+            <a href="#features" class="footer-link">Features</a>
+            <a href="#results" class="footer-link">Results</a>
+            <a href="#referral" class="footer-link">Referral</a>
+            <a href="#pricing" class="footer-link">Pricing</a>
+            <a href="policies/privacy.html" class="footer-link">Privacy Policy</a>
+            <a href="policies/terms-and-conditions.html" class="footer-link">Terms</a>
+            <a href="policies/faq.html" class="footer-link">FAQ</a>
+            <a href="contact.html" class="footer-link">Contact</a>
+        </div>
+        <div class="social-icons">
+            <a href="https://instagram.com/m_insaf_" class="social-icon">
+                <i class="fab fa-instagram"></i>
             </a>
-          </div>
-          <div class="mt-8 flex items-center">
-            <div class="flex -space-x-2">
-              <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/12.jpg" alt="">
-              <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/men/32.jpg" alt="">
-              <img class="inline-block h-10 w-10 rounded-full ring-2 ring-white" src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
-            </div>
-            <div class="text-left ml-4">
-              <p class="text-sm text-gray-600">Trusted by <span class="font-bold">50,000+</span> students</p>
-              <div class="flex items-center">
-                <i class="fas fa-star text-yellow-400 mr-1"></i>
-                <i class="fas fa-star text-yellow-400 mr-1"></i>
-                <i class="fas fa-star text-yellow-400 mr-1"></i>
-                <i class="fas fa-star text-yellow-400 mr-1"></i>
-                <i class="fas fa-star text-yellow-400 mr-1"></i>
-                <span class="text-sm font-medium text-gray-700 ml-1">4.8/5</span>
-              </div>
-            </div>
-          </div>
+            
         </div>
-        <div class="relative">
-          <div class="relative rounded-xl shadow-2xl overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1588072432836-e10032774350?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1472&q=80" alt="Student smiling at screen" class="w-full h-auto">
-            <div class="absolute inset-0 bg-gradient-to-t from-gray-900/70 to-transparent"></div>
-            <div class="absolute bottom-0 left-0 right-0 p-6 text-white text-center">
-              <p class="text-lg font-medium">"From Confused to Confident – In Minutes"</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+        <p class="footer-credit">Made with ❤️ by <span>INZAF INDUSTRIES</span></p>
+    </footer>
 
-  <!-- Who It's For Section -->
-  <section class="py-12 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Made for students after</h2>
-      </div>
-      
-      <div class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-xl shadow-md text-center hover:shadow-lg transition">
-          <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto">
-            <span class="text-2xl font-bold text-primary-600">10th</span>
-          </div>
-          <h3 class="mt-4 text-lg font-medium text-gray-900">Class 10 Students</h3>
-          <p class="mt-2 text-gray-600 text-sm">
-            Choose the right stream for your future
-          </p>
-        </div>
-        
-        <div class="bg-white p-6 rounded-xl shadow-md text-center hover:shadow-lg transition">
-          <div class="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto">
-            <span class="text-2xl font-bold text-secondary-600">12th</span>
-          </div>
-          <h3 class="mt-4 text-lg font-medium text-gray-900">Class 12 Students</h3>
-          <p class="mt-2 text-gray-600 text-sm">
-            Find the perfect college course for you
-          </p>
-        </div>
-        
-        <div class="bg-white p-6 rounded-xl shadow-md text-center hover:shadow-lg transition">
-          <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
-            <i class="fas fa-graduation-cap text-yellow-600 text-2xl"></i>
-          </div>
-          <h3 class="mt-4 text-lg font-medium text-gray-900">College Students</h3>
-          <p class="mt-2 text-gray-600 text-sm">
-            Discover career paths matching your degree
-          </p>
-        </div>
-        
-        <div class="bg-white p-6 rounded-xl shadow-md text-center hover:shadow-lg transition">
-          <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto">
-            <i class="fas fa-user-graduate text-purple-600 text-2xl"></i>
-          </div>
-          <h3 class="mt-4 text-lg font-medium text-gray-900">Career Changers</h3>
-          <p class="mt-2 text-gray-600 text-sm">
-            Find new opportunities that fit your skills
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- How It Works Section -->
-  <section id="how-it-works" class="py-16 sm:py-24">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">How Olvera Works</h2>
-        <p class="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
-          Our simple 3-step process delivers powerful career insights in just 5 minutes
-        </p>
-      </div>
-      
-      <div class="mt-16 relative">
-        <div class="hidden lg:block absolute top-0 left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-gradient-to-b from-primary-100 via-primary-300 to-primary-100"></div>
-        
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div class="relative bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition">
-            <div class="absolute -top-4 -left-4 w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">1</div>
-            <h3 class="text-xl font-bold text-gray-900 mt-4">Answer Smart Questions</h3>
-            <p class="mt-3 text-gray-600">
-              We ask about your interests, strengths, and goals in a simple, friendly quiz.
-            </p>
-            <div class="mt-6">
-              <img src="https://images.unsplash.com/photo-1521791055366-0d553872125f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1469&q=80" alt="Person taking assessment" class="rounded-lg w-full h-48 object-cover">
-            </div>
-          </div>
-          
-          <div class="relative bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition">
-            <div class="absolute -top-4 -left-4 w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">2</div>
-            <h3 class="text-xl font-bold text-gray-900 mt-4">Let AI Analyze You</h3>
-            <p class="mt-3 text-gray-600">
-              Our AI compares your answers with thousands of career paths and success stories.
-            </p>
-            <div class="mt-6">
-              <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=765&q=80" alt="AI analysis" class="rounded-lg w-full h-48 object-cover">
-            </div>
-          </div>
-          
-          <div class="relative bg-white p-8 rounded-xl shadow-md hover:shadow-lg transition">
-            <div class="absolute -top-4 -left-4 w-12 h-12 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">3</div>
-            <h3 class="text-xl font-bold text-gray-900 mt-4">Get Your Career Match</h3>
-            <p class="mt-3 text-gray-600">
-              See which course and career fits you best—instantly and clearly.
-            </p>
-            <div class="mt-6">
-              <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" alt="Career report" class="rounded-lg w-full h-48 object-cover">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Benefits Section -->
-  <section id="benefits" class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">Why Choose Olvera?</h2>
-      </div>
-      
-      <div class="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
-          <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-            <i class="fas fa-brain text-primary-600 text-xl"></i>
-          </div>
-          <h3 class="mt-4 text-lg font-bold text-gray-900">AI-Powered Guidance</h3>
-          <p class="mt-2 text-gray-600">
-            Backed by advanced AI models to provide accurate career suggestions.
-          </p>
-        </div>
-        
-        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
-          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-            <i class="fas fa-bolt text-green-600 text-xl"></i>
-          </div>
-          <h3 class="mt-4 text-lg font-bold text-gray-900">Instant Results</h3>
-          <p class="mt-2 text-gray-600">
-            Get personalized recommendations in just 5 minutes.
-          </p>
-        </div>
-        
-        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
-          <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-            <i class="fas fa-user-graduate text-yellow-600 text-xl"></i>
-          </div>
-          <h3 class="mt-4 text-lg font-bold text-gray-900">Student Focused</h3>
-          <p class="mt-2 text-gray-600">
-            Designed specifically for Indian students' needs and aspirations.
-          </p>
-        </div>
-        
-        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
-          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-            <i class="fas fa-chart-line text-purple-600 text-xl"></i>
-          </div>
-          <h3 class="mt-4 text-lg font-bold text-gray-900">Market Trends</h3>
-          <p class="mt-2 text-gray-600">
-            Recommendations based on current job market demands.
-          </p>
-        </div>
-        
-        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
-          <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-            <i class="fas fa-graduation-cap text-red-600 text-xl"></i>
-          </div>
-          <h3 class="mt-4 text-lg font-bold text-gray-900">Course Matching</h3>
-          <p class="mt-2 text-gray-600">
-            Discover the best courses for your recommended careers.
-          </p>
-        </div>
-        
-        <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition">
-          <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-            <i class="fas fa-rupee-sign text-blue-600 text-xl"></i>
-          </div>
-          <h3 class="mt-4 text-lg font-bold text-gray-900">100% Free</h3>
-          <p class="mt-2 text-gray-600">
-            No hidden charges - get started with our free assessment.
-          </p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Testimonials Section -->
-  <section id="testimonials" class="py-16 sm:py-24 bg-primary-700 text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center">
-        <h2 class="text-3xl sm:text-4xl font-bold">What Students Say</h2>
-        <p class="mt-4 text-xl text-primary-100 max-w-3xl mx-auto">
-          Hear from students who discovered their ideal path with Olvera
-        </p>
-      </div>
-      
-      <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-white p-8 rounded-xl text-gray-800">
-          <div class="flex items-center">
-            <img class="w-12 h-12 rounded-full" src="https://randomuser.me/api/portraits/women/32.jpg" alt="Riya">
-            <div class="ml-4">
-              <h4 class="font-bold">Riya Patel</h4>
-              <p class="text-sm text-gray-600">Class 12 Student</p>
-            </div>
-          </div>
-          <p class="mt-6">
-            "I had no idea what to do after 12th. Olvera showed me clear options based on my interests! The psychology-based questions really understood me better than I understood myself."
-          </p>
-          <div class="mt-4 flex">
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-          </div>
-        </div>
-        
-        <div class="bg-white p-8 rounded-xl text-gray-800">
-          <div class="flex items-center">
-            <img class="w-12 h-12 rounded-full" src="https://randomuser.me/api/portraits/men/45.jpg" alt="Arjun">
-            <div class="ml-4">
-              <h4 class="font-bold">Arjun Mehta</h4>
-              <p class="text-sm text-gray-600">Class 10 Student</p>
-            </div>
-          </div>
-          <p class="mt-6">
-            "The assessment was so easy and fun! It suggested Commerce with Data Science which I never considered. Now I'm excited about my future instead of stressed."
-          </p>
-          <div class="mt-4 flex">
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-          </div>
-        </div>
-        
-        <div class="bg-white p-8 rounded-xl text-gray-800">
-          <div class="flex items-center">
-            <img class="w-12 h-12 rounded-full" src="https://randomuser.me/api/portraits/women/68.jpg" alt="Priya">
-            <div class="ml-4">
-              <h4 class="font-bold">Mrs. Aravind</h4>
-              <p class="text-sm text-gray-600">Parent</p>
-            </div>
-          </div>
-          <p class="mt-6">
-            "As a parent, this gave me peace of mind. Finally, a reliable career tool that considers my child's personality rather than just marks. The detailed roadmap was incredibly helpful."
-          </p>
-          <div class="mt-4 flex">
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-          </div>
-        </div>
-        
-        <div class="bg-white p-8 rounded-xl text-gray-800">
-          <div class="flex items-center">
-            <img class="w-12 h-12 rounded-full" src="https://randomuser.me/api/portraits/men/22.jpg" alt="Vikram">
-            <div class="ml-4">
-              <h4 class="font-bold">Vikram Singh</h4>
-              <p class="text-sm text-gray-600">College Student</p>
-            </div>
-          </div>
-          <p class="mt-6">
-            "I was about to drop out of engineering when Olvera suggested UX Design. The career change roadmap showed me exactly how to transition. Best decision ever!"
-          </p>
-          <div class="mt-4 flex">
-            <i class="fas fa-star text-yellow-400"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-            <i class="fas fa-star text-yellow-400 ml-1"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
-  <section class="py-16 bg-gradient-to-r from-primary-600 to-primary-800 text-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="text-3xl sm:text-4xl font-bold">Ready to Find Your Path?</h2>
-      <p class="mt-4 text-xl max-w-3xl mx-auto">
-        Take the first step toward your dream career. Our assessment takes just 5 minutes.
-      </p>
-      <div class="mt-8">
-        <a href="login" class="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-full shadow-sm text-primary-700 bg-white hover:bg-gray-100 transition">
-          Take the Career Test Now <i class="fas fa-arrow-right ml-2"></i>
-        </a>
-      </div>
-      <p class="mt-4 text-sm opacity-90">
-        No credit card required. Get instant results.
-      </p>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="bg-gray-900 text-gray-400">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <div>
-          <div class="flex items-center">
-            <i class="fas fa-compass text-primary-400 text-2xl mr-2"></i>
-            <span class="text-xl font-bold text-white">Olvera<span class="text-primary-400">.in</span></span>
-          </div>
-          <p class="mt-4 text-sm">
-            AI-powered career guidance to help Indian students discover their ideal paths based on strengths and interests.
-          </p>
-          <div class="mt-6 flex space-x-4">
-            <a href="https://instagram.com/m_insaf_" class="text-gray-400 hover:text-white">
-              <i class="fab fa-instagram"></i>
-            </a>
-          </div>
-        </div>
-        
-        <div>
-          <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Quick Links</h3>
-          <ul class="mt-4 space-y-2">
-            <li><a href="#" class="hover:text-white transition">Home</a></li>
-            <li><a href="#how-it-works" class="hover:text-white transition">How It Works</a></li>
-            <li><a href="#benefits" class="hover:text-white transition">Benefits</a></li>
-            <li><a href="#testimonials" class="hover:text-white transition">Testimonials</a></li>
-            <li><a href="blogs" class="hover:text-white transition">blogs</a></li>
-            <li><a href="about" class="hover:text-white transition">about</a></li>
-          </ul>
-        </div>
-        
-        <div>
-          <h3 class="text-sm font-semibold text-white uppercase tracking-wider">Legal</h3>
-          <ul class="mt-4 space-y-2">
-            <li><a href="policies/privacy" class="hover:text-white transition">Privacy Policy</a></li>
-            <li><a href="policies/terms-and-conditions.html" class="hover:text-white transition">Terms of Service</a></li>
-          </ul>
-        </div>
-      </div>
-      
-      <div class="mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
-        <p class="text-sm">
-          &copy; 2025 Olvera.in. All rights reserved.
-        </p>
-        <div class="mt-4 md:mt-0 flex space-x-6">
-          <a href="policies/privacy" class="text-sm hover:text-white transition">Privacy</a>
-          <a href="policies/terms-and-conditions" class="text-sm hover:text-white transition">Terms</a>
-          <a href="contact" class="text-sm hover:text-white transition">Contact</a>
-          <a href="about" class="text-sm hover:text-white transition">About</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Sticky CTA (Mobile) -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white shadow-lg p-4 md:hidden z-50">
-    <a href="home" class="block w-full bg-gradient-to-r from-primary-600 to-primary-800 text-white text-center py-3 rounded-full font-medium">
-      Start Free Career Test
-    </a>
-  </div>
-
-  <!-- Firebase Analytics Implementation -->
-  <script>
+    <script>
+        // Scroll animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const animateOnScroll = () => {
+                const elements = document.querySelectorAll('.section-title, .step-card, .feature-card, .certificate-container, .referral-banner, .pricing-container');
+                
+                elements.forEach(element => {
+                    const elementPosition = element.getBoundingClientRect().top;
+                    const windowHeight = window.innerHeight;
+                    
+                    if (elementPosition < windowHeight - 100) {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                        
+                        if (element.classList.contains('certificate-container')) {
+                            element.style.transform = 'perspective(1000px) rotateX(0deg)';
+                        }
+                    }
+                });
+            };
+            
+            // Initial check
+            animateOnScroll();
+            
+            // Check on scroll
+            window.addEventListener('scroll', animateOnScroll);
+            
+            // Chatbot interaction
+            const chatbotIcon = document.querySelector('.chatbot-icon');
+            chatbotIcon.addEventListener('click', function() {
+                alert("Hello! I'm Olvera, your AI career guide. How can I help you today?");
+            });
+            
+            // Simple testimonial slider
+            const testimonials = [
+                {
+                    avatar: "https://randomuser.me/api/portraits/women/32.jpg",
+                    quote: "Olvera predicted my career match perfectly! I'm now pursuing data science thanks to their accurate assessment.",
+                    name: "Priya Sharma",
+                    title: "Data Science Student at IIT Delhi"
+                },
+                {
+                    avatar: "https://randomuser.me/api/portraits/men/45.jpg",
+                    quote: "The skill gap analysis showed me exactly what I needed to work on. I landed my dream job within 3 months!",
+                    name: "Rahul Verma",
+                    title: "Software Engineer at Google"
+                },
+                {
+                    avatar: "https://randomuser.me/api/portraits/women/68.jpg",
+                    quote: "I was confused between medicine and research. Olvera's report made the choice clear and I've never been happier.",
+                    name: "Ananya Patel",
+                    title: "Medical Researcher at AIIMS"
+                }
+            ];
+            
+            let currentTestimonial = 0;
+            const testimonialSlide = document.querySelector('.testimonial-slide');
+            
+            function changeTestimonial() {
+                testimonialSlide.classList.remove('active');
+                
+                setTimeout(() => {
+                    const testimonial = testimonials[currentTestimonial];
+                    testimonialSlide.querySelector('.user-avatar').src = testimonial.avatar;
+                    testimonialSlide.querySelector('.testimonial-quote').textContent = testimonial.quote;
+                    testimonialSlide.querySelector('.user-name').textContent = testimonial.name;
+                    testimonialSlide.querySelector('.user-title').textContent = testimonial.title;
+                    
+                    testimonialSlide.classList.add('active');
+                    
+                    currentTestimonial = (currentTestimonial + 1) % testimonials.length;
+                }, 500);
+            }
+            
+            // Change testimonial every 5 seconds
+            setInterval(changeTestimonial, 5000);
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        window.scrollTo({
+                            top: targetElement.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+        });
+   
     // Your Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",

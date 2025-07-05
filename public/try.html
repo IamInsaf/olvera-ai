@@ -1,292 +1,869 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Interactive Questionnaire</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-  />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400&display=swap"
-    rel="stylesheet"
-  />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Olvera - Secure Payment Gateway</title>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore-compat.js"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --primary-color: #1c1c3c;
+      --primary-hover: #2c2c5c;
+      --secondary-color: #4a6fa5;
+      --success-color: #28a745;
+      --warning-color: #ffc107;
+      --danger-color: #dc3545;
+      --light-color: #f8f9fa;
+      --dark-color: #343a40;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
-      font-family: 'Roboto', sans-serif;
-      font-style: italic;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
     }
-    .progress-bar {
-      height: 6px;
-      background-color: #e5e7eb;
-      border-radius: 3px;
-      overflow: hidden;
+    
+    .container {
+      max-width: 100%;
+      padding: 20px;
+      margin: 0 auto;
     }
-    .progress-fill {
-      height: 100%;
-      background-color: #4f46e5;
-      transition: width 0.3s ease;
+    
+    .card {
+      background: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 30px;
+      margin: 20px auto;
+      max-width: 500px;
+      transition: var(--transition);
     }
-    .fade-in {
-      animation: fadeIn 0.3s ease-in;
+    
+    .card:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+    
+    h1, h2, h3 {
+      color: var(--primary-color);
+      margin-bottom: 20px;
     }
-    .shake {
-      animation: shake 0.5s;
+    
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
     }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      20%, 60% { transform: translateX(-5px); }
-      40%, 80% { transform: translateX(5px); }
+    
+    h2 {
+      font-size: 24px;
+    }
+    
+    h3 {
+      font-size: 20px;
+    }
+    
+    p {
+      margin-bottom: 15px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: var(--dark-color);
+    }
+    
+    input {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      transition: var(--transition);
+    }
+    
+    input:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(28, 44, 60, 0.1);
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
+      border: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-2px);
+    }
+    
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+    
+    .status-message {
+      padding: 15px;
+      border-radius: var(--border-radius);
+      margin: 20px 0;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .status-info {
+      background-color: #e7f5ff;
+      color: #1c7ed6;
+    }
+    
+    .status-success {
+      background-color: #ebfbee;
+      color: var(--success-color);
+    }
+    
+    .status-warning {
+      background-color: #fff9db;
+      color: #e67700;
+    }
+    
+    .status-error {
+      background-color: #fff5f5;
+      color: var(--danger-color);
+    }
+    
+    .qr-code-container {
+      width: 200px;
+      height: 200px;
+      margin: 20px auto;
+      padding: 15px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: var(--box-shadow);
+    }
+    
+    .qr-code-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .copy-url-container {
+      position: relative;
+      background: #f5f5f5;
+      padding: 12px 15px;
+      border-radius: var(--border-radius);
+      margin: 20px auto;
+      max-width: 100%;
+      word-break: break-all;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid #ddd;
+    }
+    
+    .copy-url-container:hover {
+      background: #eee;
+    }
+    
+    .copy-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--dark-color);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 8px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    
+    .copy-url-container:hover .copy-tooltip {
+      opacity: 1;
+    }
+    
+    .copy-feedback {
+      color: var(--success-color);
+      font-size: 14px;
+      text-align: center;
+      margin-top: 5px;
+      height: 20px;
+    }
+    
+    .payment-features {
+      text-align: left;
+      margin: 25px 0;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+    
+    .feature-icon {
+      color: var(--success-color);
+      margin-right: 10px;
+      font-size: 18px;
+      margin-top: 2px;
+    }
+    
+    .payment-methods {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 25px 0;
+    }
+    
+    .payment-method {
+      width: 60px;
+      height: 40px;
+      object-fit: contain;
+      filter: grayscale(30%);
+      opacity: 0.8;
+      transition: var(--transition);
+    }
+    
+    .payment-method:hover {
+      opacity: 1;
+      filter: grayscale(0);
+    }
+    
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .desktop-message {
+      display: none;
+    }
+    
+    .mobile-content {
+      display: none;
+    }
+    
+    .security-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 25px;
+      color: #6c757d;
+      font-size: 14px;
+    }
+    
+    .security-badge i {
+      margin-right: 8px;
+      color: var(--success-color);
+    }
+    
+    @media only screen and (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+      
+      .card {
+        padding: 20px;
+        margin: 10px auto;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .mobile-content {
+        display: block;
+      }
+    }
+    
+    @media only screen and (min-width: 769px) {
+      .desktop-message {
+        display: block;
+      }
+      
+      .mobile-content {
+        display: none;
+      }
+    }
+    
+    /* Animation for payment success */
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+      40% {transform: translateY(-10px);}
+      60% {transform: translateY(-5px);}
+    }
+    
+    .bounce {
+      animation: bounce 1s;
+    }
+    
+    /* Tooltip styles */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 200px;
+      background-color: var(--dark-color);
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 8px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 14px;
+      font-weight: normal;
+    }
+    
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    /* Price display */
+    .price {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin: 20px 0;
+    }
+    
+    .price small {
+      font-size: 16px;
+      font-weight: normal;
+      color: #6c757d;
     }
   </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center p-4">
-  <div class="w-full max-w-md bg-white rounded-lg shadow-lg p-6 fade-in">
-    <div class="text-center mb-4">
-      <i class="fas fa-user-edit text-indigo-600 text-4xl mb-2"></i>
-      <h1 class="text-2xl font-semibold text-gray-800 italic">Personal Questionnaire</h1>
-      <p class="text-gray-600 mt-2 italic">Share your thoughts with us</p>
-    </div>
-    <form id="userForm" class="flex flex-col space-y-4">
-      <div class="space-y-2">
-        <label for="userInput" class="text-gray-700 italic text-lg">Enter your name:</label>
-        <input
-          type="text"
-          id="userInput"
-          name="userInput"
-          required
-          placeholder="Your name"
-          class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 italic"
-          autocomplete="off"
-        />
-      </div>
-      <button
-        type="submit"
-        class="bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition italic flex items-center justify-center space-x-2"
-      >
-        <span>Start Questionnaire</span>
-        <i class="fas fa-arrow-right"></i>
-      </button>
-    </form>
-  </div>
-
-  <!-- Modal backdrop -->
-  <div
-    id="modalBackdrop"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4"
-  >
-    <!-- Modal container -->
-    <div
-      class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 flex flex-col fade-in"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modalTitle"
-    >
-      <div class="flex justify-between items-center mb-4">
-        <h2 id="modalTitle" class="text-xl font-semibold italic text-gray-800 flex items-center">
-          <i class="fas fa-question-circle text-indigo-600 mr-2"></i>
-          <span>Question</span>
-        </h2>
-        <button id="closeModal" class="text-gray-500 hover:text-gray-700">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      
-      <div class="progress-bar mb-4">
-        <div id="progressFill" class="progress-fill"></div>
-      </div>
-      
-      <div class="mb-6">
-        <p id="questionText" class="italic text-gray-800 text-lg min-h-[4rem] fade-in"></p>
-      </div>
-      
-      <textarea
-        id="answerInput"
-        rows="4"
-        placeholder="Type your answer here..."
-        class="w-full border border-gray-300 rounded-md p-3 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500 italic"
-      ></textarea>
-      
-      <div class="mt-6 flex justify-between items-center">
-        <button
-          id="prevBtn"
-          class="text-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-50 transition italic flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled
-        >
-          <i class="fas fa-arrow-left mr-2"></i>
-          <span>Previous</span>
+<body>
+  <div class="container">
+    <!-- Desktop Message -->
+    <div class="desktop-message">
+      <div class="card">
+        <h1><i class="fas fa-mobile-alt"></i> Mobile Payment Required</h1>
+        <p>We've detected that you're accessing this page from a desktop computer.</p>
+        <p>For enhanced security and better user experience, payments can only be processed from mobile devices.</p>
+        
+        <div class="payment-features">
+          <div class="feature-item">
+            <i class="fas fa-shield-alt feature-icon"></i>
+            <div>
+              <strong>Secure Payment</strong>
+              <p>Your transaction is protected with bank-level security</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-bolt feature-icon"></i>
+            <div>
+              <strong>Quick Process</strong>
+              <p>Complete your payment in just a few taps</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-rupee-sign feature-icon"></i>
+            <div>
+              <strong>One-Time Payment</strong>
+              <p>Pay just once to unlock full access</p>
+            </div>
+          </div>
+        </div>
+        
+        <h3>How to proceed:</h3>
+        <p>Scan this QR code with your smartphone camera to open the payment page:</p>
+        
+        <div class="qr-code-container">
+          <div id="qrCode" class="qr-code">
+            <img src='qr.png' alt="QR Code">
+          </div>
+        </div>
+        
+        <p>Or copy this URL and open it on your mobile browser:</p>
+        
+        <div class="copy-url-container" id="pageUrlContainer" onclick="copyUrl()">
+          <span id="pageUrl"></span>
+          <span class="copy-tooltip">Click to copy</span>
+        </div>
+        <div class="copy-feedback" id="copyFeedback"></div>
+        
+        <button class="btn btn-primary btn-block" onclick="checkPaymentStatusManually()">
+          <i class="fas fa-sync-alt"></i> Check Payment Status
         </button>
         
-        <span id="questionCounter" class="italic text-gray-600"></span>
+        <div id="desktopStatus" class="status-message"></div>
         
-        <button
-          id="nextBtn"
-          class="bg-indigo-600 text-white px-5 py-2 rounded-md hover:bg-indigo-700 transition italic flex items-center"
-        >
-          <span id="nextBtnText">Next</span>
-          <i class="fas fa-arrow-right ml-2"></i>
-        </button>
+        <div class="security-badge">
+          <i class="fas fa-lock"></i>
+          <span>Secure SSL Encrypted Connection</span>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Completion Modal -->
-  <div id="completionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 text-center">
-      <div class="text-green-500 text-5xl mb-4">
-        <i class="fas fa-check-circle"></i>
+    
+    <!-- Mobile Content -->
+    <div class="mobile-content">
+      <div class="card">
+        <h1>Unlock Your Career Test</h1>
+        <div class="price">₹49 <small>one-time payment</small></div>
+        
+        <div class="payment-features">
+          <div class="feature-item">
+            <i class="fas fa-check-circle feature-icon"></i>
+            <div>
+              <strong>Comprehensive Assessment</strong>
+              <p>Get detailed insights about your career strengths</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-chart-line feature-icon"></i>
+            <div>
+              <strong>Personalized Report</strong>
+              <p>Receive tailored recommendations based on your results</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-clock feature-icon"></i>
+            <div>
+              <strong>Instant Access</strong>
+              <p>Get your results immediately after payment</p>
+            </div>
+          </div>
+        </div>
+        
+        <div id="paymentSection">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" placeholder="Enter your full name">
+          </div>
+          
+          <div class="form-group">
+            <label for="phone">Mobile Number</label>
+            <input type="tel" id="phone" placeholder="Enter your 10-digit mobile number" maxlength="10">
+          </div>
+          
+          <button class="btn btn-primary btn-block" onclick="startPayment()">
+            <i class="fas fa-lock"></i> Pay Securely ₹49
+          </button>
+          
+          <div class="payment-methods">
+            <img src="https://cdn.razorpay.com/static/assets/payment-methods/visa.svg" class="payment-method" alt="Visa">
+            <img src="https://cdn.razorpay.com/static/assets/payment-methods/mastercard.svg" class="payment-method" alt="Mastercard">
+            <img src="https://cdn.razorpay.com/static/assets/payment-methods/rupay.svg" class="payment-method" alt="RuPay">
+            <img src="https://cdn.razorpay.com/static/assets/payment-methods/upi.svg" class="payment-method" alt="UPI">
+            <img src="https://cdn.razorpay.com/static/assets/payment-methods/netbanking.svg" class="payment-method" alt="Netbanking">
+          </div>
+          
+          <div id="status" class="status-message status-info" style="display: none;"></div>
+        </div>
+        
+        <div class="security-badge">
+          <i class="fas fa-shield-alt"></i>
+          <span>Your payment is secured with Razorpay</span>
+        </div>
       </div>
-      <h2 class="text-2xl font-semibold mb-2 italic text-gray-800">Questionnaire Complete!</h2>
-      <p class="text-gray-600 mb-6 italic">Thank you for sharing your thoughts with us.</p>
-      <button id="restartBtn" class="bg-indigo-600 text-white px-5 py-2 rounded-md hover:bg-indigo-700 transition italic">
-        Start New Questionnaire
-      </button>
     </div>
   </div>
 
   <script>
-    const questions = [
-      "What motivates you the most in life?",
-      "Describe a challenge you recently overcame.",
-      "What is your favorite hobby and why?",
-      "Where do you see yourself in five years?",
-      "What is one thing you want to learn this year?"
-    ];
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357"
+    };
 
-    // DOM elements
-    const userForm = document.getElementById("userForm");
-    const modalBackdrop = document.getElementById("modalBackdrop");
-    const questionText = document.getElementById("questionText");
-    const answerInput = document.getElementById("answerInput");
-    const nextBtn = document.getElementById("nextBtn");
-    const prevBtn = document.getElementById("prevBtn");
-    const questionCounter = document.getElementById("questionCounter");
-    const progressFill = document.getElementById("progressFill");
-    const closeModal = document.getElementById("closeModal");
-    const completionModal = document.getElementById("completionModal");
-    const restartBtn = document.getElementById("restartBtn");
-    const nextBtnText = document.getElementById("nextBtnText");
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    let currentQuestionIndex = 0;
-    let answers = [];
-    let userName = "";
+    const backendURL = "https://us-central1-promgn-in.cloudfunctions.net/paymentAPI";
 
-    // Event listeners
-    userForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      userName = document.getElementById("userInput").value.trim();
-      if (!userName) {
-        alert("Please enter your name before starting.");
+    let currentUserId = null;
+    let paymentChecked = false;
+    let paymentInProgress = false;
+
+    // Check if device is mobile
+    function isMobileDevice() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    // Generate QR code dynamically
+    function generateQRCode() {
+      const url = window.location.href;
+      document.getElementById('pageUrl').textContent = url;
+      
+      // If you want to generate QR code dynamically instead of using static image:
+      /*
+      QRCode.toCanvas(document.getElementById('qrCode'), url, {
+        width: 180,
+        margin: 1,
+        color: {
+          dark: '#1c1c3c',
+          light: '#ffffff'
+        }
+      }, function(error) {
+        if (error) console.error('QR code generation error:', error);
+      });
+      */
+    }
+
+    // Copy URL to clipboard
+    async function copyUrl() {
+      try {
+        const url = window.location.href;
+        await navigator.clipboard.writeText(url);
+        
+        const feedback = document.getElementById('copyFeedback');
+        feedback.textContent = "URL copied to clipboard!";
+        feedback.style.color = "var(--success-color)";
+        
+        setTimeout(() => {
+          feedback.textContent = "";
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy URL:', err);
+        const feedback = document.getElementById('copyFeedback');
+        feedback.textContent = "Failed to copy URL. Please try again.";
+        feedback.style.color = "var(--danger-color)";
+      }
+    }
+
+    // Manual payment status check for desktop
+    async function checkPaymentStatusManually() {
+      const user = auth.currentUser;
+      if (!user) {
+        window.location.href = "login.html";
         return;
       }
-      startQuestionnaire();
-    });
+      
+      const statusElement = document.getElementById('desktopStatus');
+      statusElement.textContent = "Checking payment status...";
+      statusElement.className = "status-message status-info";
+      statusElement.style.display = "block";
+      
+      try {
+        const userRef = db.collection("Olverausers").doc(user.uid);
+        const doc = await userRef.get();
 
-    nextBtn.addEventListener("click", () => {
-      const answer = answerInput.value.trim();
-      if (answer === "") {
-        showValidationError();
+        if (doc.exists && doc.data()?.hasPaid === true) {
+          statusElement.textContent = "✅ Payment verified! Redirecting you to your dashboard...";
+          statusElement.className = "status-message status-success bounce";
+          
+          // Update UI to show success
+          setTimeout(() => {
+            window.location.href = "home.html";
+          }, 1500);
+        } else {
+          statusElement.textContent = "Payment not yet completed. Please complete payment on your mobile device and check again.";
+          statusElement.className = "status-message status-warning";
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        statusElement.textContent = "Error checking payment status. Please try again.";
+        statusElement.className = "status-message status-error";
+      }
+    }
+
+    // Check payment status in Firestore
+    async function checkPaymentStatus(user, isInitialCheck = false) {
+      if (!user?.uid) {
+        console.error("No user provided");
+        window.location.href = "login.html";
+        return false;
+      }
+
+      try {
+        const userRef = db.collection("Olverausers").doc(user.uid);
+        const doc = await userRef.get();
+
+        if (doc.exists && doc.data()?.hasPaid === true) {
+          console.log("✅ Payment verified via olverausers. Access granted.");
+          // Redirect to dashboard or unlock content
+          window.location.href = "home.html";
+          return true;
+        } else {
+          console.log("❌ User has not paid or record not found:", user.uid);
+          // Only redirect if we're not on payments page and this is the initial check
+          if (isInitialCheck && !window.location.href.includes('payments.html')) {
+            // window.location.href = "payments.html";
+          }
+          return false;
+        }
+      } catch (error) {
+        console.error("Error checking payment status:", error);
+        if (isInitialCheck && !window.location.href.includes('payments.html')) {
+          window.location.href = "payments.html";
+        }
+        return false;
+      }
+    }
+
+    // Validate form inputs
+    function validateInputs() {
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      
+      if (!name) {
+        showStatus("Please enter your name", "error");
+        return false;
+      }
+      
+      if (!phone || !/^\d{10}$/.test(phone)) {
+        showStatus("Please enter a valid 10-digit phone number", "error");
+        return false;
+      }
+      
+      return true;
+    }
+    
+    // Show status message
+    function showStatus(message, type = "info") {
+      const statusElement = document.getElementById("status");
+      statusElement.textContent = message;
+      statusElement.className = `status-message status-${type}`;
+      statusElement.style.display = "block";
+    }
+
+    // Start payment process
+    async function startPayment() {
+      if (paymentInProgress) return;
+      
+      if (!isMobileDevice()) {
+        showStatus("Please use a mobile device to complete the payment", "error");
         return;
       }
+
+      if (!validateInputs()) return;
       
-      answers[currentQuestionIndex] = answer;
+      paymentInProgress = true;
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
       
-      if (currentQuestionIndex < questions.length - 1) {
-        currentQuestionIndex++;
-        showQuestion(currentQuestionIndex);
-        answerInput.value = answers[currentQuestionIndex] || "";
-      } else {
-        completeQuestionnaire();
+      showStatus("Creating secure order...", "info");
+      
+      try {
+        // Disable the pay button
+        const payButton = document.querySelector("#paymentSection button");
+        const originalButtonText = payButton.innerHTML;
+        payButton.innerHTML = '<span class="loader"></span> Processing...';
+        payButton.disabled = true;
+        
+        const res = await fetch(`${backendURL}/createOrder`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            name, 
+            phone, 
+            userId: currentUserId,
+            product: "Career Test Access"
+          })
+        });
+
+        const { order, error } = await res.json();
+        if (!order) {
+          showStatus("Order creation failed: " + (error || "Unknown error"), "error");
+          payButton.innerHTML = originalButtonText;
+          payButton.disabled = false;
+          paymentInProgress = false;
+          return;
+        }
+
+        const options = {
+          key: "rzp_live_dE2RUyUj98msAj",
+          amount: order.amount,
+          currency: "INR",
+          name: "Olvera Career Test",
+          description: "Career Test Payment",
+          order_id: order.id,
+          image: "https://example.com/your-logo.png", // Add your logo URL here
+          handler: async function (response) {
+            showStatus("Verifying your payment...", "info");
+            
+            try {
+              const verifyRes = await fetch(`${backendURL}/verifyPayment`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  orderId: response.razorpay_order_id,
+                  paymentId: response.razorpay_payment_id,
+                  signature: response.razorpay_signature,
+                  userId: currentUserId
+                })
+              });
+
+              const verifyData = await verifyRes.json();
+              if (verifyData.success) {
+                showStatus("✅ Payment successful! Preparing your dashboard...", "success");
+                
+                // Update Firestore and redirect after short delay
+                try {
+                  await db.collection("Olverausers").doc(currentUserId).set({
+                    hasPaid: true,
+                    paymentDate: new Date(),
+                    name: name,
+                    phone: phone,
+                    lastPaymentId: response.razorpay_payment_id,
+                    product: "Career Test Access"
+                  }, { merge: true });
+                  
+                  setTimeout(() => {
+                    window.location.href = "home.html?payment=success";
+                  }, 1500);
+                } catch (error) {
+                  console.error("Error updating payment status:", error);
+                  showStatus("Payment verified but database update failed. Please contact support.", "warning");
+                }
+              } else {
+                showStatus("❌ Payment verification failed. Please try again or contact support.", "error");
+              }
+            } catch (err) {
+              console.error("Verification error:", err);
+              showStatus("Error verifying payment. Please contact support with payment ID.", "error");
+            } finally {
+              paymentInProgress = false;
+              payButton.innerHTML = originalButtonText;
+              payButton.disabled = false;
+            }
+          },
+          prefill: { 
+            name, 
+            contact: phone, 
+            email: currentUserId + "@olvera.com" 
+          },
+          notes: {
+            product: "Career Test Access",
+            userId: currentUserId
+          },
+          theme: { 
+            color: "#1c1c3c",
+            hide_topbar: false
+          },
+          modal: {
+            ondismiss: function() {
+              showStatus("Payment window closed. You can try again.", "warning");
+              paymentInProgress = false;
+              payButton.innerHTML = originalButtonText;
+              payButton.disabled = false;
+            }
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+        
+        rzp.on('payment.failed', function(response) {
+          console.error("Payment failed:", response.error);
+          showStatus(`Payment failed: ${response.error.description}`, "error");
+          paymentInProgress = false;
+          payButton.innerHTML = originalButtonText;
+          payButton.disabled = false;
+        });
+      } catch (err) {
+        console.error("Payment error:", err);
+        showStatus("Something went wrong during payment processing.", "error");
+        paymentInProgress = false;
+        const payButton = document.querySelector("#paymentSection button");
+        payButton.innerHTML = '<i class="fas fa-lock"></i> Pay Securely ₹49';
+        payButton.disabled = false;
+      }
+    }
+
+    // Initialize the page when loaded
+    function initPage() {
+      // Generate QR code for desktop users
+      if (!isMobileDevice()) {
+        generateQRCode();
       }
       
-      updateNavigationButtons();
-      answerInput.focus();
-    });
-
-    prevBtn.addEventListener("click", () => {
-      answers[currentQuestionIndex] = answerInput.value.trim();
-      currentQuestionIndex--;
-      showQuestion(currentQuestionIndex);
-      answerInput.value = answers[currentQuestionIndex] || "";
-      updateNavigationButtons();
-      answerInput.focus();
-    });
-
-    closeModal.addEventListener("click", () => {
-      if (confirm("Are you sure you want to cancel the questionnaire? Your progress will be lost.")) {
-        resetQuestionnaire();
+      // Set up phone number input formatting
+      const phoneInput = document.getElementById('phone');
+      if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+          this.value = this.value.replace(/\D/g, '').slice(0, 10);
+        });
       }
-    });
-
-    restartBtn.addEventListener("click", () => {
-      completionModal.classList.add("hidden");
-      userForm.reset();
-      document.getElementById("userInput").focus();
-    });
-
-    // Functions
-    function startQuestionnaire() {
-      currentQuestionIndex = 0;
-      answers = [];
-      showQuestion(currentQuestionIndex);
-      modalBackdrop.classList.remove("hidden");
-      answerInput.value = "";
-      updateNavigationButtons();
-      answerInput.focus();
-      updateProgressBar();
-    }
-
-    function showQuestion(index) {
-      questionText.classList.remove("fade-in");
-      setTimeout(() => {
-        questionText.textContent = questions[index];
-        questionText.classList.add("fade-in");
-      }, 10);
       
-      questionCounter.textContent = `${index + 1}/${questions.length}`;
-      nextBtnText.textContent = index === questions.length - 1 ? "Submit" : "Next";
-      updateProgressBar();
+      // Handle auth state changes
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          currentUserId = user.uid;
+          
+          // First check payment status (initial check)
+          checkPaymentStatus(user, true);
+          
+          // Only show payment section if on mobile
+          if (isMobileDevice()) {
+            document.getElementById("paymentSection").style.display = "block";
+          }
+        } else {
+          // User not logged in, redirect to login
+          window.location.href = "login.html";
+        }
+      });
     }
 
-    function updateNavigationButtons() {
-      prevBtn.disabled = currentQuestionIndex === 0;
-    }
-
-    function completeQuestionnaire() {
-      modalBackdrop.classList.add("hidden");
-      completionModal.classList.remove("hidden");
-      
-      // In a real app, you might send the data to a server here
-      console.log("User:", userName);
-      console.log("Answers:", answers);
-    }
-
-    function resetQuestionnaire() {
-      modalBackdrop.classList.add("hidden");
-      completionModal.classList.add("hidden");
-      userForm.reset();
-    }
-
-    function updateProgressBar() {
-      const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
-      progressFill.style.width = `${progress}%`;
-    }
-
-    function showValidationError() {
-      answerInput.classList.add("shake", "border-red-500");
-      answerInput.focus();
-      setTimeout(() => {
-        answerInput.classList.remove("shake", "border-red-500");
-      }, 500);
-    }
-
-    // Initialize
-    updateProgressBar();
+    // Initialize the page
+    window.onload = initPage;
   </script>
 </body>
 </html>
