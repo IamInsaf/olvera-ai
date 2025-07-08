@@ -25,6 +25,8 @@ const { askany } = require('./askany');
 
 const paymentAPI = require("./payments");
 
+const { coursesug, conformskill } = require("./conform");
+
 // Import the new searchJob function
 const { searchJob } = require('./searchJob');
 
@@ -1254,4 +1256,8 @@ exports.improve  = improve;
 exports.analyzeJobOpportunity = analyzeJobOpportunity;
 exports.analyzeskills = analyzeskills;
 exports.askany = askany;
+
+exports.coursesug = coursesug;
+exports.conformskill = conformskill;
+
 exports.paymentAPI = paymentAPI.paymentAPI;

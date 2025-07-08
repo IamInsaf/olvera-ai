@@ -3,1348 +3,529 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Olvera - AI Career Guidance</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Sora:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-      <!-- Firebase Analytics -->
-  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
+    <title>Olvera - Career Test for 12th Pass Students</title>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.2/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
-        :root {
-            --bg-dark: #0A0A0F;
-            --accent-violet: #9D4AFF;
-            --accent-cyan: #00F5FF;
-            --text-light: #FFFFFF;
-            --glass-bg: rgba(15, 15, 25, 0.8);
-            --glass-border: rgba(157, 74, 255, 0.3);
-        }
-
-        * {
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Sora', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            overflow-x: hidden;
+            color: #e0e0e0;
             line-height: 1.6;
+            background-color: #a7a4a4;
+            min-height: 100vh;
         }
-
-        h1, h2, h3, h4 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-        }
-
-        /* Hero Section */
-        .hero {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            padding: 0 2rem;
-        }
-
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, rgba(157, 74, 255, 0.2) 0%, transparent 70%);
-            z-index: -1;
-        }
-
-        .hero-content {
-            max-width: 900px;
-            z-index: 2;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 1s ease forwards 0.5s;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 20px rgba(157, 74, 255, 0.3);
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 2.5rem;
-            opacity: 0.9;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            margin: 0 0.5rem;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
-            color: white;
-            box-shadow: 0 4px 20px rgba(157, 74, 255, 0.4);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(157, 74, 255, 0.6);
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: 0.5s;
-        }
-
-        .btn-primary:hover::before {
-            left: 100%;
-        }
-
-        .btn-secondary {
-            border: 2px solid var(--accent-cyan);
-            color: var(--accent-cyan);
-            background: transparent;
-        }
-
-        .btn-secondary:hover {
-            background: var(--accent-cyan);
-            color: var(--bg-dark);
-            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
-        }
-
-        /* Floating Chatbot */
-        .chatbot-icon {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 4px 20px rgba(157, 74, 255, 0.4);
-            z-index: 100;
-            animation: float 3s ease-in-out infinite;
-            transition: all 0.3s ease;
-        }
-
-        .chatbot-icon:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 30px rgba(157, 74, 255, 0.6);
-        }
-
-        .chatbot-icon i {
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        /* How It Works Section */
-        .section {
-            padding: 6rem 2rem;
-            position: relative;
-        }
-
-        .section-title {
-            text-align: center;
-            margin-bottom: 4rem;
-            font-size: 2.5rem;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .section-title span {
-            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .steps-container {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            flex-wrap: wrap;
-            max-width: 1200px;
+        .container {
+            max-width: 600px;
             margin: 0 auto;
+            padding: 20px;
         }
-
-        .step-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 2rem;
-            width: 300px;
+        .header {
             text-align: center;
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(20px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .step-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(157, 74, 255, 0.1) 0%, transparent 70%);
-            transform: rotate(45deg);
-            transition: all 0.5s ease;
-            opacity: 0;
-        }
-
-        .step-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(157, 74, 255, 0.2);
-        }
-
-        .step-card:hover::before {
-            opacity: 1;
-            transform: rotate(0deg);
-        }
-
-        .step-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
-            border-radius: 50%;
-            font-size: 2rem;
+            padding: 30px 0;
+            background: linear-gradient(135deg, #4a00e0, #8e2de2);
             color: white;
-            box-shadow: 0 4px 15px rgba(157, 74, 255, 0.4);
-        }
-
-        .step-card h3 {
-            margin-bottom: 1rem;
-            font-size: 1.5rem;
-        }
-
-        .step-card p {
-            opacity: 0.8;
-            font-size: 0.95rem;
-        }
-
-        /* AI Features Section */
-        .features-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .feature-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--glass-border);
             border-radius: 15px;
-            padding: 2rem;
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(157, 74, 255, 0.2);
-            border-color: rgba(157, 74, 255, 0.6);
-        }
-
-        .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .feature-card h3 {
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-        }
-
-        .feature-card p {
-            opacity: 0.8;
-            font-size: 0.95rem;
-        }
-
-        /* Student Results Section */
-        .testimonials-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .testimonial-slide {
-            background: var(--glass-bg);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 2rem;
-            margin: 0 1rem;
-            text-align: center;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: all 0.5s ease;
-        }
-
-        .testimonial-slide.active {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .user-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            margin: 0 auto 1.5rem;
-            border: 2px solid var(--accent-violet);
-            object-fit: cover;
-        }
-
-        .testimonial-quote {
-            font-style: italic;
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .testimonial-quote::before,
-        .testimonial-quote::after {
-            content: '"';
-            font-size: 2rem;
-            color: var(--accent-cyan);
-            opacity: 0.5;
-            position: absolute;
-        }
-
-        .testimonial-quote::before {
-            top: -15px;
-            left: -10px;
-        }
-
-        .testimonial-quote::after {
-            bottom: -25px;
-            right: -10px;
-        }
-
-        .user-name {
-            font-weight: 500;
-            margin-bottom: 0.5rem;
-        }
-
-        .user-title {
-            opacity: 0.7;
-            font-size: 0.9rem;
-        }
-
-        /* Certificate Mockup */
-        .certificate-container {
-            max-width: 800px;
-            margin: 4rem auto 0;
-            position: relative;
-            opacity: 0;
-            transform: perspective(1000px) rotateX(-10deg);
-            transition: all 0.8s ease;
-        }
-
-        .certificate {
-            background: linear-gradient(135deg, #1A1A2E, #16213E);
-            border-radius: 15px;
-            padding: 2rem;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--glass-border);
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease-out;
             transform-style: preserve-3d;
-            transition: all 0.5s ease;
+            box-shadow: 0 10px 30px rgba(74, 0, 224, 0.3);
         }
-
-        .certificate:hover {
-            transform: perspective(1000px) rotateX(0deg) translateY(-10px);
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
-        }
-
-        .certificate-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .certificate-header h3 {
-            font-size: 1.8rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .certificate-body {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .certificate-logo {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .certificate-logo i {
-            font-size: 3rem;
-            color: white;
-        }
-
-        .certificate-details p {
-            margin-bottom: 0.5rem;
-        }
-
-        .certificate-details strong {
-            color: var(--accent-cyan);
-        }
-
-        .certificate-footer {
-            text-align: center;
-            margin-top: 2rem;
-        }
-
-        .share-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .share-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .share-btn:hover {
-            transform: translateY(-3px);
-            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
-            color: white;
-        }
-
-        /* Referral Program */
-        .referral-banner {
-            background: linear-gradient(135deg, #1A1A2E, #16213E);
-            border-radius: 15px;
-            padding: 2rem;
-            text-align: center;
-            max-width: 1000px;
-            margin: 0 auto;
-            border: 1px solid var(--glass-border);
-            position: relative;
-            overflow: hidden;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .referral-banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path fill="rgba(157, 74, 255, 0.05)" d="M0,0 L100,0 L100,100 L0,100 Z" /></svg>');
-            background-size: cover;
-            z-index: -1;
-        }
-
-        .referral-banner h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: flicker 2s infinite alternate;
-        }
-
-        .referral-banner p {
-            max-width: 700px;
-            margin: 0 auto 2rem;
-            opacity: 0.9;
-        }
-
-        .progress-container {
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            background: var(--glass-bg);
-            height: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-bar {
-            height: 100%;
-            width: 0;
-            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-            border-radius: 10px;
-            transition: width 1s ease;
-            position: relative;
-        }
-
-        .progress-milestones {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            padding: 0 10px;
-        }
-
-        .milestone {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--bg-dark);
-            border: 2px solid var(--glass-border);
-            position: relative;
-        }
-
-        .milestone.active {
-            background: var(--accent-cyan);
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 10px var(--accent-cyan);
-        }
-
-        .leaderboard {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .leaderboard-user {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 1.5rem;
-            width: 150px;
-            text-align: center;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .leaderboard-user:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(157, 74, 255, 0.2);
-        }
-
-        .leaderboard-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            margin: 0 auto 1rem;
-            object-fit: cover;
-            border: 2px solid var(--accent-violet);
-        }
-
-        .leaderboard-crown {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1.5rem;
-            color: gold;
-            animation: bounce 2s infinite;
-        }
-
-        /* Pricing CTA */
-        .pricing-container {
-            max-width: 800px;
-            margin: 0 auto;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        .pricing-container h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .pricing-container p {
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            opacity: 0.9;
-        }
-
-        .price-tag {
-            font-size: 3.5rem;
+        h1 {
+            font-size: 28px;
             font-weight: 700;
-            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            margin-bottom: 1.5rem;
-            animation: pulse 2s infinite;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-
-        .highlight {
-            display: inline-block;
-            padding: 0.3rem 1rem;
-            background: rgba(0, 245, 255, 0.2);
-            border-radius: 50px;
-            color: var(--accent-cyan);
+        h2 {
+            font-size: 20px;
             font-weight: 500;
-            margin-bottom: 2rem;
-            border: 1px solid var(--accent-cyan);
+            margin-top: 0;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-
-        .payment-mockup {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
+        .section {
+            background: #212121;
             border-radius: 15px;
-            padding: 2rem;
-            max-width: 400px;
-            margin: 0 auto;
-            transition: all 0.3s ease;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: both;
+            transform-style: preserve-3d;
+            transition: transform 0.5s, box-shadow 0.5s;
+            border: 1px solid #333;
         }
-
-        .payment-mockup:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(157, 74, 255, 0.2);
+        .section:hover {
+            transform: translateY(-5px) rotateX(5deg);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
         }
-
-        .payment-header {
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.4s; }
+        .section:nth-child(4) { animation-delay: 0.6s; }
+        .section:nth-child(5) { animation-delay: 0.8s; }
+        .section:nth-child(6) { animation-delay: 1.0s; }
+        .section:nth-child(7) { animation-delay: 1.2s; }
+        .section-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #8e2de2;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
-
-        .payment-logo {
-            font-size: 1.5rem;
-            color: var(--accent-violet);
-        }
-
-        .payment-secure {
+        .benefit-item {
             display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--accent-cyan);
-            font-size: 0.9rem;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+            padding: 10px;
+            border-radius: 8px;
+            background: #252525;
         }
-
-        .payment-secure i {
-            font-size: 1rem;
+        .benefit-item:hover {
+            transform: translateX(5px) scale(1.02);
+            background: #2e2e2e;
         }
-
-        .payment-amount {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
+        .benefit-icon {
+            margin-right: 15px;
+            font-size: 24px;
+            animation: pulse 2s infinite;
+            color: #8e2de2;
         }
-
-        .payment-methods {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .payment-method {
-            width: 50px;
-            height: 30px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .qr-code {
-            width: 150px;
-            height: 150px;
-            background: white;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .testimonial {
+            background: #262525;
+            padding: 15px;
             border-radius: 10px;
-            margin-bottom: 1.5rem;
-            position: relative;
-            overflow: hidden;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            border-left: 4px solid #4a00e0;
+            transform-style: preserve-3d;
         }
-
-        .qr-code::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, transparent 48%, rgba(157, 74, 255, 0.1) 50%, transparent 52%);
-            background-size: 10px 10px;
+        .testimonial:hover {
+            transform: translateY(-5px) rotateY(5deg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
-
-        .qr-code i {
-            font-size: 3rem;
-            color: black;
+        .testimonial-name {
+            font-weight: 600;
+            margin-top: 10px;
+            color: #8e2de2;
         }
-
-        .payment-note {
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-
-        /* Footer */
-        footer {
-            background: rgba(5, 5, 10, 0.8);
-            padding: 3rem 2rem 1.5rem;
+        .cta-box {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            padding: 25px;
+            border-radius: 15px;
             text-align: center;
+            color: white;
+            animation: pulse 2s infinite;
+            transform-style: preserve-3d;
+            box-shadow: 0 10px 30px rgba(255, 65, 108, 0.3);
         }
-
-        .footer-logo {
-            font-size: 1.8rem;
+        .price {
+            font-size: 36px;
             font-weight: 700;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(90deg, var(--accent-violet), var(--accent-cyan));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            color: white;
+            margin: 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .original-price {
+            text-decoration: line-through;
+            color: rgba(255,255,255,0.7);
+            font-size: 18px;
+        }
+        .button {
             display: inline-block;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .footer-link {
-            color: var(--text-light);
+            background: #4a00e0;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
             text-decoration: none;
-            opacity: 0.8;
-            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 18px;
+            margin: 15px 0;
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+            box-shadow: 0 5px 15px rgba(74, 0, 224, 0.4);
+            transform-style: preserve-3d;
+            border: none;
+            cursor: pointer;
         }
-
-        .footer-link:hover {
-            opacity: 1;
-            color: var(--accent-cyan);
+        .button:hover {
+            background: #3a00b3;
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(74, 0, 224, 0.5);
         }
-
-        .social-icons {
+        .trust-badges {
             display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 20px 0;
         }
-
-        .social-icon {
+        .trust-badge {
+            text-align: center;
+            margin: 10px;
+            font-size: 14px;
+            transition: transform 0.3s;
+            padding: 10px;
+            border-radius: 8px;
+            background: #252525;
+            min-width: 80px;
+        }
+        .trust-badge:hover {
+            transform: scale(1.1) rotateY(10deg);
+            background: #2e2e2e;
+        }
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+            margin: 30px 0;
+            perspective: 1000px;
+        }
+        .step {
+            flex: 1;
+            padding: 0 10px;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+        .step:hover {
+            transform: scale(1.1) rotateY(15deg);
+        }
+        .step-number {
+            background: #4a00e0;
+            color: white;
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            margin: 0 auto 15px;
+            font-weight: 600;
+            animation: bounce 2s infinite;
+            box-shadow: 0 5px 15px rgba(74, 0, 224, 0.4);
         }
-
-        .social-icon:hover {
-            background: linear-gradient(45deg, var(--accent-violet), var(--accent-cyan));
+        .highlight {
+            color: #8e2de2;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .urgent-badge {
+            background: #ff4757;
             color: white;
-            transform: translateY(-3px);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 15px;
+            animation: shake 0.5s infinite alternate;
+            box-shadow: 0 3px 10px rgba(255, 71, 87, 0.4);
+            transform-style: preserve-3d;
         }
-
-        .footer-credit {
-            opacity: 0.6;
-            font-size: 0.9rem;
-        }
-
-        .footer-credit span {
-            color: var(--accent-cyan);
-        }
-
+        
         /* Animations */
-        @keyframes fadeInUp {
+        @keyframes fadeInDown {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(-20px) rotateX(20deg);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) rotateX(0);
             }
         }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) rotateX(-20deg);
             }
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        @keyframes flicker {
-            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
-                text-shadow: 0 0 10px var(--accent-violet), 0 0 20px var(--accent-cyan);
-            }
-            20%, 24%, 55% {
-                text-shadow: none;
+            to {
+                opacity: 1;
+                transform: translateY(0) rotateX(0);
             }
         }
-
-        @keyframes bounce {
-            0%, 100% {
-                transform: translateX(-50%) translateY(0);
-            }
-            50% {
-                transform: translateX(-50%) translateY(-10px);
-            }
-        }
-
+        
         @keyframes pulse {
-            0%, 100% {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-15px);}
+            60% {transform: translateY(-7px);}
+        }
+        
+        @keyframes shake {
+            from { transform: rotate(-2deg) translateZ(10px); }
+            to { transform: rotate(2deg) translateZ(10px); }
+        }
+        
+        /* 3D Flip Animation */
+        @keyframes flipInY {
+            from {
+                transform: perspective(400px) rotateY(90deg);
+                opacity: 0;
+            }
+            to {
+                transform: perspective(400px) rotateY(0);
                 opacity: 1;
             }
-            50% {
-                opacity: 0.7;
+        }
+        
+        /* Glow Effect */
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px rgba(142, 45, 226, 0.5);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(142, 45, 226, 0.8);
             }
         }
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero p {
-                font-size: 1rem;
-            }
-            
-            .steps-container {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .step-card {
-                width: 100%;
-                max-width: 400px;
-            }
-            
-            .certificate-body {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .section-title {
-                font-size: 2rem;
-            }
+        
+        /* Floating Animation */
+        @keyframes float {
+            0% { transform: translateY(0px) rotateX(0deg); }
+            50% { transform: translateY(-10px) rotateX(5deg); }
+            100% { transform: translateY(0px) rotateX(0deg); }
         }
-
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
-            
-            .btn {
-                display: block;
-                width: 100%;
-                max-width: 250px;
-                margin: 0.5rem auto;
-            }
-            
-            .features-container {
-                grid-template-columns: 1fr;
-            }
-            
-            .price-tag {
-                font-size: 2.5rem;
-            }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        /* Background Elements */
+        .bg-element {
+            position: fixed;
+            background: rgba(142, 45, 226, 0.1);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(30px);
         }
     </style>
 </head>
 <body>
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Discover Your True Career Path with AI</h1>
-            <p>Olvera helps students unlock their born talents and make informed choices.</p>
-            <div class="hero-buttons">
-                <a href="/home" class="btn btn-primary">Start</a>
-                <a href="#features" class="btn btn-secondary">Explore Insights</a>
-            </div>
+    <!-- Background elements for depth -->
+    <div class="bg-element" style="width: 300px; height: 300px; top: -100px; left: -100px;"></div>
+    <div class="bg-element" style="width: 200px; height: 200px; bottom: -50px; right: -50px;"></div>
+    
+    <div class="container">
+        <div class="header floating">
+            <h1>🚨 Picking the WRONG career after 12th? </h1>
+            <h2>1 in 3 Indian students regret their course choice by 2nd year. Don't be one of them.</h2>
         </div>
-        
-        <!-- Floating Chatbot Icon -->
-        <div class="chatbot-icon">
-            <i class="fas fa-robot"></i>
-        </div>
-    </section>
 
-    <!-- How It Works Section -->
-    <section class="section" id="how-it-works">
-        <h2 class="section-title">How <span>Olvera</span> Works</h2>
-        <div class="steps-container">
-            <div class="step-card">
-                <div class="step-icon">
-                    <i class="fas fa-clipboard-list"></i>
-                </div>
-                <h3>Step 1: Take the Test</h3>
-                <p>Complete our 5-minute assessment designed to uncover your innate talents and preferences.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-icon">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <h3>Step 2: AI Analyzes You</h3>
-                <p>Our advanced AI evaluates your responses against thousands of successful career paths.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-icon">
-                    <i class="fas fa-rocket"></i>
-                </div>
-                <h3>Step 3: Get Personalized Career Path</h3>
-                <p>Receive a detailed report with career recommendations tailored just for you.</p>
-            </div>
+        <div class="section">
+            <h2 class="section-title">🤔 "But I've already chosen my course..."</h2>
+            <p>Most students pick careers based on:</p>
+            <p>❌ Parents' pressure<br>
+            ❌ Friends' choices<br>
+            ❌ Social media trends<br>
+            ❌ "Safe option" mentality</p>
+            <p><span class="highlight">The result?</span> Wasted years, lost passion, and average salaries.</p>
+            <p>Your career should match <span class="highlight">YOUR unique talents</span>, not someone else's expectations.</p>
         </div>
-    </section>
 
-    <!-- AI Features Section -->
-    <section class="section" id="features" style="background: radial-gradient(circle at center, rgba(10, 10, 15, 0.9) 0%, var(--bg-dark) 70%);">
-        <h2 class="section-title">Our <span>AI-Powered</span> Features</h2>
-        <div class="features-container">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-gem"></i>
-                </div>
-                <h3>Born Talent Analysis</h3>
-                <p>Discover your natural strengths and abilities you were born with through our proprietary assessment.</p>
+        <div class="section">
+            <h2 class="section-title">💎 What You'll Discover</h2>
+            <div class="benefit-item">
+                <div class="benefit-icon">🔍</div>
+                <div><strong>Your Natural Talent Type</strong><br>Are you a Creator, Thinker, Builder, or Leader?</div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-bridge"></i>
-                </div>
-                <h3>Skill Gap Identification</h3>
-                <p>Identify exactly what skills you need to develop to succeed in your ideal career path.</p>
+            <div class="benefit-item">
+                <div class="benefit-icon">🎯</div>
+                <div><strong>Perfect Career Matches</strong><br>5 careers that actually fit your personality</div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-comment-dots"></i>
-                </div>
-                <h3>AI-generated Questions</h3>
-                <p>Dynamic questioning that adapts to your responses for more accurate results.</p>
+            <div class="benefit-item">
+                <div class="benefit-icon">📚</div>
+                <div><strong>Course Suggestions</strong><br>Exact degrees/diplomas to reach your goals</div>
             </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <h3>Real-time Feedback</h3>
-                <p>Get immediate insights as you complete the assessment with our live analysis.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Student Results Section -->
-    <section class="section" id="results">
-        <h2 class="section-title">Student <span>Success Stories</span></h2>
-        <div class="testimonials-container">
-            <div class="testimonial-slide active">
-                <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Student" class="user-avatar">
-                <p class="testimonial-quote">Olvera predicted my career match perfectly! I'm now pursuing data science thanks to their accurate assessment.</p>
-                <h4 class="user-name">Priya Sharma</h4>
-                <p class="user-title">Data Science Student at IIT Delhi</p>
+            <div class="benefit-item">
+                <div class="benefit-icon">💯</div>
+                <div><strong>Confidence Score</strong><br>How sure you can be about your current choice</div>
             </div>
         </div>
 
-        <!-- Certificate Mockup -->
-        <div class="certificate-container">
-            <div class="certificate">
-                <div class="certificate-header">
-                    <h3>Career Aptitude Certificate</h3>
-                    <p>This certifies that you have completed the Olvera Career Assessment</p>
+        <div class="section">
+            <h2 class="section-title">✨ How Olvera Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div>Take 12-min test</div>
                 </div>
-                <div class="certificate-body">
-                    <div class="certificate-logo">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <div class="certificate-details">
-                        <p><strong>Name:</strong> Student Name</p>
-                        <p><strong>Assessment Date:</strong> June 15, 2023</p>
-                        <p><strong>Top Career Matches:</strong> Data Scientist, UX Designer, Product Manager</p>
-                        <p><strong>Primary Talents:</strong> Analytical Thinking, Creativity, Leadership</p>
-                    </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div>Get detailed report</div>
                 </div>
-                <div class="certificate-footer">
-                    <p>Share your achievement with friends and family</p>
-                    <div class="share-buttons">
-                        <div class="share-btn">
-                            <i class="fab fa-whatsapp"></i>
-                        </div>
-                        <div class="share-btn">
-                            <i class="fab fa-linkedin-in"></i>
-                        </div>
-                        <div class="share-btn">
-                            <i class="fab fa-twitter"></i>
-                        </div>
-                        <div class="share-btn">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                    </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div>Decide with 100% clarity</div>
                 </div>
             </div>
+            <p>Our smart algorithm analyzes <span class="highlight">5 key dimensions</span> of your personality to predict career success.</p>
         </div>
-    </section>
 
-    <!-- Referral Program -->
-    <section class="section" id="referral">
-        <div class="referral-banner">
-            <h2>Refer and Earn ₹Cash + Fame</h2>
-            <p>Invite friends to take the Olvera career test and earn rewards for each successful referral!</p>
-            
-            <div class="progress-container">
-                <div class="progress-bar" style="width: 40%;"></div>
-                <div class="progress-milestones">
-                    <div class="milestone active"></div>
-                    <div class="milestone active"></div>
-                    <div class="milestone"></div>
-                </div>
+        <div class="section">
+            <h2 class="section-title">📢 Real Students, Real Results</h2>
+            <div class="testimonial">
+                "I was about to join BCom like everyone else. Olvera showed I'm actually meant for Design! Saved me 3 years of misery."
+                <div class="testimonial-name">- Riya, Mumbai</div>
             </div>
-            
-            <div class="leaderboard">
-                <div class="leaderboard-user">
-                    <div class="leaderboard-crown">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Top Referrer" class="leaderboard-avatar">
-                    <h4>Rahul K.</h4>
-                    <p>₹2,450 earned</p>
-                </div>
-                <div class="leaderboard-user">
-                    <div class="leaderboard-crown">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Top Referrer" class="leaderboard-avatar">
-                    <h4>Neha P.</h4>
-                    <p>₹1,960 earned</p>
-                </div>
-                <div class="leaderboard-user">
-                    <div class="leaderboard-crown">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Top Referrer" class="leaderboard-avatar">
-                    <h4>Arjun S.</h4>
-                    <p>₹1,470 earned</p>
-                </div>
+            <div class="testimonial">
+                "Got 92% but zero clarity. The test revealed my hidden talent for Data Science. Now doing BSc in AI!"
+                <div class="testimonial-name">- Arjun, Bangalore</div>
+            </div>
+            <div class="testimonial">
+                "My confidence score was 38% for Engineering. Switched to Psychology and I've never been happier."
+                <div class="testimonial-name">- Priya, Delhi</div>
             </div>
         </div>
-    </section>
 
-    <!-- Pricing CTA Section -->
-    <section class="section" id="pricing">
-        <div class="pricing-container">
-            <h2>Start Your Career Journey Today</h2>
-            <p>For less than the price of a coffee, discover your true potential and ideal career path.</p>
-            
-            <div class="price-tag">₹49</div>
-            <div class="highlight">Only phone number needed, no email required</div>
-            
-            <div class="payment-mockup">
-                <div class="payment-header">
-                    <div class="payment-logo">
-                        <i class="fas fa-rupee-sign"></i>
-                    </div>
-                    <div class="payment-secure">
-                        <i class="fas fa-lock"></i>
-                        <span>Secure Payment</span>
-                    </div>
-                </div>
-                <div class="payment-amount">₹49.00</div>
-                <div class="payment-methods">
-                    <div class="payment-method">
-                        <i class="fab fa-google-pay"></i>
-                    </div>
-                    <div class="payment-method">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <div class="payment-method">
-                        <i class="fab fa-cc-visa"></i>
-                    </div>
-                    <div class="payment-method">
-                        <i class="fas fa-qrcode"></i>
-                    </div>
-                </div>
-                <div class="qr-code">
-                    <i class="fas fa-mobile-alt"></i>
-                </div>
-                <p class="payment-note">Scan to pay with any UPI app</p>
-            </div>
+        <div class="cta-box glow">
+            <div class="urgent-badge">ONLY 50 TESTS LEFT AT THIS PRICE!</div>
+            <h2>Validate Your Career Path Today</h2>
+            <div class="price">₹49</div>
+            <div class="original-price">Normally ₹199</div>
+            <a href="/home" class="button" id="startTestBtn">Start My ₹49 Test</a>
+            <p>Takes just 12 minutes • Instant report</p>
         </div>
-    </section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-logo">Olvera</div>
-        <div class="footer-links">
-            <a href="#" class="footer-link">Home</a>
-            <a href="#how-it-works" class="footer-link">How It Works</a>
-            <a href="#features" class="footer-link">Features</a>
-            <a href="#results" class="footer-link">Results</a>
-            <a href="#referral" class="footer-link">Referral</a>
-            <a href="#pricing" class="footer-link">Pricing</a>
-            <a href="policies/privacy.html" class="footer-link">Privacy Policy</a>
-            <a href="policies/terms-and-conditions.html" class="footer-link">Terms</a>
-            <a href="policies/faq.html" class="footer-link">FAQ</a>
-            <a href="contact.html" class="footer-link">Contact</a>
+        <div class="section">
+            <h2 class="section-title">🔒 You're In Safe Hands</h2>
+            <div class="trust-badges">
+                <div class="trust-badge">
+                    <div>🔐</div>
+                    <div>Secure UPI Payment</div>
+                </div>
+                <div class="trust-badge">
+                    <div>📧</div>
+                    <div>No Spam Ever</div>
+                </div>
+                <div class="trust-badge">
+                    <div>👍</div>
+                    <div>12,000+ Students</div>
+                </div>
+            </div>
+            <p style="text-align: center; font-size: 14px; color: #888;">© 2025 Olvera Career Tests. Not affiliated with any university.</p>
         </div>
-        <div class="social-icons">
-            <a href="https://instagram.com/m_insaf_" class="social-icon">
-                <i class="fab fa-instagram"></i>
-            </a>
-            
-        </div>
-        <p class="footer-credit">Made with ❤️ by <span>INZAF INDUSTRIES</span></p>
-    </footer>
+    </div>
 
     <script>
-        // Scroll animations
-        document.addEventListener('DOMContentLoaded', function() {
-            const animateOnScroll = () => {
-                const elements = document.querySelectorAll('.section-title, .step-card, .feature-card, .certificate-container, .referral-banner, .pricing-container');
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+            authDomain: "promgn-in.firebaseapp.com",
+            projectId: "promgn-in",
+            storageBucket: "promgn-in.appspot.com",
+            messagingSenderId: "545429176314",
+            appId: "1:545429176314:web:5590c702b55357b4bfae43",
+            measurementId: "G-YZQG3ZPQMJ"
+        };
+    
+        try {
+            // Initialize Firebase
+            const app = firebase.initializeApp(firebaseConfig);
+            
+            // Initialize Analytics only if measurementId exists
+            let analytics;
+            if (firebaseConfig.measurementId) {
+                analytics = firebase.analytics();
+                // Set analytics collection enabled
+                analytics.setAnalyticsCollectionEnabled(true);
                 
-                elements.forEach(element => {
-                    const elementPosition = element.getBoundingClientRect().top;
-                    const windowHeight = window.innerHeight;
-                    
-                    if (elementPosition < windowHeight - 100) {
-                        element.style.opacity = '1';
-                        element.style.transform = 'translateY(0)';
-                        
-                        if (element.classList.contains('certificate-container')) {
-                            element.style.transform = 'perspective(1000px) rotateX(0deg)';
-                        }
-                    }
+                // Track page view
+                analytics.logEvent('page_view', {
+                    page_title: 'Landing Page',
+                    page_location: window.location.href,
+                    page_path: window.location.pathname
                 });
-            };
-            
-            // Initial check
-            animateOnScroll();
-            
-            // Check on scroll
-            window.addEventListener('scroll', animateOnScroll);
-            
-            // Chatbot interaction
-            const chatbotIcon = document.querySelector('.chatbot-icon');
-            chatbotIcon.addEventListener('click', function() {
-                alert("Hello! I'm Olvera, your AI career guide. How can I help you today?");
-            });
-            
-            // Simple testimonial slider
-            const testimonials = [
-                {
-                    avatar: "https://randomuser.me/api/portraits/women/32.jpg",
-                    quote: "Olvera predicted my career match perfectly! I'm now pursuing data science thanks to their accurate assessment.",
-                    name: "Priya Sharma",
-                    title: "Data Science Student at IIT Delhi"
-                },
-                {
-                    avatar: "https://randomuser.me/api/portraits/men/45.jpg",
-                    quote: "The skill gap analysis showed me exactly what I needed to work on. I landed my dream job within 3 months!",
-                    name: "Rahul Verma",
-                    title: "Software Engineer at Google"
-                },
-                {
-                    avatar: "https://randomuser.me/api/portraits/women/68.jpg",
-                    quote: "I was confused between medicine and research. Olvera's report made the choice clear and I've never been happier.",
-                    name: "Ananya Patel",
-                    title: "Medical Researcher at AIIMS"
-                }
-            ];
-            
-            let currentTestimonial = 0;
-            const testimonialSlide = document.querySelector('.testimonial-slide');
-            
-            function changeTestimonial() {
-                testimonialSlide.classList.remove('active');
-                
-                setTimeout(() => {
-                    const testimonial = testimonials[currentTestimonial];
-                    testimonialSlide.querySelector('.user-avatar').src = testimonial.avatar;
-                    testimonialSlide.querySelector('.testimonial-quote').textContent = testimonial.quote;
-                    testimonialSlide.querySelector('.user-name').textContent = testimonial.name;
-                    testimonialSlide.querySelector('.user-title').textContent = testimonial.title;
-                    
-                    testimonialSlide.classList.add('active');
-                    
-                    currentTestimonial = (currentTestimonial + 1) % testimonials.length;
-                }, 500);
+            } else {
+                console.warn('Firebase Analytics not initialized - missing measurementId');
             }
             
-            // Change testimonial every 5 seconds
-            setInterval(changeTestimonial, 5000);
+            // Initialize Auth
+            const auth = firebase.auth();
             
-            // Smooth scrolling for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    const targetId = this.getAttribute('href');
-                    if (targetId === '#') return;
-                    
-                    const targetElement = document.querySelector(targetId);
-                    if (targetElement) {
-                        window.scrollTo({
-                            top: targetElement.offsetTop - 80,
-                            behavior: 'smooth'
+            // Check authentication state
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    // User is signed in, redirect to home
+                    window.location.href = '/home';
+                } else if (analytics) {
+                    // User is signed out, track as visitor
+                    analytics.logEvent('visitor_view');
+                }
+            });
+            
+            // Track button clicks if analytics is available
+            const startTestBtn = document.getElementById('startTestBtn');
+            if (startTestBtn && analytics) {
+                startTestBtn.addEventListener('click', function(e) {
+                    analytics.logEvent('start_test_click', {
+                        button_id: 'startTestBtn',
+                        button_text: e.target.innerText
+                    });
+                });
+            }
+            
+            // Track section views if analytics is available
+            if (analytics) {
+                document.addEventListener('DOMContentLoaded', function() {
+                    const sections = document.querySelectorAll('.section');
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const sectionTitle = entry.target.querySelector('.section-title')?.innerText || 'Untitled Section';
+                                analytics.logEvent('section_view', {
+                                    section_title: sectionTitle
+                                });
+                                
+                                // Add 3D effect when section comes into view
+                                entry.target.style.transform = 'translateY(0) rotateX(0)';
+                            }
                         });
-                    }
+                    }, { threshold: 0.5 });
+                    
+                    sections.forEach(section => {
+                        observer.observe(section);
+                    });
+                });
+            }
+            
+            // Add 3D hover effects to all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.addEventListener('mousemove', (e) => {
+                    const rect = section.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const angleY = (x - centerX) / 20;
+                    const angleX = (centerY - y) / 20;
+                    
+                    section.style.transform = `perspective(1000px) rotateX(${angleX}deg) rotateY(${angleY}deg)`;
+                });
+                
+                section.addEventListener('mouseleave', () => {
+                    section.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
                 });
             });
-        });
-   
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
-      authDomain: "promgn-in.firebaseapp.com",
-      projectId: "promgn-in",
-      storageBucket: "promgn-in.appspot.com",
-      messagingSenderId: "545429176314",
-      appId: "1:545429176314:web:5590c702b55357"
-    };
-  
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const analytics = firebase.analytics(app);
-    const auth = firebase.auth(app);
-  
-    // Check if user is authenticated
-    auth.onAuthStateChanged(user => {
-      if (user && user.uid) {
-        console.log("User is logged in:", user.uid);
-        window.location.href = "/home"; // Redirect to home if authenticated
-      }
-      else (   console.log(" no user log"))
-    });
-  
-    // Set user properties
-    analytics.setUserProperties({
-      preferred_language: navigator.language,
-      device_type: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
-    });
-  
-    // Track page views
-    analytics.logEvent('page_view', {
-      page_title: document.title,
-      page_location: window.location.href,
-      page_path: window.location.pathname
-    });
-  
-    // Track all link clicks
-    document.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', function () {
-        analytics.logEvent('select_content', {
-          content_type: 'link',
-          content_id: this.getAttribute('href') || 'unknown',
-          method: 'click'
-        });
-      });
-    });
-  
-    // Track CTA button clicks specifically
-    document.querySelectorAll('[href="index"]').forEach(button => {
-      button.addEventListener('click', function () {
-        analytics.logEvent('begin_checkout', {
-          item_name: 'Career Test',
-          item_category: 'CTA',
-          location: this.closest('section') ? this.closest('section').id || 'unknown' : 'unknown'
-        });
-      });
-    });
-  
-    // Track section visibility
-    const sections = document.querySelectorAll('section');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          analytics.logEvent('view_section', {
-            section_id: entry.target.id || 'unknown',
-            section_name: entry.target.querySelector('h2') ? entry.target.querySelector('h2').textContent : 'unknown'
-          });
+            
+        } catch (error) {
+            console.error('Firebase initialization error', error);
         }
-      });
-    }, { threshold: 0.5 });
-  
-    sections.forEach(section => {
-      observer.observe(section);
-    });
-  
-    // Track errors
-    window.addEventListener('error', function (e) {
-      analytics.logEvent('exception', {
-        description: e.message,
-        fatal: false,
-        filename: e.filename,
-        lineno: e.lineno,
-        colno: e.colno
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
