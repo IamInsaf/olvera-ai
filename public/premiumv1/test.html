@@ -527,12 +527,12 @@
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
-                await checkPaymentStatus(currentUser);
+               // await checkPaymentStatus(currentUser);
             } else {
                 try {
                     const result = await auth.signInAnonymously();
                     currentUser = result.user;
-                    await checkPaymentStatus(currentUser);
+                   // await checkPaymentStatus(currentUser);
                 } catch (error) {
                     console.error("Authentication error:", error);
                     showAlert("Failed to initialize session. Please refresh the page.", "danger");

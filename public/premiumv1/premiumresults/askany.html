@@ -33,24 +33,53 @@
 
     let currentUser = null;
 
+    async function checkPaymentStatus() {
+  try {
+    if (!currentUser) return;
+    
+    const userDocRef = doc(db, "Olverausers", currentUser.uid);
+    const userDoc = await getDoc(userDocRef);
+    console.log(currentUser.uid);
+    
+    if (userDoc.exists()) {
+      const userData = userDoc.data();
+      if (userData.hasPaid == false) {
+        // Redirect to payment page if not paid
+       window.location.href = "/payments";
+      }
+    } else {
+      // If document doesn't exist, assume payment is required
+      console.log("user paid")
+     // window.location.href = "payments.html";
+    }
+  } catch (error) {
+    console.error("Payment check error:", error);
+    // In case of error, you might want to handle it differently
+    // For now, we'll redirect to payment page to be safe
+   window.location.href = "payments.html";
+  }
+}
+
+
     // Handle login
     onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('authStatus').innerHTML = '<i class="fas fa-circle-check text-success me-1"></i> Session active';
-      } else {
-        try {
-          const result = await signInAnonymously(auth);
-          currentUser = result.user;
-          document.getElementById('authStatus').innerHTML = '<i class="fas fa-circle-check text-success me-1"></i> Session active';
-        } catch (error) {
-          console.error("Authentication error:", error);
-          document.getElementById('authStatus').innerHTML = '<i class="fas fa-circle-exclamation text-danger me-1"></i> Session error';
-          showAlert("Failed to initialize session. Please refresh the page.", "danger");
-        }
-      }
-    });
-
+  if (user) {
+    currentUser = user;
+    document.getElementById('authStatus').innerHTML = '<i class="fas fa-circle-check text-success me-1"></i> Session active';
+    await checkPaymentStatus(); // Check payment status after auth
+  } else {
+    try {
+      const result = await signInAnonymously(auth);
+      currentUser = result.user;
+      document.getElementById('authStatus').innerHTML = '<i class="fas fa-circle-check text-success me-1"></i> Session active';
+      await checkPaymentStatus(); // Check payment status after auth
+    } catch (error) {
+      console.error("Authentication error:", error);
+      document.getElementById('authStatus').innerHTML = '<i class="fas fa-circle-exclamation text-danger me-1"></i> Session error';
+      showAlert("Failed to initialize session. Please refresh the page.", "danger");
+    }
+  }
+});
     // Save and analyze input
     window.saveAndAnalyze = async function () {
       const inputText = document.getElementById("selfInput").value.trim();
@@ -267,7 +296,7 @@
     
     .card-header {
       background-color: var(--card-bg);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(84, 80, 80, 0.05);
       font-weight: 700;
       padding: 1.25rem 1.5rem;
       color: var(--dark-color);

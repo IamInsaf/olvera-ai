@@ -119,6 +119,37 @@
         const loadingMessage = document.getElementById('loadingMessage');
         const progressFill = document.getElementById('progressFill');
 
+        async function checkPaymentStatus(redirectUrl = '/payments') {
+  try {
+    const user = auth.currentUser;
+    
+    if (!user) {
+      console.log('User not authenticated');
+      return false;
+    }
+
+    const checkPayment = functions.httpsCallable('checkPaymentStatus');
+    console.log("111");
+    const result = await checkPayment({});
+    
+    if (!result.data.hasPaid) {
+      console.log('Payment required - redirecting');
+      window.location.href = redirectUrl;
+      return false;
+    }
+    
+    console.log('User has paid');
+    return true;
+    
+  } catch (error) {
+    console.error('Error checking payment status:', error);
+    // Optionally redirect on error if you want
+    // window.location.href = redirectUrl;
+    return false;
+  }
+}
+
+
         // Update progress bar
         function updateProgress(percentage) {
             progressFill.style.width = `${percentage}%`;
@@ -344,6 +375,7 @@
         auth.onAuthStateChanged((user) => {
             if (user) {
                 checkAnalysis();
+                checkPaymentStatus();
             } else {
                 // Redirect to login if not authenticated
                 window.location.href = '/login';

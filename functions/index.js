@@ -16,7 +16,8 @@ const { positive } = require('./positive');
 const { negative } = require('./negative');
 const { born } = require('./born');
 const { genjob } = require('./genjob');
-const { improve } = require('./improve');
+
+const { improve, free, premium, earn } = require('./improve');
 
 const { analyzeJobOpportunity } = require('./jobfind');
 const { analyzeskills } = require('./fskill');
@@ -26,6 +27,8 @@ const { askany } = require('./askany');
 const paymentAPI = require("./payments");
 
 const { coursesug, conformskill } = require("./conform");
+
+const { checkPaymentStatus } = require("./ispaid");
 
 // Import the new searchJob function
 const { searchJob } = require('./searchJob');
@@ -1252,7 +1255,16 @@ exports.positive  = positive;
 exports.negative  = negative;
 exports.genjob  = genjob;
 exports.born  = born;
+
 exports.improve  = improve;
+exports.free  = free;
+exports.premium  = premium;
+exports.earn  = earn;
+
+
+exports.checkPaymentStatus  = checkPaymentStatus;
+
+
 exports.analyzeJobOpportunity = analyzeJobOpportunity;
 exports.analyzeskills = analyzeskills;
 exports.askany = askany;

@@ -12,11 +12,49 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
     rel="stylesheet"
   />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
   <style>
     body {
       font-family: 'Inter', sans-serif;
       background-color: #111827;
       color: #e5e7eb;
+    }
+    .locked-card {
+      position: relative;
+      filter: grayscale(10%);
+      opacity: 0.7;
+    }
+    .locked-card::after {
+      content: "🔒 Premium Feature";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(44, 43, 43, 0.406);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 14px;
+      z-index: 10;
+    }
+    .premium-highlight {
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    }
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+      }
+      50% {
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+      }
+      100% {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+      }
     }
   </style>
 </head>
@@ -28,134 +66,365 @@
         Explore insights and tools to understand and improve yourself
       </p>
     </div>
-    <a href="/home" class="text-gray-400 hover:text-blue-400 transition" title="Home">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z" />
-      </svg>
-    </a>
+    <div class="flex items-center space-x-4">
+      <div id="auth-status" class="text-sm text-gray-300 hidden">
+        <span id="user-email"></span>
+        <button id="sign-out" class="ml-2 text-blue-400 hover:text-blue-300">Sign Out</button>
+      </div>
+      <a href="/home" class="text-gray-400 hover:text-blue-400 transition" title="Home">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9.75L12 3l9 6.75V21a.75.75 0 01-.75.75H3.75A.75.75 0 013 21V9.75z" />
+        </svg>
+      </a>
+    </div>
   </header>
-  
 
   <main class="flex-grow px-6 sm:px-12 py-10 max-w-7xl mx-auto w-full">
-    <section
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-      role="list"
-    >
+    <div id="auth-message" class="mb-6 p-4 bg-blue-900/30 rounded-lg border border-blue-700 hidden">
+      <p class="text-blue-200">You're viewing the free version. <a href="/payments" class="text-blue-300 underline">Upgrade to premium</a> to unlock all features.</p>
+    </div>
+    
+    <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" role="list">
+      <!-- Free Tier Card -->
+      <a
+        href="premiumresults/free-result"
+        class="group bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-900 border-2 border-gray-600 hover:border-green-500"
+        role="listitem"
+        aria-label="Free Trial - Basic personality insights"
+        id="free-tier-card"
+      >
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">🆓</div>
+        <h2 class="text-lg font-semibold text-green-400 mb-1">Free Trial</h2>
+        <p class="text-green-300 text-sm">Basic personality insights</p>
+        <div class="mt-2 text-xs text-gray-400">Always available</div>
+      </a>
+      
+      <!-- Starter Tier Card - Now unlocked for free users -->
+      <a
+        href="premiumresults/premium"
+        class="group bg-gradient-to-br from-gray-800 to-yellow-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-yellow-900 border-2 border-yellow-700 hover:border-yellow-500"
+        role="listitem"
+        aria-label="Starter Package - Essential premium features"
+        id="starter-tier-card"
+      >
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">⭐</div>
+        <h2 class="text-lg font-semibold text-yellow-400 mb-1">Starter Package</h2>
+        <p class="text-yellow-300 text-sm">Essential premium features</p>
+        <div class="mt-2 text-xs text-gray-400">Now available to all users</div>
+      </a>
+
+      <!-- NEW: 10K/day Ideas Card - Highlighted Premium Feature -->
+      <a
+        href="premiumresults/earn"
+        class="group bg-gradient-to-br from-gray-800 to-orange-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-orange-900 border-2 border-orange-500 hover:border-orange-300 premium-highlight"
+        role="listitem"
+        aria-label="10K/Day Ideas - Premium business ideas"
+        id="ideas-card"
+      >
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">💰</div>
+        <h2 class="text-lg font-semibold text-orange-400 mb-1">Earn 10K/month</h2>
+        <p class="text-orange-300 text-sm">earn 10k/month according to your potential</p>
+        <div class="mt-2 text-xs text-gray-400">Unlock your earning potential</div>
+      </a>
+
+      <!-- Positive/Negative Analysis Cards -->
       <a
         href="premiumresults/positive"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-900 border border-gray-700 hover:border-green-500"
+        class="group bg-gradient-to-br from-gray-800 to-green-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-900 border-2 border-green-700 hover:border-green-500"
         role="listitem"
-        aria-label="Your Positive - Understand your top strengths"
+        aria-label="Strengths Analysis - Understand your top strengths"
+        id="positive-card"
       >
-        <div class="text-4xl mb-4 select-none" aria-hidden="true">🟢</div>
-        <h2 class="text-lg font-semibold text-green-400 mb-1">Your Positive</h2>
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">💪</div>
+        <h2 class="text-lg font-semibold text-green-400 mb-1">Strengths Analysis</h2>
         <p class="text-green-300 text-sm">Understand your top strengths</p>
+        <div class="mt-2 text-xs text-gray-400">In-depth evaluation</div>
       </a>
 
       <a
         href="premiumresults/negative"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-900 border border-gray-700 hover:border-red-500"
+        class="group bg-gradient-to-br from-gray-800 to-red-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-900 border-2 border-red-700 hover:border-red-500"
         role="listitem"
-        aria-label="Your Negative - Identify areas to work on"
+        aria-label="Growth Areas - Identify areas to improve"
+        id="negative-card"
       >
-        <div class="text-4xl mb-4 select-none" aria-hidden="true">🔴</div>
-        <h2 class="text-lg font-semibold text-red-400 mb-1">Your Negative</h2>
-        <p class="text-red-300 text-sm">Identify areas to work on</p>
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">📉</div>
+        <h2 class="text-lg font-semibold text-red-400 mb-1">Growth Areas</h2>
+        <p class="text-red-300 text-sm">Identify areas to improve</p>
+        <div class="mt-2 text-xs text-gray-400">Constructive feedback</div>
       </a>
 
+      <!-- Career-Related Cards -->
       <a
         href="premiumresults/advance-job-analyze"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-900 border border-gray-700 hover:border-blue-500"
+        class="group bg-gradient-to-br from-gray-800 to-blue-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-900 border-2 border-blue-700 hover:border-blue-500"
         role="listitem"
-        aria-label="Find Job - Explore careers that suit your profile"
+        aria-label="Career Matcher - Find jobs matching your profile"
+        id="job-analyze-card"
       >
-        <div class="text-4xl mb-4 select-none" aria-hidden="true">💼</div>
-        <h2 class="text-lg font-semibold text-blue-400 mb-1">Find Job</h2>
-        <p class="text-blue-300 text-sm">Explore careers that suit your profile</p>
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">🔍</div>
+        <h2 class="text-lg font-semibold text-blue-400 mb-1">Career Matcher</h2>
+        <p class="text-blue-300 text-sm">Find matching professions</p>
+        <div class="mt-2 text-xs text-gray-400">Detailed matching</div>
       </a>
 
       <a
         href="premiumresults/jobs"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-purple-900 border border-gray-700 hover:border-purple-500"
+        class="group bg-gradient-to-br from-gray-800 to-purple-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-purple-900 border-2 border-purple-700 hover:border-purple-500"
         role="listitem"
-        aria-label="Job Suggestion - AI-powered career suggestions"
+        aria-label="Career Explorer - AI-powered job suggestions"
+        id="job-suggestion-card"
       >
         <div class="text-4xl mb-4 select-none" aria-hidden="true">🧭</div>
-        <h2 class="text-lg font-semibold text-purple-400 mb-1">Job Suggestion</h2>
-        <p class="text-purple-300 text-sm">AI-powered career suggestions</p>
+        <h2 class="text-lg font-semibold text-purple-400 mb-1">Career Explorer</h2>
+        <p class="text-purple-300 text-sm">AI-powered suggestions</p>
+        <div class="mt-2 text-xs text-gray-400">Personalized paths</div>
       </a>
 
+      <!-- Talent/Skills Cards -->
       <a
         href="premiumresults/borntalent"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-pink-900 border border-gray-700 hover:border-pink-500"
+        class="group bg-gradient-to-br from-gray-800 to-pink-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-pink-900 border-2 border-pink-700 hover:border-pink-500"
         role="listitem"
-        aria-label="Born Talent - Discover your natural strengths"
+        aria-label="Natural Talents - Discover your innate abilities"
+        id="talent-card"
       >
-        <div class="text-4xl mb-4 select-none" aria-hidden="true">🌟</div>
-        <h2 class="text-lg font-semibold text-pink-400 mb-1">Born Talent</h2>
-        <p class="text-pink-300 text-sm">Discover your natural strengths</p>
-      </a>
-
-      <a
-        href="premiumresults/improve"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-teal-900 border border-gray-700 hover:border-teal-500"
-        role="listitem"
-        aria-label="Personality Improvement - Suggestions to grow and improve"
-      >
-        <div class="text-4xl mb-4 select-none" aria-hidden="true">🧠</div>
-        <h2 class="text-lg font-semibold text-teal-400 mb-1">Personality Improvement</h2>
-        <p class="text-teal-300 text-sm">Suggestions to grow and improve</p>
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">✨</div>
+        <h2 class="text-lg font-semibold text-pink-400 mb-1">Natural Talents</h2>
+        <p class="text-pink-300 text-sm">Discover innate abilities</p>
+        <div class="mt-2 text-xs text-gray-400">Unique to you</div>
       </a>
 
       <a
         href="premiumresults/skills"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-yellow-900 border border-gray-700 hover:border-yellow-500"
+        class="group bg-gradient-to-br from-gray-800 to-yellow-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-yellow-900 border-2 border-yellow-700 hover:border-yellow-500"
         role="listitem"
-        aria-label="Personality Improvement - Suggestions to grow and improve"
+        aria-label="Skill Finder - Identify key skills to develop"
+        id="skills-card"
       >
-        <div class="text-4xl mb-4 select-none" aria-hidden="true">🧠🤹</div>
-        <h2 class="text-lg font-semibold text-yellow-400 mb-1">search-skill</h2>
-        <p class="text-yellow-300 text-sm">Suggestions to grow and improve</p>
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">🛠️</div>
+        <h2 class="text-lg font-semibold text-yellow-400 mb-1">Skill Finder</h2>
+        <p class="text-yellow-300 text-sm">Identify key skills</p>
+        <div class="mt-2 text-xs text-gray-400">Development focus</div>
       </a>
 
+      <!-- Improvement Cards -->
+      <a
+        href="premiumresults/improve"
+        class="group bg-gradient-to-br from-gray-800 to-teal-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-teal-900 border-2 border-teal-700 hover:border-teal-500"
+        role="listitem"
+        aria-label="Personal Growth - Strategies for improvement"
+        id="improve-card"
+      >
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">📈</div>
+        <h2 class="text-lg font-semibold text-teal-400 mb-1">Personal Growth</h2>
+        <p class="text-teal-300 text-sm">Strategies for improvement</p>
+        <div class="mt-2 text-xs text-gray-400">Actionable steps</div>
+      </a>
+
+      <!-- Interactive Tools -->
       <a
         href="premiumresults/askany"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-900 border border-gray-700 hover:border-green-500"
+        class="group bg-gradient-to-br from-gray-800 to-indigo-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-indigo-900 border-2 border-indigo-700 hover:border-indigo-500"
         role="listitem"
-        aria-label="Improvement - Suggestions to grow and improve"
+        aria-label="Ask Anything - Get personalized answers"
+        id="ask-any-card"
       >
-        <div class="text-4xl mb-4 select-none" aria-hidden="true">🔎</div>
-        <h2 class="text-lg font-semibold text-green-400 mb-1">ASK anything</h2>
-        <p class="text-green-300 text-sm">Suggestions to find your self</p>
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">❓</div>
+        <h2 class="text-lg font-semibold text-indigo-400 mb-1">Ask Anything</h2>
+        <p class="text-indigo-300 text-sm">Get personalized answers</p>
+        <div class="mt-2 text-xs text-gray-400">AI-powered Q&A</div>
       </a>
 
+      <!-- Education/Course Cards -->
       <a
         href="premiumresults/confeg"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-yellow-900 border border-gray-700 hover:border-yellow-500"
+        class="group bg-gradient-to-br from-gray-800 to-amber-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-900 border-2 border-amber-700 hover:border-amber-500"
         role="listitem"
-        aria-label="Improvement - Suggestions to grow and improve"
+        aria-label="Course Advisor - Validate your learning path"
+        id="course-confirm-card"
       >
-        <div class="text-4xl mb-4 select-none" aria-hidden="true">🔎</div>
-        <h2 class="text-lg font-semibold text-yellow-400 mb-1">Conform your Course</h2>
-        <p class="text-yellow-300 text-sm">Suggestions to understant your self</p>
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">✅</div>
+        <h2 class="text-lg font-semibold text-amber-400 mb-1">Course Advisor</h2>
+        <p class="text-amber-300 text-sm">Validate your learning path</p>
+        <div class="mt-2 text-xs text-gray-400">Path confirmation</div>
       </a>
 
       <a
         href="premiumresults/coursesuggest"
-        class="group bg-gray-800 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-green-900 border border-gray-700 hover:border-green-500"
+        class="group bg-gradient-to-br from-gray-800 to-emerald-900/20 rounded-xl shadow-md p-6 flex flex-col cursor-pointer transition-transform transform hover:scale-[1.03] hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-900 border-2 border-emerald-700 hover:border-emerald-500"
         role="listitem"
-        aria-label="Improvement - Suggestions to grow and improve"
+        aria-label="Learning Paths - Personalized course suggestions"
+        id="course-suggest-card"
       >
-        <div class="text-4xl mb-4 select-none" aria-hidden="true">🔎</div>
-        <h2 class="text-lg font-semibold text-green-400 mb-1">Course suggestion for you</h2>
-        <p class="text-green-300 text-sm">Suggestions to find your self</p>
+        <div class="text-4xl mb-4 select-none" aria-hidden="true">🎓</div>
+        <h2 class="text-lg font-semibold text-emerald-400 mb-1">Learning Paths</h2>
+        <p class="text-emerald-300 text-sm">Personalized suggestions</p>
+        <div class="mt-2 text-xs text-gray-400">Tailored to you</div>
       </a>
-
     </section>
   </main>
 
   <footer class="bg-gray-800 shadow-inner py-6 px-6 sm:px-12 flex justify-center border-t border-gray-700">
-    <!-- Footer content can be added here -->
+    <p class="text-gray-400 text-sm">© 2025 Self-Discovery Dashboard. All rights reserved.</p>
   </footer>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+            apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+            authDomain: "promgn-in.firebaseapp.com",
+            projectId: "promgn-in",
+            storageBucket: "promgn-in.appspot.com",
+            messagingSenderId: "545429176314",
+            appId: "1:545429176314:web:5590c702b55357b4bfae43",
+            measurementId: "G-YZQG3ZPQMJ"
+        };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const analytics = firebase.analytics();
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Track page view
+    analytics.logEvent('page_view', {
+      page_title: 'Dashboard Home',
+      page_location: window.location.href
+    });
+
+    // Authentication state observer
+    auth.onAuthStateChanged((user) => {
+      const authStatus = document.getElementById('auth-status');
+      const userEmail = document.getElementById('user-email');
+      const signOutBtn = document.getElementById('sign-out');
+      const authMessage = document.getElementById('auth-message');
+
+      if (user) {
+        // User is signed in
+        authStatus.classList.remove('hidden');
+        userEmail.textContent = user.email;
+        
+        // Check premium status in Firestore
+        db.collection('Olverausers').doc(user.uid).get().then((doc) => {
+          if (doc.exists) {
+            const hasPaid = doc.data().hasPaid || false;
+            
+            if (!hasPaid) {
+              authMessage.classList.remove('hidden');
+              lockPremiumFeatures();
+              // Highlight the 10K/day ideas card for non-premium users
+              const ideasCard = document.getElementById('ideas-card');
+              if (ideasCard) {
+                ideasCard.classList.add('premium-highlight');
+                ideasCard.addEventListener('click', (e) => {
+                  e.preventDefault();
+                  alert('Unlock your earning potential with premium! Get personalized 10K/day business ideas tailored to your skills and personality.');
+                  analytics.logEvent('premium_feature_attempt', { feature: '10k_ideas' });
+                  window.location.href = '/payments';
+                });
+              }
+            } else {
+              authMessage.classList.add('hidden');
+              unlockAllFeatures();
+            }
+          } else {
+            // User document doesn't exist - treat as free user
+            authMessage.classList.remove('hidden');
+            lockPremiumFeatures();
+          }
+        }).catch((error) => {
+          console.error("Error checking premium status:", error);
+          // Default to locked in case of error
+          authMessage.classList.remove('hidden');
+          lockPremiumFeatures();
+        });
+
+        // Track user login
+        analytics.logEvent('login', { method: 'email' });
+      } else {
+        // User is signed out
+        authStatus.classList.add('hidden');
+        authMessage.classList.remove('hidden');
+        lockAllFeatures();
+        
+        // Track user logout
+        analytics.logEvent('logout');
+      }
+    });
+
+    // Sign out handler
+    document.getElementById('sign-out')?.addEventListener('click', () => {
+      auth.signOut().then(() => {
+        console.log('User signed out');
+      }).catch((error) => {
+        console.error('Sign out error:', error);
+      });
+    });
+
+    // Function to lock premium features (but keep starter tier unlocked)
+    function lockPremiumFeatures() {
+      const premiumCards = [
+        'ideas-card', 'positive-card', 'negative-card',
+        'job-analyze-card', 'job-suggestion-card', 'talent-card',
+        'skills-card', 'improve-card', 'ask-any-card',
+        'course-confirm-card', 'course-suggest-card'
+      ];
+      
+      premiumCards.forEach(cardId => {
+        const card = document.getElementById(cardId);
+        if (card) {
+          card.classList.add('locked-card');
+          card.href = "#";
+          card.addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('This is a premium feature. Please upgrade to access.');
+            analytics.logEvent('premium_feature_attempt', { feature: cardId });
+          });
+        }
+      });
+      
+      // Unlock the free tier and starter tier cards
+      const freeCards = ['free-tier-card', 'starter-tier-card'];
+      freeCards.forEach(cardId => {
+        const card = document.getElementById(cardId);
+        if (card) {
+          card.classList.remove('locked-card');
+          // Restore original href
+          if (cardId === 'free-tier-card') {
+            card.href = "premiumresults/free-result";
+          } else if (cardId === 'starter-tier-card') {
+            card.href = "premiumresults/premium";
+          }
+        }
+      });
+    }
+
+    // Function to lock all features (when signed out)
+    function lockAllFeatures() {
+      const allCards = document.querySelectorAll('a[role="listitem"]');
+      allCards.forEach(card => {
+        card.classList.add('locked-card');
+        card.href = "#";
+        card.addEventListener('click', (e) => {
+          e.preventDefault();
+          alert('Please sign in to access this feature.');
+          analytics.logEvent('signin_required_attempt');
+        });
+      });
+    }
+
+    // Function to unlock all features (premium user)
+    function unlockAllFeatures() {
+      const allCards = document.querySelectorAll('a[role="listitem"]');
+      allCards.forEach(card => {
+        card.classList.remove('locked-card');
+        card.classList.remove('premium-highlight');
+        // Restore original href from data attribute or default
+        const originalHref = card.getAttribute('data-original-href') || card.href;
+        card.href = originalHref;
+      });
+    }
+  </script>
 </body>
 </html>
