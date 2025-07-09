@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Olvera - course confirmation</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getFirestore, doc, collection, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
+
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyD14-jgQYI4nOnFPNnhFbylbiQZQBOwJ68",
+      authDomain: "promgn-in.firebaseapp.com",
+      projectId: "promgn-in",
+      storageBucket: "promgn-in.appspot.com",
+      messagingSenderId: "545429176314",
+      appId: "1:545429176314:web:5590c702b55357b4bfae43",
+      measurementId: "G-YZQG3ZPQMJ"
+    };
+
+    // Init Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const functions = getFunctions(app);
+
+    let currentUser = null;
+
+    // Handle login
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUser = user;
+       
+      } else {
+        try {
+          const result = await signInAnonymously(auth);
+          currentUser = result.user;
+        } catch (error) {
+          console.error("Authentication error:", error);
+          showAlert("Failed to initialize session. Please refresh the page.", "danger");
+        }
+      }
+    });
+
+    // Save and analyze job
+    window.saveAndAnalyze = async function () {
+      const jobText = document.getElementById("jobInput").value.trim();
+      if (!jobText) {
+        showAlert("Please enter job data.", "warning");
+        return;
+      }
+
+      // Show loading state
+      const analyzeBtn = document.getElementById("analyzeBtn");
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Analyzing...';
+
+      try {
+        let jobData;
+        try {
+          jobData = JSON.parse(jobText);
+        } catch (e) {
+          jobData = { description: jobText };
+        }
+
+        if (!currentUser) {
+          showAlert("User not authenticated. Please try again.", "danger");
+          return;
+        }
+
+        // Save job data
+        const savedRef = doc(collection(doc(db, "talent", currentUser.uid), "course"), "saved");
+        await setDoc(savedRef, jobData);
+
+        // Call analysis function
+        const analyzeJob = httpsCallable(functions, "conformskill");
+        const response = await analyzeJob();
+
+        // Update score display
+        updateScoreDisplay(response.data.compatibilityScore);
+        
+        document.getElementById("analysisText").innerHTML = formatAnalysisText(response.data.analysis);
+        document.getElementById("resultBox").style.display = "block";
+        
+        // Scroll to results
+        document.getElementById("resultBox").scrollIntoView({ behavior: 'smooth' });
+        
+      } catch (error) {
+        console.error("Analysis error:", error);
+        showAlert("Failed to analyze skill. Please try again.", "danger");
+      } finally {
+        // Reset button state
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerHTML = '<i class="fas fa-search me-2"></i> Save & Analyze Job';
+      }
+    };
+
+    function updateScoreDisplay(score) {
+      const scoreElement = document.getElementById("score");
+      const scoreBar = document.getElementById("scoreBar");
+      
+      scoreElement.textContent = `${score}%`;
+      scoreBar.style.width = `${score}%`;
+      scoreBar.setAttribute('aria-valuenow', score);
+
+      // Update color based on score
+      scoreBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+      if (score >= 75) {
+        scoreBar.classList.add('bg-success');
+      } else if (score >= 50) {
+        scoreBar.classList.add('bg-warning');
+      } else {
+        scoreBar.classList.add('bg-danger');
+      }
+    }
+
+    // Helper function to format analysis text
+    function formatAnalysisText(text) {
+      return text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/- (.*?)(?:\n|$)/g, '<li>$1</li>')
+        .replace(/\n/g, '<br>');
+    }
+
+    // Show alert message
+    function showAlert(message, type) {
+      const alertDiv = document.createElement("div");
+      alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+      alertDiv.role = "alert";
+      alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      `;
+      
+      const container = document.querySelector(".container");
+      container.insertBefore(alertDiv, container.firstChild);
+      
+      setTimeout(() => {
+        const bsAlert = new bootstrap.Alert(alertDiv);
+        bsAlert.close();
+      }, 5000);
+    }
+  </script>
+
+  <style>
+    :root {
+      --primary-color: #6c8dfa;
+      --success-color: #1cc88a;
+      --info-color: #36b9cc;
+      --warning-color: #f6c23e;
+      --danger-color: #e74a3b;
+      --light-color: #2d3748;
+      --dark-color: #f8f9fc;
+      --bg-color: #1a202c;
+      --card-color: #2d3748;
+      --text-color: #e2e8f0;
+      --text-muted: #a0aec0;
+    }
+    
+    body {
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin-top: 2rem;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary-color) 0%, #4a6bdf 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .card {
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      margin-bottom: 2rem;
+      overflow: hidden;
+      background-color: var(--card-color);
+    }
+    
+    .card-header {
+      background-color: var(--card-color);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      font-weight: 600;
+      color: var(--text-color);
+    }
+    
+    textarea {
+      min-height: 200px;
+      border-radius: 10px !important;
+      border: 1px solid #4a5568;
+      resize: vertical;
+      background-color: var(--card-color);
+      color: var(--text-color);
+    }
+    
+    textarea:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(108, 141, 250, 0.25);
+      background-color: var(--card-color);
+      color: var(--text-color);
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      border-radius: 10px;
+      transition: all 0.3s;
+    }
+    
+    .btn-primary:hover {
+      background-color: #5a7df7;
+      border-color: #4a6bdf;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(108, 141, 250, 0.4);
+    }
+    
+    .result-box {
+      background: var(--card-color);
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      margin-top: 2rem;
+      color: var(--text-color);
+    }
+    
+    .score-container {
+      background: var(--card-color);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .score-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .score-header h5 {
+      margin: 0;
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .score-value {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+
+    .progress {
+      border-radius: 10px;
+      background-color: #4a5568;
+      overflow: visible;
+      height: 20px;
+    }
+
+    .progress-bar {
+      border-radius: 10px;
+      transition: width 1s ease-in-out;
+      position: relative;
+    }
+
+    .progress-bar::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      background: var(--card-color);
+      border: 3px solid currentColor;
+      border-radius: 50%;
+    }
+
+    .score-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+    }
+
+    .score-labels span {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    
+    .analysis-section {
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .analysis-section h5 {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+    
+    .example-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: 0.5rem;
+    }
+    
+    .example-text:hover {
+      color: var(--primary-color);
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding: 1rem 0;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    
+    .form-label {
+      color: var(--text-color);
+    }
+    
+    .text-muted {
+      color: var(--text-muted) !important;
+    }
+    
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+    
+    .btn-outline-primary:hover {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    @media (max-width: 768px) {
+      .header {
+        padding: 1.5rem;
+      }
+      
+      .container {
+        padding: 0 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header text-center">
+      <h1><i class="fas fa-briefcase me-2"></i> Course Analyzer</h1>
+      <p class="lead">Get AI-powered insights on Course</p>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-paste me-2"></i> Course Details</h5>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <label for="jobInput" class="form-label">Which Course you are now</label>
+          <textarea class="form-control" id="jobInput" rows="8" placeholder='Example JSON format:
+{
+  "Btech",
+  
+  
+}
+
+Or paste plain text description'></textarea>
+          <small class="text-muted">For best results, explain </small>
+        </div>
+        
+        <div class="d-grid gap-2">
+          <button id="analyzeBtn" class="btn btn-primary" onclick="saveAndAnalyze()">
+            <i class="fas fa-search me-2"></i> Save & Analyze 
+          </button>
+        </div>
+        
+        <div class="example-text text-center mt-2" onclick="loadExample()">
+          <i class="fas fa-lightbulb me-1"></i> Load example course description
+        </div>
+      </div>
+    </div>
+    
+    <div class="result-box" id="resultBox" style="display:none;">
+      <div class="text-center mb-4">
+        <h2><i class="fas fa-chart-line me-2"></i> Analysis Results</h2>
+        <p class="text-muted">Your compatibility with this course</p>
+      </div>
+      
+      <div class="score-container">
+        <div class="score-header">
+          <h5><i class="fas fa-percentage me-2"></i> Compatibility Score</h5>
+          <span id="score" class="score-value">0%</span>
+        </div>
+        <div class="progress">
+          <div id="scoreBar" 
+               class="progress-bar progress-bar-striped progress-bar-animated" 
+               role="progressbar" 
+               style="width: 0%" 
+               aria-valuenow="0" 
+               aria-valuemin="0" 
+               aria-valuemax="100">
+          </div>
+        </div>
+        <div class="score-labels">
+          <span>Low</span>
+          <span>Medium</span>
+          <span>High</span>
+        </div>
+      </div>
+      
+      <div class="analysis-section">
+        <h5><i class="fas fa-comment-alt me-2"></i> Detailed Analysis</h5>
+        <div id="analysisText" class="analysis-content"></div>
+      </div>
+      
+      <div class="d-grid gap-2 mt-3">
+        <button class="btn btn-outline-primary" onclick="window.print()">
+          <i class="fas fa-print me-2"></i> Print Results
+        </button>
+      </div>
+    </div>
+    
+    <footer>
+      <p>Olvera Course Analyzer &copy; 2025</p>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Load example job description
+    function loadExample() {
+      const exampleText = `{
+        Btech
+        
+      
+      }`;
+      
+      document.getElementById("jobInput").value = exampleText;
+    }
+
+  
+    // Show about modal
+    function showAbout() {
+      const aboutModal = new bootstrap.Modal(document.createElement('div'));
+      
+      const modalContent = `
+        <div class="modal-dialog">
+          <div class="modal-content" style="background-color: var(--card-color); color: var(--text-color);">
+            <div class="modal-header">
+              <h5 class="modal-title">About skill Analyzer</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>This tool uses AI to analyze skills and provide:</p>
+              <ul>
+                <li>Compatibility score based on your profile</li>
+                <li>Detailed analysis of requirements</li>
+                <li>Strengths and gaps in your qualifications</li>
+              </ul>
+              <p>All data is processed securely and anonymously.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Got it!</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      aboutModal._element.innerHTML = modalContent;
+      aboutModal.show();
+    }
+  </script>
+</body>
+</html>

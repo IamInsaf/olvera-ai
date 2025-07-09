@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talent Analysis Profile</title>
+    <title>COURSE SUGGEST</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
@@ -41,7 +41,7 @@
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- Header -->
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-100">Your Talent Analysis</h1>
+            <h1 class="text-3xl font-bold text-gray-100">Your COURSE Analysis</h1>
             <p class="text-gray-400" id="statusMessage">Loading your talent profile...</p>
             <div class="progress-bar mt-2" id="progressBar">
                 <div class="progress-fill" id="progressFill"></div>
@@ -157,124 +157,64 @@
 
         // Parse markdown-style content to HTML
         function formatAnalysisContent(text) {
-            // Convert main headers with icons and better hierarchy
-            text = text.replace(/^-\s*\*\*Innate Talents\*\*:/gm, 
-                '<h2 class="text-2xl font-bold mt-12 mb-6 text-purple-300 border-b-2 border-purple-700 pb-3 flex items-center gap-3">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />' +
-                '</svg>Innate Talents</h2>');
-            
-            text = text.replace(/^-\s*\*\*Unique Natural Abilities\*\*:/gm, 
-                '<h2 class="text-2xl font-bold mt-12 mb-6 text-teal-300 border-b-2 border-teal-700 pb-3 flex items-center gap-3">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />' +
-                '</svg>Unique Natural Abilities</h2>');
-            
-            text = text.replace(/^-\s*\*\*Career Alignment with Talents\*\*:/gm, 
-                '<h2 class="text-2xl font-bold mt-12 mb-6 text-blue-300 border-b-2 border-blue-700 pb-3 flex items-center gap-3">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />' +
-                '</svg>Career Alignment with Talents</h2>');
-            
-            text = text.replace(/^-\s*\*\*Market Advantage\*\*:/gm, 
-                '<h2 class="text-2xl font-bold mt-12 mb-6 text-indigo-300 border-b-2 border-indigo-700 pb-3 flex items-center gap-3">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />' +
-                '</svg>Market Advantage</h2>');
-            
-            text = text.replace(/^-\s*\*\*Development Opportunities\*\*:/gm, 
-                '<h2 class="text-2xl font-bold mt-12 mb-6 text-green-300 border-b-2 border-green-700 pb-3 flex items-center gap-3">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />' +
-                '</svg>Development Opportunities</h2>');
-            
-            text = text.replace(/^-\s*\*\*Future Potential\*\*:/gm, 
-                '<h2 class="text-2xl font-bold mt-12 mb-6 text-amber-300 border-b-2 border-amber-700 pb-3 flex items-center gap-3">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />' +
-                '</svg>Future Potential</h2>');
+    // Header: Top 3 Course Recommendations
+    text = text.replace(/^-\s*\*\*Top 3 Course Recommendations\*\*:/gm,
+        '<h2 class="text-2xl font-bold mt-12 mb-6 text-emerald-300 border-b-2 border-emerald-700 pb-3 flex items-center gap-3">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />' +
+        '</svg>Top 3 Course Recommendations</h2>'
+    );
 
-            // Convert bold and italic with better semantics
-            text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-100">$1</strong>');
-            text = text.replace(/\*(.*?)\*/g, '<em class="italic text-gray-300">$1</em>');
+    // Header: Talent-to-Course Fit Summary
+    text = text.replace(/^-\s*\*\*Talent-to-Course Fit Summary\*\*:/gm,
+        '<h2 class="text-2xl font-bold mt-12 mb-6 text-cyan-300 border-b-2 border-cyan-700 pb-3 flex items-center gap-3">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h4" />' +
+        '</svg>Talent-to-Course Fit Summary</h2>'
+    );
 
-            // Enhanced development opportunities with progress indicators
-            text = text.replace(/^\s*(\d+)\.\s+\[Opportunity \d+:\s*(.*?)\]/gm, 
-                `<div class="opportunity-box group relative bg-gray-800 p-6 rounded-xl shadow-sm border-l-4 border-green-500 mb-6 hover:shadow-md transition-shadow">
-                    <span class="text-lg font-bold text-green-300">$1. $2</span>
-                    <div class="progress-bar mt-3 h-2 bg-gray-700 rounded-full overflow-hidden">
-                        <div class="h-full bg-green-500 rounded-full w-0 group-hover:w-full transition-all duration-500"></div>
-                    </div>
-                </div>`);
+    // Header: Final Recommendation
+    text = text.replace(/^-\s*\*\*Final Recommendation\*\*:/gm,
+        '<h2 class="text-2xl font-bold mt-12 mb-6 text-yellow-300 border-b-2 border-yellow-700 pb-3 flex items-center gap-3">' +
+        '<svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">' +
+        '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2" />' +
+        '</svg>Final Recommendation</h2>'
+    );
 
-            // Enhanced talent cards with hover effects and badges
-            text = text.replace(/^\s*-\s+\[(.*?)\]/gm, 
-                `<li class="talent-card bg-gray-800 p-4 rounded-lg mb-3 border border-gray-700 hover:border-purple-500 hover:shadow-sm transition-all">
-                    <div class="flex items-start">
-                        <span class="talent-badge bg-purple-900 text-purple-300 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full mt-0.5">Talent</span>
-                        <span>$1</span>
-                    </div>
-                </li>`);
+    // Course Cards: Convert numbered recommendations to styled blocks
+    text = text.replace(/^\s*\d+\.\s\*\*(.*?)\*\*\s*$/gm, 
+        `<div class="course-card bg-gray-800 border border-gray-700 rounded-xl p-5 mb-6 shadow hover:shadow-md transition">
+            <h3 class="text-xl font-semibold text-emerald-300 mb-2">$1</h3>`);
 
-            // Highlight innate talents with badges and tooltips
-            text = text.replace(/(Natural Talent:|Innate Ability:|Distinctive Quality:)/g, 
-                `<span class="talent-label relative inline-block font-bold text-purple-400 group">
-                    <span class="badge bg-purple-900 text-purple-300 text-xs font-semibold px-2 py-0.5 rounded ml-1">!</span>
-                    <span class="tooltip invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-gray-900 rounded whitespace-nowrap">Key Strength</span>
-                    $1
-                </span>`);
+    // Sub-elements within each course card
+    text = text.replace(/^\s*-\s+\*\*Why this fits\*\*:\s*(.*)/gm, 
+        `<p class="text-sm text-gray-300 mb-2"><span class="font-bold text-emerald-400">Why this fits:</span> $1</p>`);
+    text = text.replace(/^\s*-\s+\*\*Career Path\*\*:\s*(.*)/gm, 
+        `<p class="text-sm text-gray-300 mb-2"><span class="font-bold text-cyan-400">Career Path:</span> $1</p>`);
+    text = text.replace(/^\s*-\s+\*\*Required Strengths\*\*:\s*(.*)/gm, 
+        `<p class="text-sm text-gray-300"><span class="font-bold text-indigo-400">Required Strengths:</span> $1</p></div>`);
 
-            // Convert lists to proper HTML with animated checkmarks
-            let inList = false;
-            let lines = text.split('\n');
-            let newText = [];
-            
-            for (let i = 0; i < lines.length; i++) {
-                if (/^\s*[-•]/.test(lines[i])) {
-                    if (!inList) {
-                        newText.push('<ul class="talent-list space-y-3 mb-8 pl-5">');
-                        inList = true;
-                    }
-                    // Convert list items with animation
-                    newText.push(lines[i].replace(/^\s*[-•]\s*(.*)/, 
-                        `<li class="relative pl-7 before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-purple-500 before:rounded-full before:transition-all before:hover:scale-150">
-                            <span class="list-item-content">$1</span>
-                        </li>`));
-                } else {
-                    if (inList) {
-                        newText.push('</ul>');
-                        inList = false;
-                    }
-                    newText.push(lines[i]);
-                }
-            }
-            
-            if (inList) newText.push('</ul>');
-            text = newText.join('\n');
+    // Bold and Italic styling
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-100">$1</strong>');
+    text = text.replace(/\*(.*?)\*/g, '<em class="italic text-gray-300">$1</em>');
 
-            // Enhanced milestone items with animated checkmarks
-            text = text.replace(/^\s*-\s+\[Milestone:\s*(.*?)\]/gm, 
-                `<li class="milestone-item flex items-start mb-4 group">
-                    <span class="milestone-icon bg-amber-900 text-amber-300 rounded-full w-7 h-7 flex items-center justify-center mr-3 mt-0.5 flex-shrink-0 transition-all group-hover:bg-amber-800">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                    </span>
-                    <span class="milestone-text text-gray-300 group-hover:text-gray-100 transition-colors">$1</span>
-                </li>`);
+    // Final recommendation list
+    text = text.replace(/^\s*-\s+(.*)/gm, 
+        `<li class="flex items-start gap-3 text-gray-300 mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <span>$1</span>
+        </li>`);
 
-            // Add visual separation between sections with gradient backgrounds
-            text = text.replace(/(<\/h2>)/g, '$1<div class="section-content pl-6 pr-4 py-2 bg-gradient-to-r from-transparent to-gray-800/30 rounded-lg">');
-            text = text.replace(/(<h2)/g, '</div>$1');
+    // Wrap list items into a UL
+    text = text.replace(/(<li .*?<\/li>)/g, '<ul class="space-y-2 pl-6 mb-6">$1</ul>');
 
-            // Final cleanup
-            text = text.replace(/<div class="section-content pl-6 pr-4 py-2 bg-gradient-to-r from-transparent to-gray-800\/30 rounded-lg"><\/div>/g, '');
-            text = text.replace(/<\/div><h2/g, '</div>\n<h2');
-
-            return `<div class="talent-analysis-container space-y-10 text-gray-300 leading-relaxed max-w-4xl mx-auto px-4">
-                        ${text}
-                    </div>`;
-        }  
+    // Wrap entire content
+    return `<div class="course-analysis-container space-y-10 text-gray-300 leading-relaxed max-w-4xl mx-auto px-4">
+                ${text}
+            </div>`;
+}
 
         async function checkAnalysis() {
             loadingElement.classList.remove('hidden');
@@ -290,7 +230,7 @@
                 }
                 
                 updateProgress(40);
-                const docRef = db.collection('talent').doc(user.uid).collection('result').doc('bornt');
+                const docRef = db.collection('talent').doc(user.uid).collection('course').doc('suggest');
                 const doc = await docRef.get();
                 updateProgress(60);
                 
@@ -346,7 +286,7 @@
                 }
                 
                 // Call the Cloud Function
-                const analyzeTalent = functions.httpsCallable('born');
+                const analyzeTalent = functions.httpsCallable('coursesug');
                 loadingMessage.textContent = "Analyzing your talent profile...";
                 generateElement.classList.add('hidden');
                 loadingElement.classList.remove('hidden');

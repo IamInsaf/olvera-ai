@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talent Improvement Profile</title>
+    <title>Talent FREE PLAN</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -69,7 +69,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <h1 class="text-3xl font-bold text-gray-100">Your Improvement Roadmap</h1>
+            <h1 class="text-3xl font-bold text-gray-100">FREE PLAN(only basic details)</h1>
             <p class="text-gray-400 mt-2" id="statusMessage">Loading your personalized improvement plan...</p>
             <div class="max-w-md mx-auto mt-4">
                 <div class="progress-bar mt-2" id="progressBar">
@@ -97,12 +97,12 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             </div>
-            <h3 class="text-2xl font-semibold text-gray-100 mb-3">Ready for Your Improvement Plan?</h3>
+            <h3 class="text-2xl font-semibold text-gray-100 mb-3">Ready for Your FREE TRIAL?</h3>
             <p class="text-gray-400 mb-8 leading-relaxed">
                 We'll analyze your talents and create a step-by-step roadmap to help you maximize your potential and achieve your career goals.
             </p>
             <button onclick="generateNewAnalysis()" class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 text-white rounded-lg hover:from-indigo-700 hover:to-indigo-600 transition-all shadow-md hover:shadow-lg flex items-center mx-auto">
-                <span id="generateButtonText">Create My Improvement Plan</span>
+                <span id="generateButtonText">Create result My FREE PLAN version</span>
                 <svg id="generateSpinner" class="hidden animate-spin ml-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -162,37 +162,6 @@
         const loadingMessage = document.getElementById('loadingMessage');
         const progressFill = document.getElementById('progressFill');
 
-        async function checkPaymentStatus(redirectUrl = '/payments') {
-  try {
-    const user = auth.currentUser;
-    
-    if (!user) {
-      console.log('User not authenticated');
-      return false;
-    }
-
-    const checkPayment = functions.httpsCallable('checkPaymentStatus');
-    console.log("111");
-    const result = await checkPayment({});
-    
-    if (!result.data.hasPaid) {
-      console.log('Payment required - redirecting');
-      window.location.href = redirectUrl;
-      return false;
-    }
-    
-    console.log('User has paid');
-    return true;
-    
-  } catch (error) {
-    console.error('Error checking payment status:', error);
-    // Optionally redirect on error if you want
-    // window.location.href = redirectUrl;
-    return false;
-  }
-}
-
-
         // Update progress bar
         function updateProgress(percentage) {
             progressFill.style.width = `${percentage}%`;
@@ -200,160 +169,51 @@
 
         // Parse markdown-style content to HTML
         function formatAnalysisContent(text) {
-            // Convert main headers with progress-themed styling
-            text = text.replace(/^-\s*\*\*Core Strengths\*\*:/gm, 
-                `<div class="relative">
-                    <h2 class="text-2xl font-bold mt-12 mb-6 text-gray-100 flex items-center">
-                        <span class="bg-green-900 text-green-300 rounded-full w-8 h-8 flex items-center justify-center mr-3">✓</span>
-                        Core Strengths
-                    </h2>
-                    <div class="absolute top-0 right-0 text-xs font-medium text-green-300 bg-green-900 px-2 py-1 rounded-full">
-                        Your Advantages
-                    </div>
-                </div>`);
-            
-            text = text.replace(/^-\s*\*\*Areas for Improvement\*\*:/gm, 
-                `<div class="relative">
-                    <h2 class="text-2xl font-bold mt-12 mb-6 text-gray-100 flex items-center">
-                        <span class="bg-blue-900 text-blue-300 rounded-full w-8 h-8 flex items-center justify-center mr-3">↑</span>
-                        Areas for Improvement
-                    </h2>
-                    <div class="absolute top-0 right-0 text-xs font-medium text-blue-300 bg-blue-900 px-2 py-1 rounded-full">
-                        Growth Potential
-                    </div>
-                </div>`);
-            
-            text = text.replace(/^-\s*\*\*Career Goal Alignment\*\*:/gm, 
-                `<div class="relative">
-                    <h2 class="text-2xl font-bold mt-12 mb-6 text-gray-100 flex items-center">
-                        <span class="bg-purple-900 text-purple-300 rounded-full w-8 h-8 flex items-center justify-center mr-3">↗</span>
-                        Career Goal Alignment
-                    </h2>
-                    <div class="absolute top-0 right-0 text-xs font-medium text-purple-300 bg-purple-900 px-2 py-1 rounded-full">
-                        Strategic Fit
-                    </div>
-                </div>`);
-            
-            text = text.replace(/^-\s*\*\*Competitive Positioning\*\*:/gm, 
-                `<div class="relative">
-                    <h2 class="text-2xl font-bold mt-12 mb-6 text-gray-100 flex items-center">
-                        <span class="bg-amber-900 text-amber-300 rounded-full w-8 h-8 flex items-center justify-center mr-3">⚔</span>
-                        Competitive Positioning
-                    </h2>
-                    <div class="absolute top-0 right-0 text-xs font-medium text-amber-300 bg-amber-900 px-2 py-1 rounded-full">
-                        Market Edge
-                    </div>
-                </div>`);
-            
-            text = text.replace(/^-\s*\*\*Step-by-Step Improvement Process\*\*:/gm, 
-                `<div class="relative">
-                    <h2 class="text-2xl font-bold mt-12 mb-6 text-gray-100 flex items-center">
-                        <span class="bg-indigo-900 text-indigo-300 rounded-full w-8 h-8 flex items-center justify-center mr-3">①</span>
-                        Step-by-Step Improvement Process
-                    </h2>
-                    <div class="absolute top-0 right-0 text-xs font-medium text-indigo-300 bg-indigo-900 px-2 py-1 rounded-full">
-                        Action Plan
-                    </div>
-                </div>`);
-            
-            text = text.replace(/^-\s*\*\*Progress Roadmap\*\*:/gm, 
-                `<div class="relative">
-                    <h2 class="text-2xl font-bold mt-12 mb-6 text-gray-100 flex items-center">
-                        <span class="bg-teal-900 text-teal-300 rounded-full w-8 h-8 flex items-center justify-center mr-3">⏳</span>
-                        Progress Roadmap
-                    </h2>
-                    <div class="absolute top-0 right-0 text-xs font-medium text-teal-300 bg-teal-900 px-2 py-1 rounded-full">
-                        Timeline
-                    </div>
-                </div>`);
+  if (typeof text !== 'string') {
+    console.warn('formatAnalysisContent expects a string input');
+    return '';
+  }
 
-            // Convert bold and italic
-            text = text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-100">$1</strong>');
-            text = text.replace(/\*(.*?)\*/g, '<em class="text-gray-400">$1</em>');
+  // Trim whitespace first
+  let formattedText = text.trim();
 
-            // Convert numbered steps to clear, distinct process steps
-            text = text.replace(/^\s*(\d+)\.\s+\[Step \d+:\s*(.*?)\]/gm, 
-                `<div class="step-container mb-8">
-                    <div class="flex items-start">
-                        <div class="step-number bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0 shadow-md">$1</div>
-                        <div class="step-content bg-gray-800 p-5 rounded-lg shadow-sm border border-gray-700 flex-grow hover:shadow-md transition">
-                            <div class="font-semibold text-indigo-400 mb-2 flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
-                                </svg>
-                                Action Item
-                            </div>
-                            <div class="text-gray-300">$2</div>
-                        </div>
-                    </div>
-                </div>`);
+  // Process ordered lists (1., 2., etc.)
+  formattedText = formattedText.replace(/^(\d+)\.\s+(.*?)(?=\n|$)/gm, '<li>$1. $2</li>');
+  
+  // Process unordered lists (- or * bullets)
+  formattedText = formattedText.replace(/^[-*]\s+(.*?)(?=\n|$)/gm, '<li>$1</li>');
+  
+  // Process bold (**text**)
+  formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Process italic (*text* or _text_)
+  formattedText = formattedText.replace(/(?<!\\)[\*_](.*?)(?<!\\)[\*_]/g, '<em>$1</em>');
+  
+  // Process code blocks (`code`)
+  formattedText = formattedText.replace(/`(.*?)`/g, '<code>$1</code>');
+  
+  // Process line breaks (but preserve multiple line breaks)
+  formattedText = formattedText.replace(/\n{2,}/g, '</p><p>').replace(/\n/g, '<br>');
+  
+  // Wrap in paragraph tags if there's any content
+  if (formattedText) {
+    formattedText = `<p>${formattedText}</p>`;
+  }
 
-            // Convert bullet points to improvement items
-            text = text.replace(/^\s*-\s+\[(.*?)\]/gm, 
-                '<li class="improvement-item bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-700 mb-3 hover:shadow-md transition flex items-start">' +
-                '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500 mr-2 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">' +
-                '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />' +
-                '</svg>' +
-                '<span class="text-gray-300">$1</span>' +
-                '</li>');
+  // Clean up any empty paragraphs
+  formattedText = formattedText.replace(/<p><\/p>/g, '');
 
-            // Convert lists to proper HTML
-            let inList = false;
-            let lines = text.split('\n');
-            let newText = [];
-            
-            for (let i = 0; i < lines.length; i++) {
-                if (/^\s*[-•]/.test(lines[i]) && !/^\s*\d+\./.test(lines[i])) {
-                    if (!inList) {
-                        newText.push('<ul class="improvement-list space-y-3 mb-8">');
-                        inList = true;
-                    }
-                    newText.push(lines[i]);
-                } else {
-                    if (inList) {
-                        newText.push('</ul>');
-                        inList = false;
-                    }
-                    newText.push(lines[i]);
-                }
-            }
-            
-            if (inList) newText.push('</ul>');
-            text = newText.join('\n');
+  return formattedText;
+}
 
-            // Convert timeline items
-            text = text.replace(/^\s*-\s+\[Timeline:\s*(.*?)\]/gm, 
-                '<li class="timeline-item relative pl-10 pb-6 last:pb-2">' +
-                '<div class="timeline-dot absolute w-5 h-5 bg-indigo-500 rounded-full left-[-2px] top-1 border-4 border-gray-900 shadow"></div>' +
-                '<div class="timeline-content bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-sm hover:shadow-md transition">' +
-                '<div class="text-sm font-medium text-indigo-400 mb-1">Milestone</div>' +
-                '<div class="text-gray-300">$1</div>' +
-                '</div>' +
-                '</li>');
 
-            // Add visual separation between sections
-            text = text.replace(/(<\/h2>)/g, '$1<div class="section-content pl-2">');
-            text = text.replace(/(<h2)/g, '</div>$1');
 
-            // Final cleanup
-            text = text.replace(/<div class="section-content pl-2"><\/div>/g, '');
 
-            return `<div class="improvement-container space-y-8 text-gray-300 leading-relaxed">
-                        ${text}
-                        <div class="mt-12 bg-gradient-to-r from-indigo-900/50 to-blue-900/50 rounded-xl p-6 border border-indigo-800 text-center">
-                            <h3 class="text-xl font-semibold text-indigo-300 mb-3">Ready to take the next step?</h3>
-                            <p class="text-gray-400 mb-5 max-w-2xl mx-auto">Your personalized improvement plan is ready. Start implementing these steps today to maximize your potential.</p>
-                            <button onclick="window.print()" class="px-6 py-2 bg-gray-800 text-indigo-400 rounded-lg border border-indigo-700 hover:bg-gray-700 shadow-sm hover:shadow-md transition inline-flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                </svg>
-                                Print Your Plan
-                            </button>
-                        </div>
-                    </div>`;
-        }
 
-        async function checkAnalysis() {
+
+
+
+async function checkAnalysis() {
             loadingElement.classList.remove('hidden');
             generateElement.classList.add('hidden');
             contentElement.classList.add('hidden');
@@ -367,7 +227,7 @@
                 }
                 
                 updateProgress(40);
-                const docRef = db.collection('talent').doc(user.uid).collection('result').doc('improve');
+                const docRef = db.collection('talent').doc(user.uid).collection('result').doc('premium');
                 const doc = await docRef.get();
                 updateProgress(60);
                 
@@ -430,7 +290,7 @@
                 }
                 
                 // Call the Cloud Function
-                const analyzeTalent = functions.httpsCallable('improve');
+                const analyzeTalent = functions.httpsCallable('premium');
                 loadingMessage.textContent = "Analyzing your profile to create a personalized improvement roadmap...";
                 generateElement.classList.add('hidden');
                 loadingElement.classList.remove('hidden');
@@ -459,7 +319,6 @@
         auth.onAuthStateChanged((user) => {
             if (user) {
                 checkAnalysis();
-                checkPaymentStatus();
             } else {
                 // Redirect to login if not authenticated
                 window.location.href = '/login';
