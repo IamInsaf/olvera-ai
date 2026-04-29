@@ -9,8 +9,8 @@ if (!admin.apps.length) admin.initializeApp();
 const db = admin.firestore();
 
 const razorpay = new Razorpay({
-  key_id: "rzp_live_dE2RUyUj98msAj",
-  key_secret: "gG39v0417ATlZj3bSPaQGBjd",
+  key_id: "xxxxxxxxxxxxxxxxxxxxxx",
+  key_secret: "xxxxxxxxxxxxxxxxxxxxx",
 });
 
 const app = express();
